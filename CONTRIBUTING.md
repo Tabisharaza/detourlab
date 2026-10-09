@@ -16,7 +16,7 @@ No package installation is needed for the app. `npm ci --ignore-scripts --no-aud
 
 ## Choose a scope
 
-[Issue drafts](docs/ISSUE_DRAFTS.md) include reproducible problems, acceptance criteria and explicit non-goals. Before adding a solver, city dataset, dependency or storage service, propose the interface and its effect on licensing, privacy and reproducibility.
+Start with [open contribution issues](https://github.com/Tabisharaza/detourlab/issues). [Additional issue scopes](docs/ISSUE_DRAFTS.md) include reproducible problems, acceptance criteria and explicit non-goals, and distinguish published issues from proposals. Before adding a solver, city dataset, dependency or storage service, propose the interface and its effect on licensing, privacy and reproducibility.
 
 A bug report should identify the source revision, Node/browser/OS version, expected and observed outcomes, and the smallest synthetic input that reproduces it. Do not attach production fleet data or secrets.
 

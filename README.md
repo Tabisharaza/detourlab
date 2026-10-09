@@ -2,7 +2,7 @@
 
 **Close a road. Keep the same orders. See what changes.**
 
-[Open the live demo](https://detourlab-tabish.tabisharaza.chatgpt.site/) · [Quickstart](#run-locally) · [Experiment format](docs/EXPERIMENTS.md) · [Contribute](CONTRIBUTING.md)
+[Open the live demo](https://detourlab-tabish.tabisharaza.chatgpt.site/) · [Release verification](docs/PUBLICATION.md) · [Quickstart](#run-locally) · [Experiment format](docs/EXPERIMENTS.md) · [Contribute](CONTRIBUTING.md)
 
 DetourLab is a browser-based logistics disruption lab. Create named closure variants over one shared street network and delivery plan, replay the fleet, and compare distance, late arrivals and unreachable stops. Export the experiment as JSON and reproduce every result from the command line.
 
@@ -41,7 +41,7 @@ npm start -- --dist  # Preview the built distribution
 npm run benchmark    # Named-machine timing of the original paired fixture
 ```
 
-The app has zero runtime and development npm dependencies. The lockfile is included. CI validates it with `npm ci --ignore-scripts --no-audit --no-fund`; this is optional for local use. Node 24.2.0 is the API floor for the release verifier, not a tested-minimum claim. Local checks used Node 24.19.0; 24.21.0 is additional configured CI coverage, not a required installed version. See [CI and reproducibility](docs/CI.md).
+The app has zero runtime and development npm dependencies. The lockfile is included. CI validates it with `npm ci --ignore-scripts --no-audit --no-fund`; this is optional for local use. Node 24.2.0 is the API floor for the release verifier, not a tested-minimum claim. Local checks used Node 24.19.0. [The initial public release passed hosted CI](https://github.com/Tabisharaza/detourlab/actions/runs/37995893928) on Node 24.19.0 and 24.21.0; the latter is additional verified coverage, not a required installed version. See [CI and reproducibility](docs/CI.md).
 
 ## Reproduce all variants
 
@@ -110,8 +110,8 @@ Application code, procedural geometry and fixtures use the [MIT license](LICENSE
 
 ## Contribute
 
-Start with a small reproducible scenario or an improvement that makes results easier to inspect. [CONTRIBUTING.md](CONTRIBUTING.md) explains the checks, [the roadmap](docs/ROADMAP.md) separates current and future work, and [issue drafts](docs/ISSUE_DRAFTS.md) contain concrete scopes and acceptance tests.
+Start with a small reproducible scenario or an improvement that makes results easier to inspect. [CONTRIBUTING.md](CONTRIBUTING.md) explains the checks, [the roadmap](docs/ROADMAP.md) separates current and future work, and [open contribution issues](https://github.com/Tabisharaza/detourlab/issues) offer concrete scopes and acceptance tests. [Additional draft scopes](docs/ISSUE_DRAFTS.md) distinguish published work from proposals.
 
 [A/B Street](https://github.com/a-b-street/abstreet), [Eclipse SUMO](https://github.com/eclipse-sumo/sumo), [VROOM](https://github.com/VROOM-Project/vroom), and [kepler.gl](https://github.com/keplergl/kepler.gl) address adjacent planning, simulation, optimization and visualization problems. DetourLab focuses on a small, inspectable disruption experiment and a portable regression fixture. Their code and datasets are not included here.
 
-**Status:** early synthetic workbench. The desktop demo and automated suite have been checked; browser file-picker roundtrips, mobile, reduced-motion emulation and screen-reader auditing remain open. GitHub-hosted CI must be verified after repository publication. No adoption, production-readiness or Trending claim is made.
+**Status:** early synthetic workbench. The desktop demo and automated suite have been checked; browser file-picker roundtrips, mobile, reduced-motion emulation and screen-reader auditing remain open. The [initial public release](docs/PUBLICATION.md) passed GitHub-hosted CI on both pinned Node versions, with 173 tests per job and the 20 CLI gates repeated separately. This does not close the browser QA gaps. No adoption, production-readiness or Trending claim is made.

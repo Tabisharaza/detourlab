@@ -10,6 +10,10 @@
 
 The source commit was matched to the saved hosted version. Deployment reported success, and the public page was subsequently exercised in a real desktop browser.
 
+## Public source release and hosted CI
+
+The [public repository](https://github.com/Tabisharaza/detourlab) was published on October 9, 2026 UTC. Its initial full-source commit is `6410b0acdf4ea8ecd7f54f64c28d7c579d21b9da`, with all 58 archive members verified against the remote tree. [Hosted CI](https://github.com/Tabisharaza/detourlab/actions/runs/37995893928) passed 173 tests per job on Node 24.19.0 and 24.21.0, with 20 CLI tests separately repeated and byte-identical rebuilds. [PUBLICATION.md](PUBLICATION.md) records exact archive, tree and toolchain evidence. These source-publication and documentation steps did not redeploy the v4 application.
+
 ## Automated application checks
 
 The v4 application passed 156 checks with zero failures/skips:
@@ -54,7 +58,7 @@ Image SHA-256 is recorded in [release checklist](RELEASE_CHECKLIST.md). The imag
 - Mobile viewport behavior and reduced-motion preference emulation
 - Screen-reader review and a cross-browser/platform matrix
 - Exhaustive visual testing of large imported graphs
-- GitHub-hosted CI execution before a canonical repository exists
+- Pull-request/fork CI behavior and Windows/macOS coverage (the verified hosted run was an Ubuntu push run)
 - Real-world/operational model validation and project-name clearance
 
 Source tests cover many import and interruption semantics, but those gaps must not be described as passed browser checks. Run the relevant tests in a permitted environment before upgrading the corresponding claim.

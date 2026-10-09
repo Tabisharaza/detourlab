@@ -1,6 +1,8 @@
 # Publish from clean source
 
-This procedure prepares a new public repository from the reviewed release ZIP. It does not itself authorize publication. Confirm the intended owner, available name, visibility and publication timing first. Keep the current live app unchanged unless a separate deployment is intended.
+The initial publication is complete: see [PUBLICATION.md](PUBLICATION.md) for the actual repository, archive digest, two-commit clean history and successful CI. The procedure below retains the general one-commit Git CLI route; the initial publication used the existing authenticated connection with a LICENSE-only bootstrap followed by the exact reviewed tree. Do not re-create the existing repository to follow this procedure.
+
+This procedure prepares a new public repository from a reviewed release ZIP. It does not itself authorize publication. Confirm the intended owner, available name, visibility and publication timing first. Keep the current live app unchanged unless a separate deployment is intended.
 
 ## 1. Verify and extract the release
 

@@ -22,23 +22,24 @@ Screenshot SHA-256: `31ae1995fe2809e38589420cc4f44528841de2578b0eff17cb1f1ccbbe5
 - [x] Check local documentation links, fixture figures and screenshot integrity.
 - [x] Check the source archive against source bytes, excluding `.git`, provider configuration, private files and generated build output; review the included files for credentials.
 
-These local checks were completed October 9, 2026 UTC. The added 17 tests exercise release-distribution verification; the application's previous 156 checks remain included. This is not evidence that GitHub CI or the newer Node matrix entry has run.
+These local checks were completed October 9, 2026 UTC. The added 17 tests exercise release-distribution verification; the application's previous 156 checks remain included. These local checks did not themselves establish hosted CI coverage. The later [public-release CI record](PUBLICATION.md) separately verifies both matrix jobs.
 
 ## Before creating the public repository
 
-- [ ] Confirm the canonical project name and available repository slug at publication time. A repository-name search is not trademark clearance.
-- [ ] Review the intended public source, license, screenshot and actual known gaps.
+- [x] Confirm the available repository slug and publish [Tabisharaza/detourlab](https://github.com/Tabisharaza/detourlab). This is not trademark clearance.
+- [x] Review the intended public source, license, screenshot and actual known gaps.
 - [x] Document responsible disclosure without inventing a private inbox or requiring a security-setting change; optional private reporting can be added separately when approved.
 - [x] Confirm no fabricated badges, usage numbers, adoption or Trending claims.
 
 ## After repository publication
 
-- [ ] Verify the expected commit on the remote.
-- [ ] Run the configured GitHub workflow for that exact commit and review every job.
-- [ ] Record current-patch Node results separately from the locally tested baseline.
-- [ ] Verify README links and image rendering from the published repository.
-- [ ] Publish only selected issue drafts; do not imply they already exist.
-- [ ] Add a passing-CI badge only after there is a real workflow/repository URL and a successful run.
+- [x] Verify full-source commit `6410b0a` and all 58 remote paths, file modes, sizes and blob hashes against the reviewed archive.
+- [x] Inspect [run 37995893928](https://github.com/Tabisharaza/detourlab/actions/runs/37995893928): both jobs and every step succeeded.
+- [x] Record Node 24.19.0 / npm 11.17.0 and Node 24.21.0 / npm 11.19.0 separately from the local baseline.
+- [x] Verify README links and actual image rendering from the published repository; the image loaded at 1165×1586 pixels.
+- [x] Publish selected contribution issues [#1](https://github.com/Tabisharaza/detourlab/issues/1), [#2](https://github.com/Tabisharaza/detourlab/issues/2) and [#3](https://github.com/Tabisharaza/detourlab/issues/3), and read back their contents and labels.
+
+These completed gates apply to the [initial public source release](PUBLICATION.md), not automatically to future revisions. A status badge is optional; the exact successful run is linked instead.
 
 ## Remaining browser/operational gates
 

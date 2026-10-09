@@ -1,6 +1,12 @@
 # Useful issue drafts
 
-These are prepared scopes for future GitHub issues. They have not been posted, assigned or promised. Publish only the issues the maintainer chooses after the repository exists.
+These scopes were prepared before publication. Selected work is now public:
+
+- [#1: Tiny multi-variant experiment walkthrough](https://github.com/Tabisharaza/detourlab/issues/1), a separately scoped documentation starter
+- [#2: Real desktop-browser import/export roundtrips](https://github.com/Tabisharaza/detourlab/issues/2), a bounded subset of scope 1 below
+- [#3: Profile and avoid redraws of unchanged paused scenes](https://github.com/Tabisharaza/detourlab/issues/3), based on scope 4 below
+
+The numbered headings below are draft scope numbers, not GitHub issue numbers. Other scopes remain proposals; none implies an assignment or delivery commitment. Use each public issue's own acceptance criteria when contributing.
 
 ## 1. Exercise file roundtrips and interruptions in a real browser
 

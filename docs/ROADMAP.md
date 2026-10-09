@@ -10,7 +10,7 @@ The current app deliberately retains fixed job assignment, fixed order and assum
 
 1. Publish a truthful README, live demo link, actual screenshot and model assumptions.
 2. Keep source, license notices, lockfile, fixtures and build manifest reproducible.
-3. Run the configured GitHub workflow on the exact publication commit; do not add a passing-CI claim before it runs.
+3. The [initial public source release passed both CI jobs](PUBLICATION.md). Keep checking the exact commit for every subsequent change.
 4. Complete the outstanding browser file, mobile, reduced-motion and accessibility checks in an appropriate environment.
 5. Check the final project/repository name and retain the responsible-disclosure instructions. Advertising a private reporting channel requires verifying it first; enabling one is optional, not a publication gate.
 
@@ -25,7 +25,7 @@ The current app deliberately retains fixed job assignment, fixed order and assum
 - Additional independent routing oracles and cross-browser deterministic fixtures
 - Synchronized side-by-side map panes and bounded multi-seed summaries, after a clear design review
 
-Each proposed issue in [ISSUE_DRAFTS.md](ISSUE_DRAFTS.md) has a concrete acceptance boundary. These are draft work items, not already-created GitHub issues or delivery commitments.
+Start with the [published contribution issues](https://github.com/Tabisharaza/detourlab/issues). [ISSUE_DRAFTS.md](ISSUE_DRAFTS.md) links the selected public scopes and retains other proposals with concrete acceptance boundaries. An open issue is not an assignment or delivery commitment.
 
 ## Later: separately licensed real-city packs
 
