@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "id": "minimal-directed",
+  "name": "Four-node directed example",
+  "seed": 1,
+  "description": "A small reproducible network: close B to C at 10 seconds and route B to D to C instead.",
+  "nodes": [
+    {
+      "id": "A",
+      "x": 0,
+      "y": 0
+    },
+    {
+      "id": "B",
+      "x": 1,
+      "y": 0
+    },
+    {
+      "id": "C",
+      "x": 2,
+      "y": 0
+    },
+    {
+      "id": "D",
+      "x": 1,
+      "y": 1
+    }
+  ],
+  "edges": [
+    {
+      "id": "ab",
+      "from": "A",
+      "to": "B",
+      "distanceM": 100,
+      "travelTimeS": 10,
+      "roadName": "First Street"
+    },
+    {
+      "id": "bc",
+      "from": "B",
+      "to": "C",
+      "distanceM": 100,
+      "travelTimeS": 10,
+      "roadName": "Second Street"
+    },
+    {
+      "id": "bd",
+      "from": "B",
+      "to": "D",
+      "distanceM": 80,
+      "travelTimeS": 8,
+      "roadName": "Detour Avenue"
+    },
+    {
+      "id": "dc",
+      "from": "D",
+      "to": "C",
+      "distanceM": 80,
+      "travelTimeS": 8,
+      "roadName": "Canal Street"
+    }
+  ],
+  "vehicles": [
+    {
+      "id": "van-1",
+      "startNode": "A",
+      "startTimeS": 0
+    }
+  ],
+  "jobs": [
+    {
+      "id": "job-1",
+      "nodeId": "C",
+      "vehicleId": "van-1",
+      "dueTimeS": 22,
+      "serviceTimeS": 3
+    }
+  ],
+  "closures": [
+    {
+      "id": "bc-closure",
+      "edgeIds": [
+        "bc"
+      ],
+      "atS": 10
+    }
+  ],
+  "durationS": 60
+}

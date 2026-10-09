@@ -1,0 +1,20 @@
+{
+  "name": "detourlab",
+  "version": "0.1.0",
+  "description": "A keyless, reproducible city-logistics disruption laboratory",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24.2.0"
+  },
+  "scripts": {
+    "start": "node scripts/serve.js",
+    "build": "node scripts/build.js",
+    "test": "node --test",
+    "check": "node scripts/check.js && node --test && node scripts/build.js",
+    "scenario": "node scripts/run-scenario.js",
+    "benchmark": "node scripts/benchmark.js",
+    "experiment": "node scripts/run-experiment.js"
+  }
+}

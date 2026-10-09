@@ -1,0 +1,32 @@
+name: Scoped improvement
+description: Propose a measurable improvement to reproducibility, explanation or usability.
+title: "[Proposal]: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What experiment or task is difficult today?
+      description: Describe an observed problem and who encounters it. Avoid assumed users or projected savings.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Proposed scope and non-goals
+      description: Identify the smallest useful change. Note any model-policy change, new dependency, data source or permission.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance evidence
+      description: Give fixtures, expected results and automated/browser checks that would show the change works.
+    validations:
+      required: true
+  - type: textarea
+    id: provenance
+    attributes:
+      label: Data, licensing and privacy
+      description: If a dataset or service is involved, link its primary source and license. The default app must remain usable without keys or private data.
+    validations:
+      required: false

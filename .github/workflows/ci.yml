@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify Node ${{ matrix.node }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        node: ['24.19.0', '24.21.0']
+    defaults:
+      run:
+        shell: bash
+    env:
+      TZ: UTC
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
+      EXPECTED_NODE_VERSION: ${{ matrix.node }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Select the matrix Node release
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ matrix.node }}
+          package-manager-cache: false
+
+      - name: Record toolchain and validate the lockfile
+        run: |
+          node --version
+          npm --version
+          node --input-type=module -e "import assert from 'node:assert/strict'; assert.equal(process.versions.node, process.env.EXPECTED_NODE_VERSION)"
+          npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Check syntax, run all tests, and build
+        run: npm run check
+
+      - name: Exercise CLI success, threshold-failure, and invalid-input gates
+        run: node --test tests/cli.test.js tests/experiment-cli.test.js
+
+      - name: Verify and reproduce every distribution byte
+        run: |
+          node scripts/verify-dist.js
+          reference="$(mktemp -d "${RUNNER_TEMP}/detourlab-dist.XXXXXX")"
+          trap 'rm -rf "$reference"' EXIT
+          cp -R dist/. "$reference/"
+          npm run build
+          node scripts/verify-dist.js dist "$reference"
+
+      - name: Confirm verification did not change tracked source
+        run: git diff --exit-code && git diff --cached --exit-code

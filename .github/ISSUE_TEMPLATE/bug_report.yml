@@ -1,0 +1,52 @@
+name: Reproducible bug
+description: Report a routing, import, replay or interface failure using synthetic data.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use a minimal synthetic scenario. Do not attach customer addresses, fleet routes, credentials or other private data. For a security vulnerability, follow SECURITY.md rather than publishing an exploit here.
+  - type: input
+    id: revision
+    attributes:
+      label: Source revision or release
+      description: Include the commit/tag, or say you used the live demo and when.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Runtime and environment
+      placeholder: "Node 24.19.0 / Linux, or browser version / operating system"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Smallest reproduction
+      description: List exact controls or CLI commands. Include a small synthetic JSON fixture if relevant, within the documented 2 MiB limit.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+      description: State the route, status, count or interface behavior you expected and why.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result
+      description: Include relevant output, warnings or a screenshot. Remove personal data and secrets.
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Before submitting
+      options:
+        - label: "My report and attachments contain synthetic or appropriately sanitized data, without secrets or private fleet/customer information."
+          required: true
+        - label: "I checked whether unreachable/skipped jobs explain lower distance or lateness."
+          required: false

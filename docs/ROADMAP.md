@@ -1,0 +1,40 @@
+# Roadmap
+
+## Implemented: reproducible synthetic workbench
+
+One shared network and demand set supports 2–6 named variants, independent permanent closures, real outcome cards, a selected-vehicle route overlay, shared replay time, bounded JSON and headless thresholds. Cancellation and stale-result guards preserve a coherent experiment.
+
+The current app deliberately retains fixed job assignment, fixed order and assumed edge costs. See [verified behavior and gaps](VERIFICATION.md).
+
+## Release-readiness gates
+
+1. Publish a truthful README, live demo link, actual screenshot and model assumptions.
+2. Keep source, license notices, lockfile, fixtures and build manifest reproducible.
+3. Run the configured GitHub workflow on the exact publication commit; do not add a passing-CI claim before it runs.
+4. Complete the outstanding browser file, mobile, reduced-motion and accessibility checks in an appropriate environment.
+5. Check the final project/repository name and retain the responsible-disclosure instructions. Advertising a private reporting channel requires verifying it first; enabling one is optional, not a publication gate.
+
+[Release checklist](RELEASE_CHECKLIST.md) tracks these gates. No feature expansion is required to fix a documentation or publication problem.
+
+## Next useful contributions
+
+- Searchable, keyboard-friendly road selection and stronger non-map explanations
+- Versioned JSON Schemas with parity tests against the runtime validators
+- Actual browser interruption/import/export coverage
+- Paused-render and large-fixture profiling, with repeatable measurements
+- Additional independent routing oracles and cross-browser deterministic fixtures
+- Synchronized side-by-side map panes and bounded multi-seed summaries, after a clear design review
+
+Each proposed issue in [ISSUE_DRAFTS.md](ISSUE_DRAFTS.md) has a concrete acceptance boundary. These are draft work items, not already-created GitHub issues or delivery commitments.
+
+## Later: separately licensed real-city packs
+
+A bounded OSM importer and a small Riyadh pack are plausible extensions. They require source provenance, extraction date, ODbL handling, contributor attribution and suitable geometry. Keep the dataset license separate from MIT code. Do not bulk-download standard OSM map tiles or make the core demo depend on an API key.
+
+## Optional optimization adapters
+
+A solver adapter could explore capacities, reassignment or delivery time windows. The UI and reports must disclose the changed policy so its results are not mistaken for the current fixed-sequence model.
+
+## Outside the current product
+
+Live surveillance, private production fleet data, realistic congestion forecasts, autonomous operating decisions, account systems, billing and hidden telemetry. Growth and Trending placement are outcomes to observe, not product guarantees.

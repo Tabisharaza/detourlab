@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Close a road. See the ripple. A keyless, reproducible logistics simulation lab with a completely synthetic district.">
+  <meta name="theme-color" content="#0b111b">
+  <title>DetourLab — Rehearse the disruption</title>
+  <link rel="icon" href="./public/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./src/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#experiment">Skip to experiment</a>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="DetourLab home"><span class="brand-mark"><img src="./public/favicon.svg" alt=""></span><span>detour<span class="brand-light">lab</span><sup>ALPHA</sup></span></a>
+    <nav aria-label="Main"><span class="nav-active">Experiment lab</span><button id="guide-button" class="nav-button">How it works <span>↗</span></button></nav>
+    <div class="top-end"><span class="offline-tag"><i></i> Local-first · zero keys</span><button id="export-button" class="button button-outline">↓ <span>Export experiment</span></button></div>
+  </header>
+  <main class="workspace" id="experiment">
+    <aside class="scenario-panel" aria-labelledby="scenario-heading">
+      <div class="eyebrow">THE EXPERIMENT</div>
+      <h1 id="scenario-heading">Small closure.<br>Citywide ripple.</h1>
+      <p class="intro">Rehearse a disruption before it happens. Every route tells you why.</p>
+      <div class="scene-card"><div class="scene-icon">◈</div><div><strong id="scene-name">Meridian district</strong><span>Fictional city · synthetic demand</span></div><span class="scene-chevron">⌄</span></div>
+      <div class="workbench-switcher"><label for="variant-select">VARIANT WORKSPACE</label><select id="variant-select"></select><div class="variant-name-row"><label class="sr-only" for="variant-name">Variant name</label><input id="variant-name" maxlength="120" placeholder="Name this variant"><button id="rename-variant" class="button">Save</button></div><div class="variant-actions"><button id="duplicate-variant" class="text-button">+ Duplicate variant</button><button id="delete-variant" class="text-button">Remove</button></div><span id="variant-limit" class="muted"></span></div>
+      <div class="section-label"><h2>01 / Choose a disruption</h2><span class="muted">PRESETS</span></div>
+      <div id="preset-list" class="preset-list"></div>
+      <div class="section-label"><h2>02 / New closure starts</h2><output id="closure-time-label">05:00</output></div>
+      <label class="sr-only" for="closure-time">Start time for new closure events, seconds after dispatch</label><input id="closure-time" type="range" min="0" max="1800" step="60" value="300">
+      <div class="range-labels"><span>Dispatch</span><span>+30 min</span></div><p class="help-text time-help">Existing events keep their own start times below.</p>
+      <div class="section-label"><h2>03 / Make it yours</h2></div>
+      <button id="edit-roads" class="button road-edit"><span>⌁</span> Edit road closures <span id="closure-count" class="counter">2</span></button>
+      <p class="help-text">Click a road on the map, or choose one below. Choose the direction below. Other variants stay unchanged.</p>
+      <label class="sr-only" for="road-select">Choose a road segment to toggle its closure</label><div class="road-picker"><select id="road-select"></select><button id="toggle-road" class="button" aria-label="Toggle closure for selected road segment">±</button></div>
+      <label class="sr-only" for="road-direction">Direction for road edits</label><select id="road-direction" class="direction-select"><option value="both">Both directions</option><option value="forward">Listed direction only</option><option value="reverse">Reverse direction only</option></select><div id="event-list" class="event-list" aria-label="Independent closure events"></div>
+      <div id="closed-roads" class="closed-roads" aria-label="Closed road segments"></div>
+      <div class="panel-bottom"><button id="import-button" class="text-button">↑ Import experiment / scenario</button><input id="import-input" type="file" accept=".json,application/json" hidden><button id="reset-button" class="text-button muted">↺ Reset experiment</button><div class="privacy-note"><span>◇</span> Your scenarios stay in this browser.<br>No tracking. No real fleet data.</div></div>
+    </aside>
+    <section class="lab-main" aria-label="Simulation and comparison">
+      <div class="lab-heading"><div><div class="eyebrow">NETWORK RESILIENCE / 001</div><h2>What if this road disappeared?</h2></div><span class="simulation-badge"><i></i> SYNTHETIC SIMULATION</span></div>
+      <section class="variant-comparison" aria-label="All variant outcomes"><div class="comparison-heading"><div><strong id="experiment-name">Meridian experiment</strong><span>Same network. Same orders. Independent closures.</span></div><div class="run-controls"><button id="cancel-run" class="text-button" hidden>Cancel run</button><button id="run-experiment" class="button">Run all variants</button></div></div><div id="variant-results" class="variant-results"></div><p id="comparison-status" class="comparison-status" role="status">Calculating all variants…</p></section>
+      <div class="metric-grid" aria-label="Final run comparison">
+        <div class="metric-card"><div class="metric-title">Total fleet distance <span>↗</span></div><div class="metric-value" id="distance-value">—</div><div class="metric-bottom"><span id="distance-delta">Calculating…</span><span class="metric-baseline" id="distance-baseline"></span></div></div>
+        <div class="metric-card"><div class="metric-title">Late deliveries <span>◷</span></div><div class="metric-value" id="late-value">—</div><div class="metric-bottom"><span id="late-delta">Calculating…</span><span class="metric-baseline" id="late-baseline"></span></div></div>
+        <div class="metric-card"><div class="metric-title">Unreachable stops <span>⊘</span></div><div class="metric-value" id="unreachable-value">—</div><div class="metric-bottom"><span id="unreachable-delta">Calculating…</span><span class="metric-baseline" id="unreachable-baseline"></span></div></div>
+      </div>
+      <div class="map-shell" id="map-shell">
+        <div class="map-top"><div class="map-title"><span class="live-dot"></span><div><strong id="map-scene-title">MERIDIAN / EXPERIMENT VIEW</strong><span id="network-description">Loading network…</span></div></div><div class="segmented" aria-label="Map view"><button id="view-disruption" class="active" aria-pressed="true">Disruption</button><button id="view-baseline" aria-pressed="false">Baseline</button><button id="view-compare" aria-pressed="false">Compare</button></div></div>
+        <div class="canvas-wrap"><canvas id="network-map" role="img" aria-label="Synthetic district map showing roads, selected route, active closures, and simulated vehicles. All controls are also available outside this map."></canvas><div id="map-tooltip" class="map-tooltip" hidden></div><div class="map-watermark"><b id="map-watermark-name">MERIDIAN</b><br><span>FICTIONAL DISTRICT · NOT LIVE TRAFFIC</span></div><div class="map-compass" aria-hidden="true">N<br><span>↑</span></div><div class="map-help" id="map-help">Click a vehicle to inspect its route</div><div class="zoom-controls"><button id="zoom-in" aria-label="Zoom map in">+</button><button id="zoom-out" aria-label="Zoom map out">−</button><button id="zoom-reset" aria-label="Reset map zoom">⌖</button></div></div>
+        <div class="map-legend"><span><i class="legend-line teal"></i> Baseline route</span><span><i class="legend-line lime"></i> Disrupted route</span><span><i class="legend-line coral"></i> Closed road</span><span><i class="legend-dot"></i> Delivery stop</span><span class="legend-note">Routes shown for selected vehicle</span></div>
+        <div class="timeline"><button id="play-button" class="play-button" aria-label="Play simulation">▶</button><div class="timeline-track"><div class="timeline-labels"><span id="clock-label">00:00</span><span id="event-label">Closure starts at 05:00</span><span id="duration-label">60:00</span></div><label class="sr-only" for="timeline">Simulation time in seconds</label><input id="timeline" type="range" min="0" max="3600" step="1" value="0"><div class="timeline-footer"><span>DISPATCH</span><span>Deterministic replay · <span id="seed-label">seed 42</span></span><span>FINAL DELIVERY</span></div></div><label class="sr-only" for="speed">Playback speed</label><select id="speed" class="speed-select"><option value="30">30×</option><option value="60" selected>60×</option><option value="120">120×</option></select><button id="replay-button" class="replay-button" aria-label="Rewind simulation">↺</button></div>
+      </div>
+      <div class="below-map"><span><i></i> <span id="status-line">Building the experiment…</span></span><button id="assumptions-button" class="text-button">Model assumptions ↗</button></div>
+    </section>
+    <aside class="inspector" aria-label="Route inspector">
+      <div class="eyebrow">FOLLOW THE CONSEQUENCE</div><h2>One route.<br>The whole story.</h2><label class="vehicle-label" for="vehicle-select">Inspect a vehicle</label><select id="vehicle-select" class="vehicle-select"></select>
+      <div class="vehicle-summary"><div class="vehicle-avatar">↗</div><div><strong id="vehicle-name">Vehicle 01</strong><span id="vehicle-status">Ready to dispatch</span></div><span id="vehicle-dot" class="vehicle-dot"></span></div>
+      <div class="route-stats"><div><span>BASELINE</span><strong id="route-baseline-distance">—</strong><small id="route-baseline-time">—</small></div><div><span>DISRUPTED</span><strong id="route-scenario-distance">—</strong><small id="route-scenario-time">—</small></div></div>
+      <div class="explanation"><div class="explanation-header"><span>↳</span><strong>Why this route changed</strong></div><p id="route-reason">Calculating the route…</p></div>
+      <div class="section-label"><h3>Delivery sequence</h3><span id="job-count" class="muted"></span></div><ol id="job-list" class="job-list"></ol>
+      <div class="inspector-footer"><div class="eyebrow">REPRODUCIBLE BY DESIGN</div><p>Same seed. Same orders.<br>One changed assumption.</p><span id="scenario-hash">Scenario v1 · seed 42</span></div>
+    </aside>
+  </main>
+  <div id="toast" role="status" aria-live="polite" class="toast" hidden></div>
+  <dialog id="guide-dialog"><form method="dialog"><button class="dialog-close" aria-label="Close guide">×</button></form><div class="eyebrow">DETOURLAB / FIELD GUIDE</div><h2>Rehearse the disruption.</h2><p>DetourLab is a small, inspectable logistics laboratory. Close a road, replay exactly the same demand, and see the consequences of that single change.</p><div class="guide-grid"><section><h3>01. Change the network</h3><p>Choose a named variant, then set its closures. Duplicate it to compare a different plan. Each event has its own cutoff, and the road dropdown offers direction-aware keyboard editing.</p></section><section><h3>02. Replay the outcome</h3><p>All variant cards compare against one open-network baseline. Select any result to inspect its route at the same playback time. Top-line metrics cover the entire run, not just playback time.</p></section><section><h3>03. Follow the evidence</h3><p>Pick any vehicle to inspect its route and delivery outcomes. Export the whole versioned experiment as portable JSON and run it in Node to reproduce every variant and regression threshold.</p></section><section><h3>04. Know the limits</h3><p>Every street, vehicle and order here is synthetic. Travel times are fixed assumptions. This is a network-disruption experiment, not traffic prediction or an optimal vehicle-routing solver.</p></section></div><div class="assumption-box"><h3>Engine rules</h3><ul><li>Each variant shares exactly the same vehicles and ordered demand. Each vehicle keeps its assigned delivery order. Routes minimize assumed travel time with stable tie-breaking.</li><li>Closures are permanent from their start time. A vehicle already on a closing road finishes that edge, then reroutes at the next node.</li><li>An unreachable stop is skipped and recorded. The vehicle stays at its current node and attempts the next assigned stop.</li><li>Due times are arrival deadlines. Service time delays the next delivery; it does not change whether the current arrival is late.</li><li>No congestion, capacity, collision, break, traffic-signal, return-to-depot or real-world forecast model is included.</li></ul></div><p class="guide-footnote">Original synthetic geometry and application code. No map tiles, external fonts, analytics or API calls.</p></dialog>
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>
