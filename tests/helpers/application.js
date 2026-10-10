@@ -50,12 +50,26 @@ export function application({ workerConstructionError = () => null, mapClass = n
       return this.isConnected ? [{}] : [];
     }
     replaceChildren(...items) {
-      for (const child of this.children) child.parentElement = null;
+      for (const child of this.children) {
+        if (child.contains?.(document.activeElement)) document.activeElement = document.body;
+        child.parentElement = null;
+      }
       this._text = ''; this.children = []; this.append(...items);
       if (this.tagName === 'SELECT') this.value = items[0]?.value ?? '';
     }
     append(...items) { for (const item of items) { item.remove?.(); item.parentElement = this; this.children.push(item); } }
-    remove() { if (this.parentElement) this.parentElement.children = this.parentElement.children.filter(item => item !== this); this.parentElement = null; }
+    insertBefore(item, reference) {
+      if (reference === item) return item;
+      if (reference !== null && !this.children.includes(reference)) throw new Error('Reference node is not a child.');
+      item.remove?.(); item.parentElement = this;
+      this.children.splice(reference === null ? this.children.length : this.children.indexOf(reference), 0, item);
+      return item;
+    }
+    remove() {
+      if (this.contains(document.activeElement)) document.activeElement = document.body;
+      if (this.parentElement) this.parentElement.children = this.parentElement.children.filter(item => item !== this);
+      this.parentElement = null;
+    }
     contains(element) { for (let current = element; current; current = current.parentElement) if (current === this) return true; return false; }
     matches(selector) {
       return selector.split(',').some(part => {

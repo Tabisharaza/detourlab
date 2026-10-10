@@ -83,19 +83,43 @@ function selectVariant(id) {
   state.selectedVariantId = id; state.scenario = scenarioForVariant(state.experiment, id);
   updateControls(); showSelectedResult();
 }
+function updateControlList(region, records, render, fallback, keyFor = record => record.id) {
+  const active = document.activeElement;
+  const controls = () => [...region.querySelectorAll('button, input, select, textarea')].filter(control => control.tagName === active?.tagName);
+  const index = controls().indexOf(active);
+  const key = [...region.children].find(child => child.contains(active))?.dataset.controlKey;
+  const existing = new Map([...region.children].map(child => [child.dataset.controlKey, child]));
+  const children = records.map((record, position) => {
+    const key = keyFor(record), child = render(record, existing.get(key), position);
+    child.dataset.controlKey = key; return child;
+  });
+  const retained = new Set(children);
+  for (const child of [...region.children]) if (!retained.has(child)) child.remove();
+  // Keep surviving native controls in place. Replacing even the same input node
+  // can interrupt a change event's native Tab/blur destination.
+  children.forEach((child, position) => { if (region.children[position] !== child) region.insertBefore(child, region.children[position] ?? null); });
+  if (index < 0 || document.activeElement === active && canFocus(active)) return;
+  const current = document.activeElement;
+  if (current !== active && current !== document.body && current !== document.documentElement && canFocus(current)) return;
+  const candidates = controls(), sameRecord = children.find(child => child.dataset.controlKey === key);
+  // After deletion, retain the action at the next row, or the previous last row.
+  focusFirst([candidates.find(control => sameRecord?.contains(control)), ...candidates.slice(index), ...candidates.slice(0, index).reverse(), fallback]);
+}
 function updateVariants(preserveName = false) {
   $('experiment-name').textContent = state.experiment.name;
   $('variant-select').replaceChildren(...state.experiment.variants.map(variant => { const option = node('option', variant.name); option.value = variant.id; return option; }));
   $('variant-select').value = state.selectedVariantId;
   if (!preserveName) $('variant-name').value = activeVariant().name;
   $('variant-limit').textContent = `${state.experiment.variants.length} / ${EXPERIMENT_LIMITS.maxVariants} variants · edits stay independent`;
+  const focusedAction = document.activeElement;
   $('duplicate-variant').disabled = state.experiment.variants.length >= EXPERIMENT_LIMITS.maxVariants;
   $('delete-variant').disabled = state.experiment.variants.length <= EXPERIMENT_LIMITS.minVariants;
-  $('variant-results').replaceChildren(...state.experiment.variants.map(variant => {
+  if ([$('duplicate-variant'), $('delete-variant')].includes(focusedAction) && focusedAction.disabled) focusFirst([$('variant-select')]);
+  updateControlList($('variant-results'), state.experiment.variants, (variant, button) => {
     const result = state.allResults?.variants.find(item => item.id === variant.id);
-    const button = node('button', undefined, 'variant-result');
+    if (!button) { button = node('button', undefined, 'variant-result'); button.addEventListener('click', () => selectVariant(variant.id)); }
     button.dataset.variant = variant.id; button.classList.toggle('active', variant.id === state.selectedVariantId); button.setAttribute('aria-pressed', String(variant.id === state.selectedVariantId));
-    button.append(node('strong', variant.name));
+    button.classList.remove('has-skips'); button.replaceChildren(node('strong', variant.name));
     const numbers = node('div');
     if (result) {
       const metrics = result.result.metrics;
@@ -104,21 +128,33 @@ function updateVariants(preserveName = false) {
       button.classList.toggle('has-skips', skipped);
       button.append(numbers, node('small', skipped ? `${metrics.completedJobs}/${metrics.totalJobs} completed · skipped work reduces distance` : `${result.delta.extraDistancePct > 0 ? '+' : ''}${result.delta.extraDistancePct.toFixed(1)}% distance · ${metrics.completedJobs}/${metrics.totalJobs} completed`));
     } else { numbers.append(node('span', state.pending ? 'Calculating…' : 'Run to compare')); button.append(numbers); }
-    button.addEventListener('click', () => selectVariant(variant.id)); return button;
-  }));
+    return button;
+  }, $('variant-select'));
 }
 function updateEvents() {
   const edgeMap = new Map(state.scenario.edges.map(edge => [edge.id, edge]));
-  $('event-list').replaceChildren(...state.scenario.closures.map(closure => {
-    const row = node('div', undefined, 'event-row');
+  updateControlList($('event-list'), state.scenario.closures, (closure, row) => {
+    if (!row) {
+      row = node('div', undefined, 'event-row');
+      const variantId = state.selectedVariantId, closureId = closure.id;
+      const controls = node('div', undefined, 'event-edit'), label = node('label', 'Start (sec)'), input = node('input'), remove = node('button', 'Remove');
+      input.type = 'number'; input.min = '0'; input.max = String(LIMITS.maxTimeS); input.step = 'any';
+      input.addEventListener('change', () => {
+        if (state.selectedVariantId !== variantId) return;
+        const current = state.scenario.closures.find(item => item.id === closureId); if (!current) return;
+        const atS = Number(input.value);
+        if (input.value.trim() === '' || !Number.isFinite(atS) || atS < 0 || atS > LIMITS.maxTimeS) { input.value = String(current.atS); toast('Enter a closure time from 0 to 604800 seconds.', true); return; }
+        replaceClosures(state.scenario.closures.map(item => item.id === closureId ? { ...item, atS } : item));
+      });
+      remove.addEventListener('click', () => { if (state.selectedVariantId === variantId) replaceClosures(state.scenario.closures.filter(item => item.id !== closureId)); });
+      controls.append(label, input, remove); row.append(node('strong'), node('small'), controls);
+    }
     const roads = [...new Set(closure.edgeIds.map(id => edgeMap.get(id).roadName))];
-    row.append(node('strong', roads.join(', ')), node('small', `${closure.edgeIds.length} directed edges · ${closure.id}`));
-    const controls = node('div', undefined, 'event-edit'), label = node('label', 'Start (sec)'), input = node('input');
-    input.type = 'number'; input.min = '0'; input.max = String(LIMITS.maxTimeS); input.step = 'any'; input.value = String(closure.atS); input.setAttribute('aria-label', `Start time in seconds for ${closure.id}`);
-    input.addEventListener('change', () => { const atS = Number(input.value); if (input.value.trim() === '' || !Number.isFinite(atS) || atS < 0 || atS > LIMITS.maxTimeS) { input.value = String(closure.atS); toast('Enter a closure time from 0 to 604800 seconds.', true); return; } replaceClosures(state.scenario.closures.map(item => item.id === closure.id ? { ...item, atS } : item)); });
-    const remove = node('button', 'Remove'); remove.setAttribute('aria-label', `Remove closure event ${closure.id}`); remove.addEventListener('click', () => replaceClosures(state.scenario.closures.filter(item => item.id !== closure.id)));
-    controls.append(label, input, remove); row.append(controls); return row;
-  }));
+    const [title, detail, controls] = row.children, [, input, remove] = controls.children;
+    title.textContent = roads.join(', '); detail.textContent = `${closure.edgeIds.length} directed edges · ${closure.id}`;
+    input.value = String(closure.atS); input.setAttribute('aria-label', `Start time in seconds for ${closure.id}`);
+    remove.setAttribute('aria-label', `Remove closure event ${closure.id}`); return row;
+  }, $('road-select'), closure => JSON.stringify([state.selectedVariantId, closure.id]));
 }
 
 function makeRoads() {
@@ -142,14 +178,21 @@ function updateControls() {
   const closed = closedIds();
   $('closure-count').textContent = String(roads.filter(edge => pairsFor(edge.id).some(id => closed.has(id))).length);
   const presets = createPresets(scenario).filter(preset => preset.id === 'clear' || preset.edgeIds.length > 0);
-  $('preset-list').replaceChildren(...presets.map((preset, index) => {
-    const button = node('button', undefined, 'preset'); const active = preset.edgeIds.length === closed.size && preset.edgeIds.every(id => closed.has(id)); button.classList.toggle('active', active); button.setAttribute('aria-pressed', String(active)); button.dataset.preset = preset.id;
+  updateControlList($('preset-list'), presets, (preset, button, index) => {
+    if (!button) {
+      button = node('button', undefined, 'preset'); button.dataset.preset = preset.id;
+      button.addEventListener('click', () => { const current = createPresets(state.scenario).find(item => item.id === button.dataset.preset); if (current) setClosures(current.edgeIds); });
+    }
+    const active = preset.edgeIds.length === closed.size && preset.edgeIds.every(id => closed.has(id)); button.classList.toggle('active', active); button.setAttribute('aria-pressed', String(active));
     const names = { central: ['Bridge works', 'A busy crossing goes offline'], 'all-bridges': ['River cut', 'Three crossings. One hard limit.'], clear: ['Clear roads', 'The unchanged control run'] };
     const [name, detail] = names[preset.id] ?? [preset.name, preset.description];
-    const text = node('div'); text.append(node('strong', name), node('small', detail)); button.append(node('span', ['⌁','⊘','↗'][index] ?? '◇', 'preset-icon'), text); button.title = preset.description; button.addEventListener('click', () => { setClosures(preset.edgeIds); }); return button;
-  }));
+    const text = node('div'); text.append(node('strong', name), node('small', detail)); button.replaceChildren(node('span', ['⌁','⊘','↗'][index] ?? '◇', 'preset-icon'), text); button.title = preset.description; return button;
+  }, $('road-select'));
   const closedRoads = roads.filter(edge => pairsFor(edge.id).some(id => closed.has(id)));
-  $('closed-roads').replaceChildren(...closedRoads.map(edge => { const button = node('button', `${edge.roadName} ×`, 'closure-chip'); button.title = `Reopen ${edge.roadName}, ${edge.from} to ${edge.to}`; button.setAttribute('aria-label', button.title); button.addEventListener('click', () => toggleRoad(edge.id, true)); return button; }));
+  updateControlList($('closed-roads'), closedRoads, (edge, button) => {
+    if (!button) { button = node('button', undefined, 'closure-chip'); button.addEventListener('click', () => toggleRoad(edge.id, true)); }
+    button.textContent = `${edge.roadName} ×`; button.title = `Reopen ${edge.roadName}, ${edge.from} to ${edge.to}`; button.setAttribute('aria-label', button.title); return button;
+  }, $('road-select'));
   updateVariants(); updateEvents(); updateLesson(); map.invalidate();
 }
 function clearResults() {

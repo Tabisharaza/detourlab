@@ -1,4 +1,4 @@
-# Keyboard controls and modal focus
+# Keyboard controls and focus
 
 DetourLab uses native buttons, selects and sliders for the experiment controls. The road dropdown and direction selector offer an alternative to clicking roads on Canvas; the route inspector exposes computed outcomes as text.
 
@@ -16,7 +16,19 @@ Browser shortcuts with Control, Alt or Meta are not captured by the ordinary Tab
 
 Use native keyboard behavior for each control: Enter or Space activates a focused button; arrow keys operate a focused range or select. Focusing an input or opening either dialog prevents the page-level Space shortcut from toggling playback underneath it. A comparison card selects the plan to inspect; final result cards and playback time describe different things.
 
-Edits and calculations can replace dynamic result controls. This scoped change addresses the two modal flows and lesson transitions; it is not a guarantee of focus preservation for every dynamic editor action.
+## Dynamic experiment controls
+
+Comparison cards and closure-editor controls update when their data or calculation status changes. The current source keeps surviving controls in place by identity, rather than removing and recreating the active control:
+
+- A comparison card remains focused by variant identity when selected or refreshed by a result.
+- Editing a closure's start time retains its input and adjacent Remove control. This avoids removing the next native Tab/click target during the input's change event. Invalid edits return to the latest committed value.
+- Removing an event moves to the next available Remove action, the previous one if last, or the road selector if empty. The same source handler supports reopen chips, but the existing stylesheet hides that chip list; this is not an assertion that those chips are currently keyboard-reachable.
+- Activating a preset keeps a corresponding available preset in place through the refresh.
+- If focused Duplicate reaches the six-variant limit, or focused Remove reaches the two-variant minimum, focus goes to the variant selector instead of staying on a newly disabled button.
+
+Fallback focus is tied to the control being removed or disabled, not an earlier click or worker request. A later result must not move focus away from another input, playback control or open dialog. Surviving controls do not need a focus call. No delayed focus timer, positive `tabindex` or custom Tab order is added.
+
+This is a source-only improvement. The v7 public demo still uses the earlier runtime; see the [verification record](VERIFICATION.md) for deployment status. Native blur/Tab ordering, visible focus after scrolling and assistive-technology behavior require a separate browser review.
 
 ## Implementation and regression checks
 
@@ -28,9 +40,11 @@ Run the aggregate checks before contributing:
 npm run check
 ```
 
-The Node UI harness exercises the real event handlers with DOM and Worker stand-ins, including delayed close notifications. It does not implement a browser layout engine, keyboard tab-order algorithm or screen reader. Passing these tests is not evidence that native keyboard behavior has been tested.
+The Node UI harness exercises the real event handlers with DOM and Worker stand-ins, including delayed close notifications and focus loss when focused controls are detached. It does not implement a browser layout engine, keyboard tab-order algorithm or screen reader. Passing these tests is not evidence that native keyboard behavior has been tested.
 
 For a real-browser review, open each dialog by keyboard and check initial focus, forward and backward boundary wrapping, Escape, explicit close, guide-to-lesson transition, confirmation, repeated open/close, lesson reset and return. Also open the guide while a lesson is active, when its lesson-entry button is disabled. Check the visible focus indicator and that the underlying experiment is unchanged after cancellation.
+
+For the dynamic editor, repeatedly select a comparison card with the keyboard, update a closure time with Enter and then with Tab, remove the first/middle/last/only event and activate presets. Only check reopen chips if that UI is made visible; the current stylesheet hides the chip list. Let a result arrive while a card is focused, then repeat with focus on a different control and in an open guide. Confirm that focus stays visible and useful without interrupting native navigation. These additional browser checks have not yet been performed.
 
 The dated browser observations and remaining gaps are in [VERIFICATION.md](VERIFICATION.md). No complete accessibility audit or WCAG conformance claim is made.
 
@@ -39,4 +53,8 @@ The dated browser observations and remaining gaps are in [VERIFICATION.md](VERIF
 - [W3C APG modal dialog pattern](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/): initial focus, boundary navigation, dismissal and focus return
 - [MDN native dialog element](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog): browser-provided modal behavior
 
-These references informed the interaction design; they are not certifications of this implementation.
+- [W3C APG keyboard interface guidance](https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/): keeping focus visible and predictable when interactive content changes
+- [MDN element blur event](https://developer.mozilla.org/en-US/docs/Web/API/Element/blur_event): focus loss on removal and browser event-order differences
+- [MDN HTMLElement.focus()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/focus): focusing the intended control
+
+The dynamic-focus references were checked on October 10, 2026. These references informed the interaction design; they are not certifications of this implementation.

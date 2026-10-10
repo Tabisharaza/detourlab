@@ -2,6 +2,16 @@
 
 **Current public demo: v7**, deployed October 10, 2026 UTC from tested source `fb08b57`. [Jump to its source mapping and keyboard checks](#v7-modal-keyboard-deployment-and-desktop-checks). The earlier v4/v5/v6 records below are retained as historical evidence.
 
+## Dynamic editor focus source milestone
+
+This October 10, 2026 source update keeps surviving comparison cards, event inputs/Remove controls, presets and reopen chips in place during updates. Focus moves only when its control is removed or a focused Duplicate/Remove action becomes disabled at a variant limit. Closure callbacks read the current variant/event state, including repeated edits. The engine, schemas, file decoding and rendering model are unchanged.
+
+The original source removed focused controls during card selection, event editing/deletion and worker-driven updates. The improved Node harness drops focus to body when a focused descendant is removed. Against the previous `4ea8387` application, **12 of the 16 new regression tests fail** and four existing-behavior controls pass; all 16 pass with the candidate. These are source-handler assertions, not browser timings or native keyboard tests.
+
+Local verification used **Node 24.19.0 / npm 11.9.0 / Linux**: **39 JavaScript syntax checks, 357 tests with zero failures/skips, 20 separately repeated CLI gates, and 20 distribution payloads plus manifest**, with a byte-identical second build. The 16 new tests are included in the 357, and the repeated CLI tests are not additional unique tests. They cover retained node identity, blur-time body/new-target behavior, first/middle/last/only-event removal, same-action fallback, variant-scoped handlers, presets/chips, unavailable targets, worker terminal/stale updates, newer modal focus and variant-count boundaries.
+
+Hosted CI is pending publication of this exact source revision. **No browser or Sites deployment was performed in this pass.** The public demo remains v7; native Tab/blur ordering, scrolling/focus visibility and assistive-technology checks remain unverified for this new change. The [keyboard guide](KEYBOARD.md) provides the separate browser checklist. The existing stylesheet hides the reopen-chip list; its source-handler tests do not establish ordinary keyboard reachability. Existing native import/download and browser performance gaps remain open.
+
 ## File-input source milestone
 
 The October 10, 2026 source update aligns browser/CLI file decoding and adds bounded reads to the legacy runner. It has **not been deployed to the public demo**. The current v7 mapping and browser observations below remain the last live verification.

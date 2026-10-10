@@ -139,3 +139,7 @@ The current source skips unchanged paused Canvas paints while preserving playbac
 ### File-input source update
 
 The current source rejects malformed UTF-8 consistently, bounds both CLI reads and makes hostile file errors short and safe to display. The [deterministic regression corpus](docs/FILE_INPUT.md) covers 48 experiments and 189 variants. [Hosted CI for `e9285ee`](https://github.com/Tabisharaza/detourlab/actions/runs/38055582446) passed 341 tests on both pinned Node versions; [the verification record](docs/VERIFICATION.md#file-input-source-milestone) records the exact scope. This source update has not yet changed the v7 public demo or closed the native file-picker QA gap.
+
+### Dynamic editor keyboard update
+
+The current source keeps comparison cards and closure-editor controls in place while their data changes, so repeated keyboard edits do not discard the active control. Deleted controls and variant-limit buttons get a nearby usable focus target. [Sixteen regression tests](docs/VERIFICATION.md#dynamic-editor-focus-source-milestone) bring the locally passing suite to 357; [keyboard behavior and remaining checks](docs/KEYBOARD.md) are documented separately. This source change has not yet been deployed to the v7 demo or verified with native browser Tab/blur input.
