@@ -83,3 +83,12 @@ See [clean-source publication](PUBLISHING.md) for the fresh-history procedure. P
 - [ ] Verify native file-import/export and broader dynamic-editor focus behavior in a permitted environment.
 
 This scoped milestone does not complete the broader accessibility or native-file checklists above.
+
+## File-input source release — October 10, 2026
+
+- Runtime source: [`e9285ee6d8e47a753ffb6dccc580df9c8488cfd5`](https://github.com/Tabisharaza/detourlab/commit/e9285ee6d8e47a753ffb6dccc580df9c8488cfd5), parent `8cfceb58fd05118c24fb458029e9ee2c78219bfc`; remote tree `ed114b1e0c3933383776dd630fff6bdd6bdfc668`.
+- All 81 remote source members matched reviewed local blob hashes, modes and sizes. The six new files are one browser-safe decoder/diagnostic helper, one Node bounded-reader helper, three test files and the file-input guide. No dependencies, workflow permissions or simulation algorithms changed.
+- Independent original-fixture checks confirmed malformed-byte rejection across all three entry points, retained UI state/results, BOM consistency, FIFO rejection, bounded/escaped errors and unchanged valid CLI output.
+- [CI run 38055582446](https://github.com/Tabisharaza/detourlab/actions/runs/38055582446) completed successfully for that exact runtime commit. Both Node matrix jobs passed 341 tests, the separately repeated 20 CLI gates and a byte-identical two-build comparison of 20 payloads plus manifest. [CI.md](CI.md#file-input-milestone) records exact jobs and toolchains.
+- Runtime source ZIP: `detourlab-public-source-e9285ee.zip`, 690,525 bytes, 81 members; SHA-256 `9ff54a8f60a8e4a8a61f1d5379cee59903cf9d951e85b5e9b1462973393f3db2`. Every member matches the named remote runtime tree; ZIP integrity passes. No `.git`, `.openai`, provider configuration, generated `dist` or `node_modules` is included.
+- This release updates GitHub source only. The public demo remains v7, and native file-picker/download QA is still open. Later docs may record this evidence; their own CI runs must be checked separately.

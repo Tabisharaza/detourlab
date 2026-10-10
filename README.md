@@ -138,4 +138,4 @@ The current source skips unchanged paused Canvas paints while preserving playbac
 
 ### File-input source update
 
-The current source rejects malformed UTF-8 consistently, bounds both CLI reads and makes hostile file errors short and safe to display. The [deterministic regression corpus](docs/FILE_INPUT.md) covers 48 experiments and 189 variants. Local verification passed 341 tests; [the verification record](docs/VERIFICATION.md#file-input-source-milestone) records the exact scope. This source update has not yet changed the v7 public demo or closed the native file-picker QA gap.
+The current source rejects malformed UTF-8 consistently, bounds both CLI reads and makes hostile file errors short and safe to display. The [deterministic regression corpus](docs/FILE_INPUT.md) covers 48 experiments and 189 variants. [Hosted CI for `e9285ee`](https://github.com/Tabisharaza/detourlab/actions/runs/38055582446) passed 341 tests on both pinned Node versions; [the verification record](docs/VERIFICATION.md#file-input-source-milestone) records the exact scope. This source update has not yet changed the v7 public demo or closed the native file-picker QA gap.

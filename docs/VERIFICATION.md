@@ -16,7 +16,9 @@ Local checks used **Node 24.19.0 / npm 11.9.0 / Linux**:
 
 Original repros established silent malformed-UTF-8 replacement in the app/legacy CLI, an unwritten FIFO hanging the legacy CLI, and an oversized unknown key producing a multi-megabyte error. The new tests cover strict rejection, valid U+FFFD/BOM handling, exactly 2 MiB versus one byte over, partial/growing-file reads, regular-file enforcement, escaped/bounded diagnostics, and obsolete import results. Node Blob/File and checked-in handler stand-ins are used; no native browser file picker, browser profiling, screen-reader behavior or deployment was tested in this pass.
 
-See [FILE_INPUT.md](FILE_INPUT.md) for the contract and reproduction commands. Hosted CI for this source revision is pending publication; a prior green run is not evidence for the new files. Browser QA [issue #2](https://github.com/Tabisharaza/detourlab/issues/2) stays open.
+See [FILE_INPUT.md](FILE_INPUT.md) for the contract and reproduction commands. [Runtime commit `e9285ee6d8e47a753ffb6dccc580df9c8488cfd5`](https://github.com/Tabisharaza/detourlab/commit/e9285ee6d8e47a753ffb6dccc580df9c8488cfd5) passed [run 38055582446](https://github.com/Tabisharaza/detourlab/actions/runs/38055582446): both Node 24.19.0/npm 11.17.0 and Node 24.21.0/npm 11.19.0 jobs passed all 341 tests, repeated 20 CLI gates and byte-reproduced the 20 payloads plus manifest. All steps succeeded. The exact 81-file remote tree is `ed114b1e0c3933383776dd630fff6bdd6bdfc668`. Browser QA [issue #2](https://github.com/Tabisharaza/detourlab/issues/2) stays open.
+
+The clean source archive `detourlab-public-source-e9285ee.zip` contains exactly those 81 remote-matched source files, excludes Git/provider metadata and generated output, and passes ZIP integrity checks. Size: 690,525 bytes; SHA-256: `9ff54a8f60a8e4a8a61f1d5379cee59903cf9d951e85b5e9b1462973393f3db2`. A later documentation-only commit records these outcomes without changing that runtime.
 
 ## Historical v4 application review
 
