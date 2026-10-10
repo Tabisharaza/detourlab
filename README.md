@@ -8,9 +8,9 @@ DetourLab is a browser-based logistics disruption lab. Create named closure vari
 
 The bundled city, fleet and demand are entirely synthetic. The app needs no API key, account, map service or npm dependency.
 
-![Actual DetourLab workbench showing three variants, a tilted fictional district, route replay and delivery outcomes.](docs/images/workbench-desktop.jpg)
+![Actual DetourLab workbench showing three variants, a tilted fictional district, route replay and delivery outcomes.](docs/images/workbench-v5-desktop.jpg)
 
-*An actual capture of the public workbench. The ten-minute closure variant was created in the interface. [Screenshot provenance](docs/VERIFICATION.md#screenshot).*
+*An actual capture of the public v5 workbench on October 10, 2026 UTC. The ten-minute closure variant was created in the interface. [Screenshot provenance](docs/VERIFICATION.md#screenshot).*
 
 ## Try one experiment
 
@@ -116,6 +116,6 @@ Start with a small reproducible scenario or an improvement that makes results ea
 
 **Status:** early synthetic workbench. The desktop demo and automated suite have been checked; browser file-picker roundtrips, mobile, reduced-motion emulation and screen-reader auditing remain open. The [initial public release](docs/PUBLICATION.md) passed GitHub-hosted CI on both pinned Node versions, with 173 tests per job and the 20 CLI gates repeated separately. This does not close the browser QA gaps. No adoption, production-readiness or Trending claim is made.
 
-### Source renderer update
+### Renderer update and live demo
 
-The current source skips unchanged paused Canvas paints while preserving playback redraws. [Reproducible operation counts and limitations](docs/RENDERING.md) document the change. The live demo remains v4 pending browser verification of this update.
+The current source skips unchanged paused Canvas paints while preserving playback redraws. [Reproducible operation counts and limitations](docs/RENDERING.md) document the change. The live demo was updated to v5 on October 10, 2026 UTC from [source `74e0356`](https://github.com/Tabisharaza/detourlab/commit/74e0356c1fe0d7cfac0c2520906496aaef7869c6). Its [CI run](https://github.com/Tabisharaza/detourlab/actions/runs/38030451835) passed 194 tests per Node job, and the public desktop workflow was exercised again. [Deployment and browser evidence](docs/VERIFICATION.md#v5-renderer-deployment-and-desktop-checks) separates those checks from unmeasured browser rendering time and remaining QA gaps.

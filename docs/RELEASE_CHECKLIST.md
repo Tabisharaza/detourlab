@@ -2,7 +2,7 @@
 
 Checked items record completed evidence; unchecked items remain publication or verification work. The app remains an alpha with explicit model and QA limits.
 
-## Verified before this documentation pass
+## Historical v4 verification before initial publication
 
 - [x] Public v4 demo loads and the tested flows work.
 - [x] Application source is `cb554b15d4e8c44a589acce4d5462ebe4538ef7e`.
@@ -13,7 +13,7 @@ Checked items record completed evidence; unchecked items remain publication or v
 
 Screenshot SHA-256: `31ae1995fe2809e38589420cc4f44528841de2578b0eff17cb1f1ccbbe5b3ecc`.
 
-## Source bundle checks
+## Initial source bundle checks
 
 - [x] Run `npm run check` and `node scripts/verify-dist.js`: 173 tests passed, zero failures/skips, and 17 payload files verified on Node 24.19.0.
 - [x] Verify the lockfile under the pinned runtime and run the documented CLI commands, including success and threshold-failure exits.
@@ -40,6 +40,16 @@ These local checks were completed October 9, 2026 UTC. The added 17 tests exerci
 - [x] Publish selected contribution issues [#1](https://github.com/Tabisharaza/detourlab/issues/1), [#2](https://github.com/Tabisharaza/detourlab/issues/2) and [#3](https://github.com/Tabisharaza/detourlab/issues/3), and read back their contents and labels.
 
 These completed gates apply to the [initial public source release](PUBLICATION.md), not automatically to future revisions. A status badge is optional; the exact successful run is linked instead.
+
+## October 10 renderer and v5 deployment
+
+- [x] Publish source `74e0356` and verify all 67 public files against its remote tree.
+- [x] Inspect [run 38030451835](https://github.com/Tabisharaza/detourlab/actions/runs/38030451835): both matrix jobs passed 194 tests and the separately repeated 20 CLI gates.
+- [x] Deploy the matching source as v5 at the existing URL; retain v4 for rollback.
+- [x] Exercise the bounded [v5 desktop workflows](VERIFICATION.md#v5-renderer-deployment-and-desktop-checks), including 0/118/106 late counts and Cancel/rerun/Reset.
+- [x] Include the actual new desktop screenshot, SHA-256 `83b2b2ee97aad183211250545f520560713d6cefd53eec801d853fce65ea9017`.
+- [ ] Independently verify exact CDN-served asset bytes; the executor manifest request returned 403.
+- [ ] Measure browser rendering time and verify native resize/context-loss behavior; Node operation counts are not timing measurements.
 
 ## Remaining browser/operational gates
 

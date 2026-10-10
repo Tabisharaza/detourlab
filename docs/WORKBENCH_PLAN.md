@@ -1,6 +1,6 @@
 # Experiment workbench: bounded milestone
 
-This historical implementation plan started from v3, source commit `2910ba97352f14dbe0c9e5a074a2446f71880f47`. The workbench is now implemented in v4. See [the verification record](VERIFICATION.md) for completed checks and remaining gaps; the acceptance list below is the original scope, not a claim that every browser check passed.
+This historical implementation plan started from v3, source commit `2910ba97352f14dbe0c9e5a074a2446f71880f47`. The workbench first shipped in v4; the current deployment is recorded separately. See [the verification record](VERIFICATION.md) for completed checks and remaining gaps; the acceptance list below is the original scope, not a claim that every browser check passed.
 
 ## User workflow
 

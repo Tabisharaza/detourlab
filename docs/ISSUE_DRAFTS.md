@@ -59,7 +59,7 @@ The numbered headings below are draft scope numbers, not GitHub issue numbers. O
 
 ## 4. Stop redrawing unchanged paused scenes
 
-**Original problem:** `app.js` requests frames continuously and the initial `map.js` repainted unchanged paused scenes. A [source redraw guard and deterministic counts](RENDERING.md) now address the redundant paints. Real-browser CPU/visual evidence remains pending, so issue #3 stays open.
+**Original problem:** `app.js` requests frames continuously and the initial `map.js` repainted unchanged paused scenes. A [source redraw guard and deterministic counts](RENDERING.md) now address the redundant paints. The v5 demo passed bounded desktop interaction checks; named-browser/device CPU, raster/FPS and larger-fixture evidence remains pending, so issue #3 stays open.
 
 **Suggested scope:** Measure first, then invalidate/draw only when playback, selection, geometry, closures, viewport or relevant UI state changes. Preserve the same ledger-driven positions and screenshot semantics.
 

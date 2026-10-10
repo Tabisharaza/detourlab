@@ -29,7 +29,7 @@ The pre-publication local checks used Node 24.19.0 with npm 11.9.0. Node 24.21.0
 
 ## Demo and human-facing checks
 
-The [live demo](https://detourlab-tabish.tabisharaza.chatgpt.site/) remains deployed application v4, from application source `cb554b15d4e8c44a589acce4d5462ebe4538ef7e`. Source publication and this documentation follow-up did not deploy a changed application. [VERIFICATION.md](VERIFICATION.md) separates actual desktop-browser checks from mocked UI tests.
+At the initial publication and its first documentation follow-up, the [demo](https://detourlab-tabish.tabisharaza.chatgpt.site/) remained application v4, from application source `cb554b15d4e8c44a589acce4d5462ebe4538ef7e`; those steps did not deploy a changed application. The later October 10 v5 deployment is recorded separately in [the current verification record](VERIFICATION.md#v5-renderer-deployment-and-desktop-checks). [VERIFICATION.md](VERIFICATION.md) separates actual desktop-browser checks from mocked UI tests.
 
 The published README was inspected in a real desktop browser. Its unaltered workbench screenshot loaded successfully at its natural 1165×1586 dimensions. The screenshot shows synthetic data; its provenance and hash are retained in the verification and release-checklist documents.
 

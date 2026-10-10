@@ -42,4 +42,4 @@ Real city packs are a separate extension. They need provenance, source date, lic
 
 Canvas makes the initial district lightweight and visually explorable. Keyboard-accessible selects, event fields, result cards and textual delivery outcomes expose core controls outside the map. This is useful groundwork, not a completed accessibility audit.
 
-Paused scenes currently still enter the render loop. Profiling and accessible road search are concrete improvement opportunities; see the issue drafts. A different renderer should continue consuming the same validated ledgers.
+Paused scenes still enter the animation loop, but the [redraw guard](RENDERING.md) skips unchanged visible paints. Browser timing and accessible road search remain concrete improvement opportunities; see the issue drafts. A different renderer should continue consuming the same validated ledgers.
