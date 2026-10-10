@@ -225,7 +225,7 @@ test('cancel terminates the worker, clears results and rejects stale completion'
   assert.equal(app.state.pending, false); assert.equal(app.state.allResults, null);
   assert.equal(app.state.baseline, null); assert.equal(app.state.disrupted, null);
   assert.deepEqual(app.state.experiment, experiment);
-  assert.equal(app.element('cancel-run').hidden, true); assert.equal(app.element('status-line').getAttribute('aria-busy'), 'false');
+  assert.equal(app.element('cancel-run').hidden, true); assert.equal(app.element('status-line').parentElement.getAttribute('aria-busy'), 'false');
   assert.match(app.element('comparison-status').textContent, /Run canceled/u);
   assert.equal(app.element('distance-value').textContent, '—'); assert.equal(app.element('job-list').children.length, 0);
   assert.ok(app.element('variant-results').children.every(item => item.textContent.includes('Run to compare')));

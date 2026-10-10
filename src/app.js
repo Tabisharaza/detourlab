@@ -20,7 +20,7 @@ let workerTimeout;
 let toastTimeout;
 let initial = true;
 let lessonBackup = null;
-let lessonDialogFocus = null;
+let dialogFocus = null;
 const lessonSteps = [
   { id: 'clear', time: 0, story: 'With clear roads, the van takes A → B → C: 200 m and arrival at 20 s, before the 22 s deadline. Its run finishes at 23 s because delivery service takes 3 more seconds.' },
   { id: 'close-at-10', time: 10, story: 'At 10 s the van reaches B. B → C closes at that exact instant, so entry is blocked. It takes A → B → D → C instead: 260 m, arrival at 26 s, and 4 s late. The run finishes at 29 s, including 3 s of service.' },
@@ -296,12 +296,62 @@ function updateLesson() {
   const step = lessonSteps.find(item => item.id === state.selectedVariantId);
   $('lesson-story').textContent = state.lessonModified ? 'Your edits changed the example; reset lesson to repeat.' : step?.story ?? '';
 }
+function canFocus(element) {
+  return element?.isConnected && !element.matches(':disabled') && !element.closest('[hidden], [inert]') && element.getClientRects().length > 0 && !['hidden', 'collapse'].includes(getComputedStyle(element).visibility);
+}
+function focusFirst(elements) {
+  for (const element of elements) {
+    if (!canFocus(element)) continue;
+    element.focus();
+    if (document.activeElement === element) return;
+  }
+}
+function dialogControls(dialog) {
+  return [...dialog.querySelectorAll('button, [href], input, select, textarea, [tabindex]')].filter(element => element.tabIndex >= 0 && canFocus(element));
+}
+function dialogReturnTargets(dialog, source) {
+  return dialog === $('guide-dialog') ? [source, $('guide-button'), $('assumptions-button'), $('try-example-button')] : [source, $('try-example-button'), $('quick-example-button'), $('assumptions-button')];
+}
+function openDialog(dialog, source, initialFocus) {
+  if (dialog.open) return;
+  dialogFocus = { dialog, source, previousFocus: document.activeElement };
+  dialog.showModal();
+  focusFirst([initialFocus, ...dialogControls(dialog), dialog]);
+}
+function closeDialog(dialog, { restore = true, target = dialogFocus?.source } = {}) {
+  if (!dialog.open) return;
+  // Native close events are queued. Finish app-driven focus changes now, before
+  // another dialog or lesson can take over; the eventual event must do nothing.
+  if (dialogFocus?.dialog === dialog) dialogFocus = null;
+  dialog.close();
+  if (restore) focusFirst(dialogReturnTargets(dialog, target));
+}
+function restoreDialogFocus(dialog) {
+  // Native Escape still closes the dialog normally. Ignore an older close event
+  // if this dialog has reopened, or a different dialog now owns focus.
+  if (dialog.open || dialogFocus?.dialog !== dialog) return;
+  const { source, previousFocus } = dialogFocus;
+  dialogFocus = null;
+  // Native close may return focus before its queued event arrives. Do not undo
+  // a newer focus choice outside the dialog; body is not a useful destination.
+  const current = document.activeElement;
+  if (current !== previousFocus && current !== document.body && current !== document.documentElement && canFocus(current)) return;
+  focusFirst(dialogReturnTargets(dialog, source));
+}
+function containDialogTab(event, dialog) {
+  if (event.key !== 'Tab' || event.altKey || event.ctrlKey || event.metaKey || event.defaultPrevented || !dialog.open) return;
+  const controls = dialogControls(dialog), index = controls.indexOf(document.activeElement);
+  if (!controls.length || index < 0 || (event.shiftKey ? index === 0 : index === controls.length - 1)) {
+    event.preventDefault();
+    focusFirst([event.shiftKey ? controls.at(-1) : controls[0], dialog]);
+  }
+}
 function showLessonConfirmation(source) {
   if (state.lessonActive || $('lesson-dialog').open) return;
   setPlaying(false);
-  lessonDialogFocus = source === $('guide-example-button') ? $('try-example-button') : source;
-  if ($('guide-dialog').open) $('guide-dialog').close();
-  $('lesson-dialog').showModal(); $('lesson-cancel').focus();
+  const trigger = source === $('guide-example-button') ? $('try-example-button') : source;
+  closeDialog($('guide-dialog'), { restore: false });
+  openDialog($('lesson-dialog'), trigger, $('lesson-cancel'));
 }
 function resetLesson() {
   if (!state.lessonActive || !lessonBackup) return;
@@ -313,12 +363,13 @@ function startLesson() {
   // Only the confirmed transition takes an independently validated snapshot.
   // Opening, Cancel and native Escape leave experiments and workers untouched.
   lessonBackup = {
+    focus: dialogFocus?.source,
     experiment: validateExperiment(state.experiment),
     workspace: { selectedVariantId: state.selectedVariantId, time: state.time, speed: state.speed, view: state.view, zoom: state.zoom, selectedVehicle: state.selectedVehicle, editing: state.editing, closureTime: $('closure-time').value, roadDirection: $('road-direction').value, roadId: $('road-select').value, variantName: $('variant-name').value, timelineMax: $('timeline').max },
   };
   state.lessonActive = true;
   resetLesson();
-  lessonDialogFocus = $('lesson-clear'); $('lesson-dialog').close();
+  closeDialog($('lesson-dialog'), { target: $('lesson-clear') });
   toast('Tiny example ready. Your previous experiment is kept in memory until you return.');
 }
 function returnToExperiment() {
@@ -327,7 +378,7 @@ function returnToExperiment() {
   state.lessonActive = false; state.lessonModified = false;
   loadExperiment(backup.experiment, backup.workspace);
   lessonBackup = null;
-  $('try-example-button').focus();
+  focusFirst(dialogReturnTargets($('lesson-dialog'), backup.focus));
   toast('Your experiment and view are restored. Playback is paused; results are being recomputed.');
 }
 
@@ -345,7 +396,7 @@ $('replay-button').addEventListener('click', () => { setPlaying(false); setTime(
 $('zoom-in').addEventListener('click', () => { state.zoom = Math.min(2.5, state.zoom * 1.2); map.invalidate(); });
 $('zoom-out').addEventListener('click', () => { state.zoom = Math.max(.65, state.zoom / 1.2); map.invalidate(); });
 $('zoom-reset').addEventListener('click', () => { state.zoom = 1; map.invalidate(); });
-$('reset-button').addEventListener('click', () => { if (state.lessonActive) { resetLesson(); toast('Lesson reset. Your previous experiment is still kept in memory.'); return; } setEditing(false); setView('disruption'); $('closure-time').value = '300'; loadExperiment(createInitialExperiment()); toast('Original experiment restored: seed 42, Market Bridge closure.'); });
+$('reset-button').addEventListener('click', () => { if (state.lessonActive) { resetLesson(); focusFirst([$('lesson-clear'), $('return-experiment')]); toast('Lesson reset. Your previous experiment is still kept in memory.'); return; } setEditing(false); setView('disruption'); $('closure-time').value = '300'; loadExperiment(createInitialExperiment()); toast('Original experiment restored: seed 42, Market Bridge closure.'); });
 $('export-button').addEventListener('click', () => { const serialized = exportExperiment(state.experiment); const blob = new Blob([serialized], { type: 'application/json' }); const url = URL.createObjectURL(blob); const link = node('a'); link.href = url; link.download = `detourlab-experiment-${state.experiment.id}.json`; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); toast('All variants exported. Reproduce them with the experiment CLI.'); });
 $('import-button').addEventListener('click', () => { if (!state.lessonActive) $('import-input').click(); });
 $('import-input').addEventListener('change', async (event) => {
@@ -382,21 +433,20 @@ $('cancel-run').addEventListener('click', () => { importRevision += 1; cancelCom
 $('run-experiment').addEventListener('click', () => { importRevision += 1; compute(); });
 for (const id of ['try-example-button', 'quick-example-button', 'guide-example-button']) $(id).addEventListener('click', () => showLessonConfirmation($(id)));
 $('lesson-start').addEventListener('click', startLesson);
-$('lesson-cancel').addEventListener('click', () => $('lesson-dialog').close());
-$('lesson-dialog').addEventListener('close', () => {
-  const target = lessonDialogFocus;
-  lessonDialogFocus = null;
-  // A responsive entry can disappear while the dialog is open. Never restore
-  // focus to that hidden trigger; the scene entry remains available at all sizes.
-  (target?.getClientRects().length ? target : $('try-example-button')).focus();
-});
+$('lesson-cancel').addEventListener('click', () => closeDialog($('lesson-dialog')));
+for (const id of ['guide-dialog', 'lesson-dialog']) {
+  const dialog = $(id);
+  dialog.addEventListener('keydown', event => containDialogTab(event, dialog));
+  dialog.addEventListener('close', () => restoreDialogFocus(dialog));
+}
 $('return-experiment').addEventListener('click', returnToExperiment);
 for (const step of lessonSteps) $('lesson-' + step.id).addEventListener('click', () => {
   if (!state.lessonActive || state.lessonModified || !state.experiment.variants.some(variant => variant.id === step.id)) return;
   setPlaying(false); selectVariant(step.id); setView('compare'); setTime(step.time);
 });
-for (const id of ['guide-button', 'assumptions-button']) $(id).addEventListener('click', () => { setPlaying(false); $('guide-dialog').showModal(); });
-$('guide-dialog').addEventListener('click', (event) => { if (event.target === $('guide-dialog')) { const bounds = event.target.getBoundingClientRect(); if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) event.target.close(); } });
+for (const id of ['guide-button', 'assumptions-button']) $(id).addEventListener('click', () => { setPlaying(false); openDialog($('guide-dialog'), $(id), $('guide-dialog-title')); });
+$('guide-close').addEventListener('click', () => closeDialog($('guide-dialog')));
+$('guide-dialog').addEventListener('click', (event) => { if (event.target === $('guide-dialog')) { const bounds = event.target.getBoundingClientRect(); if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) closeDialog(event.target); } });
 window.addEventListener('keydown', (event) => { if (event.code === 'Space' && !['INPUT','BUTTON','SELECT','TEXTAREA'].includes(document.activeElement.tagName) && !$('guide-dialog').open && !$('lesson-dialog').open) { event.preventDefault(); $('play-button').click(); } });
 document.addEventListener('visibilitychange', () => { if (document.hidden) setPlaying(false); });
 let previous = performance.now();

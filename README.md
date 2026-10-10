@@ -8,6 +8,8 @@ DetourLab is a browser-based logistics disruption lab. Create named closure vari
 
 The bundled city, fleet and demand are entirely synthetic. The app needs no API key, account, map service or npm dependency.
 
+Use the native controls by keyboard, including the road and direction selectors. [Keyboard controls and modal focus](docs/KEYBOARD.md) describes the guide, lesson confirmation, focus return and verification limits.
+
 ![Actual DetourLab workbench showing three variants, a tilted fictional district, route replay and delivery outcomes.](docs/images/workbench-v5-desktop.jpg)
 
 *An actual capture of the public v5 workbench on October 10, 2026 UTC. The ten-minute closure variant was created in the interface. [Screenshot provenance](docs/VERIFICATION.md#screenshot).*
