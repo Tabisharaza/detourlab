@@ -2,7 +2,7 @@
 
 These scopes were prepared before publication. Selected work is now public:
 
-- [#1: Tiny multi-variant experiment walkthrough](https://github.com/Tabisharaza/detourlab/issues/1), a separately scoped documentation starter
+- [#1: Tiny multi-variant experiment walkthrough](https://github.com/Tabisharaza/detourlab/issues/1), implemented in source `359570c` with fixture, documented fingerprint and exact ledger regressions; its original documentation scope is separate from the added optional browser lesson
 - [#2: Real desktop-browser import/export roundtrips](https://github.com/Tabisharaza/detourlab/issues/2), a bounded subset of scope 1 below
 - [#3: Profile and avoid redraws of unchanged paused scenes](https://github.com/Tabisharaza/detourlab/issues/3), based on scope 4 below
 

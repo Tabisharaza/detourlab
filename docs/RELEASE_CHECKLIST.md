@@ -51,6 +51,16 @@ These completed gates apply to the [initial public source release](PUBLICATION.m
 - [ ] Independently verify exact CDN-served asset bytes; the executor manifest request returned 403.
 - [ ] Measure browser rendering time and verify native resize/context-loss behavior; Node operation counts are not timing measurements.
 
+## October 10 tiny lesson and v6 deployment
+
+- [x] Verify source `359570c` and all 72 remote files against its sanitized source archive.
+- [x] Verify [run 38039735868](https://github.com/Tabisharaza/detourlab/actions/runs/38039735868): both pinned Node jobs passed 220 tests and the separately repeated 20 CLI gates.
+- [x] Verify all 19 payloads and the manifest, source parity and repeated builds.
+- [x] Publish the same Site as v6, preserving v5 rollback.
+- [x] Exercise the bounded [native lesson workflows and restoration](VERIFICATION.md#v6-tiny-lesson-deployment-and-desktop-checks), including exact cutoff outcomes and preserved draft name.
+- [x] Record the actual 1165×1604 lesson screenshot and its hash.
+- [ ] Complete keyboard/screen-reader and responsive viewport coverage; native dialog focus evidence remains bounded.
+
 ## Remaining browser/operational gates
 
 - [ ] Real file import/download roundtrips and chooser cancellation

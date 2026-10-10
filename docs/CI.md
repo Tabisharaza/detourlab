@@ -2,6 +2,10 @@
 
 ## Status
 
+The v6 onboarding milestone [`359570c`](https://github.com/Tabisharaza/detourlab/commit/359570c81260b17778e3e8291128e2191ff149d2) passed [run 38039735868](https://github.com/Tabisharaza/detourlab/actions/runs/38039735868) on **2026-10-10 UTC**. Both matrix jobs passed **220 tests**, separately repeated the **20 CLI gates**, verified **19 payload files plus the manifest**, and reproduced every build byte. Toolchains were Node 24.19.0/npm 11.17.0 (job 114177411256) and Node 24.21.0/npm 11.19.0 (job 114177411223); all steps succeeded. The [v6 verification record](VERIFICATION.md#v6-tiny-lesson-deployment-and-desktop-checks) separates real browser checks from stand-ins. This evidence names that exact milestone commit, not every later docs change.
+
+### Prior renderer milestone
+
 For the deployed v5 renderer source [`74e0356`](https://github.com/Tabisharaza/detourlab/commit/74e0356c1fe0d7cfac0c2520906496aaef7869c6), [run 38030451835](https://github.com/Tabisharaza/detourlab/actions/runs/38030451835) succeeded on **2026-10-10 UTC**. Both matrix jobs passed **194 tests**, separately repeated the **20 CLI gates**, and verified **17 payload files plus the manifest** and byte-identical second builds. Actual toolchains were Node 24.19.0/npm 11.17.0 and Node 24.21.0/npm 11.19.0 on Ubuntu 24.04 image 20261004.327.1. Every job step succeeded. [The v5 browser/deployment record](VERIFICATION.md#v5-renderer-deployment-and-desktop-checks) covers separate evidence and limitations. This record is tied to that runtime commit, not an assertion about every later documentation commit.
 
 ### Initial release history

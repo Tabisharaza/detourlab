@@ -1,6 +1,6 @@
 # Verification record
 
-**Current public demo: v5**, deployed October 10, 2026 UTC from tested source `74e0356`. [Jump to its source mapping and desktop checks](#v5-renderer-deployment-and-desktop-checks). The earlier v4 record below is retained as historical evidence.
+**Current public demo: v6**, deployed October 10, 2026 UTC from tested source `359570c`. [Jump to its source mapping and desktop checks](#v6-tiny-lesson-deployment-and-desktop-checks). The earlier v4/v5 records below are retained as historical evidence.
 
 ## Historical v4 application review
 
@@ -50,7 +50,7 @@ No application error was observed in those exercised flows. This is a bounded fu
 
 ## Screenshot
 
-`docs/images/workbench-v5-desktop.jpg` is the current README image: an unaltered, actual full-page capture of the public v5 workbench on October 10, 2026 UTC at approximately 06:28. It is 1165×1586 pixels and shows three locally configured variants, a 600-second cutoff, selected VAN-02, comparison view and a paused 04:00 replay. Late counts are 118, 0 and 106 for the five-minute closure, clear-road control and ten-minute closure. SHA-256: `83b2b2ee97aad183211250545f520560713d6cefd53eec801d853fce65ea9017`.
+`docs/images/workbench-v5-desktop.jpg` is the city-view README image: an unaltered, actual full-page capture of the public v5 workbench on October 10, 2026 UTC at approximately 06:28. It is 1165×1586 pixels and shows three locally configured variants, a 600-second cutoff, selected VAN-02, comparison view and a paused 04:00 replay. Late counts are 118, 0 and 106 for the five-minute closure, clear-road control and ten-minute closure. SHA-256: `83b2b2ee97aad183211250545f520560713d6cefd53eec801d853fce65ea9017`.
 
 The earlier image is retained for historical provenance:
 
@@ -83,6 +83,36 @@ Observed v5 flows:
 A programmatic field-fill attempt did not trigger a recomputation in this automation pass; a genuine changed-value native keyboard edit did. This is not a passing assertion for that automation method or a diagnosed application defect. No source change was made for it.
 
 The checks establish these functional interactions and an actual rendered screenshot. They do not measure CPU time, FPS, rasterization, real context-loss recovery or native ResizeObserver delivery. Automated Canvas/app integration tests remain Node stand-ins. The browser version/device was not recorded for a performance baseline, and no console-log audit was performed. Issue #3 stays open for the remaining profiling and rendering evidence.
+
+## V6 tiny lesson deployment and desktop checks
+
+On **October 10, 2026 at 09:00:21 UTC**, the existing public URL was updated to **v6**. The preceding v5 and older saved versions remain available for rollback.
+
+- Runtime/source milestone: [`359570c81260b17778e3e8291128e2191ff149d2`](https://github.com/Tabisharaza/detourlab/commit/359570c81260b17778e3e8291128e2191ff149d2)
+- Public source tree: `95b42608ee6b58bf53163d111c64804fa8363af4`; all **72 files**, modes, sizes and Git blob hashes were checked against the local source archive
+- Hosting source revision: `2640a7147534192eae18d84628015931f407eda9`; its 72 public files matched the tested GitHub tree, with hosting configuration separate
+- [CI run 38039735868](https://github.com/Tabisharaza/detourlab/actions/runs/38039735868): success on Node 24.19.0/npm 11.17.0 and Node 24.21.0/npm 11.19.0, with **220 tests per job**, **20 CLI gates separately repeated**, and byte-identical rebuilds
+- Distribution: **19 payload files plus `manifest.json`**, all byte-matched to the checked source and packaged deployment. Manifest SHA-256: `9b3c98089ce2bc9b5ddf23249b5a234f2807ee5bb198910ff2e740dbb432417f`
+- Portable tiny experiment fingerprint: `7a757f1b53531826e98f44a706d3c6d235986682e6517c3c542f116fa8bf7395`, with complete route/arrival/service ledgers independently checked
+
+The milestone adds 26 tests over the prior 194: three fixture/documented-CLI assertions, two small-node label checks and 21 lesson tests. Independent review repeated the aggregate checks and exercised additional interruption/restoration cases. The routing engine, scenario and experiment validators, Worker protocol and public type files are byte-unchanged.
+
+Actual cloud Chrome checks used a **1165×757 CSS-pixel desktop viewport**:
+
+- Enter opens the optional native dialog with Cancel focused. Cancel and Escape dismiss it, restore the visible entry focus and retain city results. The guide's lesson entry also dismisses safely.
+- Confirm starts the four-node lesson at 0 s, Compare view and 1×. The real range control reports value **10** with step **1**; import is visibly disabled with an explanation.
+- Keyboard activation of the 10 s plan shows **260 m**, **1 late / 1 job**, **0 unreachable**, **A → B → D → C**, arrival **00:26** against due **00:22**, **+4 s**, and **00:29 elapsed** including service.
+- The 11 s plan shows **200 m**, **0 late**, **A → B → C**, arrival **00:20**, and **00:23 elapsed**. The clear-road plan gives the same final outcomes.
+- Renaming the lesson invalidates its reference story and disables the three reference step buttons. Reset lesson restores the canonical input and step controls without losing the prior-work backup.
+- Play/pause and keyboard timeline controls respond. Returning restores the previous variant, VAN-02 selection, **240 s** replay, **120×** speed, baseline view, **300 s** new-closure setting and an unfinished variant-name draft exactly; playback stays paused and results recompute.
+- A second entry, Cancel, second confirmed lesson and return work; ordinary Reset afterward restores the original city and 118-late bridge result.
+- The actual map visibly contains A/B/C/D labels, the closed edge and detour. Textual path and outcome controls are also present outside Canvas.
+
+A Tab press moved from Cancel to Start; a subsequent native Tab yielded no focused page-element ID before Escape. This is recorded without claiming a complete focus-trap or keyboard accessibility audit. One cleanup wait for the restored city result timed out; a fresh page inspection then showed the correct completed result. No application defect or timing guarantee is inferred from that automation timeout.
+
+The actual screenshot `docs/images/tiny-lesson-desktop.jpg` was captured at approximately **09:03 UTC**, unaltered, at **1165×1604 pixels**. It shows the selected 10-second plan, paused 00:10 replay, three result cards and the computed detour. SHA-256: `a55adb6f2c076507295e28cf3add7901ff756b4890f2e564fe366837aa4e6608`.
+
+The native deployment receipt, source/package comparisons and browser interactions are separate evidence. No independent CDN-served byte comparison was performed for v6; the earlier v5 manifest-request restriction was not retried or bypassed. No file chooser, browser import/export roundtrip, DevTools, console audit, mobile emulation, screen reader, cross-browser matrix or browser performance profiling was exercised in this pass. The in-app built-in example does not close the native file-import gap.
 
 ## Known gaps
 

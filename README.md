@@ -22,6 +22,10 @@ The [tiny experiment walkthrough](docs/EXPERIMENTS.md#tiny-walkthrough-one-secon
 node scripts/run-experiment.js examples/minimal-experiment.json --json
 ```
 
+![Actual v6 tiny lesson showing the blocked B to C edge, the A to B to D to C detour, and computed 260 m / 4-second-late outcome.](docs/images/tiny-lesson-desktop.jpg)
+
+*Actual public v6 capture, October 10, 2026 UTC. [Lesson verification and screenshot provenance](docs/VERIFICATION.md#v6-tiny-lesson-deployment-and-desktop-checks).*
+
 For the larger fictional district:
 
 1. Open the [demo](https://detourlab-tabish.tabisharaza.chatgpt.site/). The initial plans are **Market Bridge closure** and **Clear-road control**.
@@ -128,4 +132,4 @@ Start with a small reproducible scenario or an improvement that makes results ea
 
 ### Renderer update and live demo
 
-The current source skips unchanged paused Canvas paints while preserving playback redraws. [Reproducible operation counts and limitations](docs/RENDERING.md) document the change. The live demo was updated to v5 on October 10, 2026 UTC from [source `74e0356`](https://github.com/Tabisharaza/detourlab/commit/74e0356c1fe0d7cfac0c2520906496aaef7869c6). Its [CI run](https://github.com/Tabisharaza/detourlab/actions/runs/38030451835) passed 194 tests per Node job, and the public desktop workflow was exercised again. [Deployment and browser evidence](docs/VERIFICATION.md#v5-renderer-deployment-and-desktop-checks) separates those checks from unmeasured browser rendering time and remaining QA gaps.
+The current source skips unchanged paused Canvas paints while preserving playback redraws. [Reproducible operation counts and limitations](docs/RENDERING.md) document the change. The guard first shipped in v5. The current public demo is **v6**, including the reversible tiny lesson from [source `359570c`](https://github.com/Tabisharaza/detourlab/commit/359570c81260b17778e3e8291128e2191ff149d2). Its [CI run](https://github.com/Tabisharaza/detourlab/actions/runs/38039735868) passed **220 tests per Node job**, and the lesson was exercised in the public desktop browser. [Deployment and browser evidence](docs/VERIFICATION.md#v6-tiny-lesson-deployment-and-desktop-checks) retains the exact source mapping and remaining QA gaps. Browser rendering time remains unmeasured.
