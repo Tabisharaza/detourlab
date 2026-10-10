@@ -24,6 +24,7 @@ export const RELEASE_FILES = Object.freeze([
   'src/engine.js',
   'src/experiment.d.ts',
   'src/experiment.js',
+  'src/file-input.js',
   'src/map.js',
   'src/scenario.js',
   'src/simulation-worker.js',

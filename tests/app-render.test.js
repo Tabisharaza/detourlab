@@ -77,7 +77,7 @@ test('import and Reset paint new geometry while stale file reads cannot restore 
   const pending = deferredFile(), importing = app.importFile(pending.file);
   await app.element('reset-button').click(); paintThenSettle();
   assert.equal(app.state.scenario.nodes.length, 432); assert.equal(app.state.disrupted, null);
-  pending.resolve(scenarioText('stale-import')); await importing;
+  pending.resolve(new TextEncoder().encode(scenarioText('stale-import')).buffer); await importing;
   assert.equal(app.state.scenario.id, 'meridian-seed-42');
   app.latestWorker().respond(); paintThenSettle();
   await app.importExperiment(minimalScenario('fresh-map')); paintThenSettle();

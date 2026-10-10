@@ -197,7 +197,7 @@ test('new and synthetic imports cannot open the chooser or read a file during th
   const app = await start(), requests = app.posted.length; let chooserCalls = 0, fileReads = 0;
   app.element('import-input').addEventListener('click', () => { chooserCalls += 1; });
   await app.element('import-button').click(); await app.element('import-button').emit('click');
-  await app.importFile({ size: 100, text: async () => { fileReads += 1; return scenarioText('unwanted'); } });
+  await app.importFile({ size: 100, arrayBuffer: async () => { fileReads += 1; return new TextEncoder().encode(scenarioText('unwanted')).buffer; } });
   assert.equal(chooserCalls, 0); assert.equal(fileReads, 0); assert.equal(app.posted.length, requests);
   assert.deepEqual(app.state.experiment, canonical());
   await app.element('return-experiment').click(); await app.element('import-button').click(); assert.equal(chooserCalls, 1);
@@ -209,7 +209,7 @@ test('pending imports cannot overwrite either the active lesson or the returned 
     const importing = app.importFile(pending.file); await start(app);
     if (returnFirst) await app.element('return-experiment').click();
     const worker = app.latestWorker(), toast = app.element('toast').textContent;
-    pending.resolve(scenarioText('stale-file')); await importing;
+    pending.resolve(new TextEncoder().encode(scenarioText('stale-file')).buffer); await importing;
     assert.deepEqual(app.state.experiment, returnFirst ? original : canonical());
     assert.strictEqual(app.latestWorker(), worker); assert.equal(app.element('toast').textContent, toast);
   }

@@ -6,8 +6,8 @@ DetourLab is an early browser-local simulation app. It has no app account system
 
 - JSON is data; imported labels are rendered with `textContent`, not HTML.
 - Validators copy plain records and reject unknown fields, unsafe identifiers, inherited/accessor/prototype properties, sparse or modified arrays, invalid references and non-finite values.
-- Browser input and the experiment CLI are bounded at 2 MiB. The experiment CLI also rejects non-regular files and bounds bytes actually read.
-- The legacy single-scenario CLI validates the same schema after reading its local file. For untrusted files, prefer the bounded experiment runner, which also accepts legacy scenarios.
+- Browser file input and both CLIs reject malformed UTF-8 and are bounded at 2 MiB, including an optional leading BOM. Both CLIs require regular files and bound bytes actually read; the browser checks reported and returned byte sizes.
+- File-error presentation escapes control characters and limits message length. These are entry-point controls; library callers that supply already-decoded strings remain responsible for their decoding choice. See [file-input behavior and verification limits](docs/FILE_INPUT.md).
 - No imported script, URL fetch, map tile or plugin is executed.
 
 ## Current resource bounds

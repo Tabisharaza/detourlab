@@ -250,7 +250,7 @@ test('Reset rejects a pending import and results from the old experiment worker'
   const app = await loaded(), oldWorker = app.latestWorker(), pending = deferredFile();
   const importing = app.importFile(pending.file);
   await app.element('reset-button').click(); const resetWorker = app.latestWorker();
-  pending.resolve(scenarioText('must-not-load')); await importing;
+  pending.resolve(new TextEncoder().encode(scenarioText('must-not-load')).buffer); await importing;
   oldWorker.respond(); oldWorker.fail('old worker after reset');
   assert.equal(app.latestScenario().id, 'meridian-seed-42');
   assert.equal(app.state.pending, true); assert.equal(app.state.allResults, null);
@@ -262,7 +262,7 @@ test('variant edits and selection invalidate pending imports', async () => {
   for (const action of [async app => { await app.change('variant-name', 'Retained edit'); await app.element('rename-variant').click(); }, async app => app.change('variant-select', 'control')]) {
     const app = await loaded(), pending = deferredFile(); const importing = app.importFile(pending.file);
     await action(app); const experiment = copy(app.state.experiment), selection = app.state.selectedVariantId;
-    pending.resolve(scenarioText('obsolete-import')); await importing;
+    pending.resolve(new TextEncoder().encode(scenarioText('obsolete-import')).buffer); await importing;
     assert.deepEqual(app.state.experiment, experiment); assert.equal(app.state.selectedVariantId, selection);
   }
 });

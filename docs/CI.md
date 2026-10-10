@@ -18,6 +18,10 @@ Local verification on **2026-10-09** used Node **24.19.0**, npm **11.9.0**, and 
 
 [Source `fb08b57`](https://github.com/Tabisharaza/detourlab/commit/fb08b57457eb70abe107eca0cab41f6f3d30261f) passed [run 38042346894](https://github.com/Tabisharaza/detourlab/actions/runs/38042346894) on October 10, 2026 UTC. Both existing matrix jobs completed successfully: Node 24.19.0/npm 11.17.0 and Node 24.21.0/npm 11.19.0. Each checked 33 JavaScript files, passed **231 tests**, repeated all **20 CLI gates**, verified **19 distribution payloads plus the manifest**, and reproduced every build byte. Eleven new focused regressions cover modal keyboard handlers and delayed close events. The workflow itself is unchanged. [Actual browser observations](VERIFICATION.md#v7-modal-keyboard-deployment-and-desktop-checks) are recorded separately; hosted CI does not launch a browser.
 
+## File-input candidate checks
+
+The October 10, 2026 file-input source update passed local checks on Node 24.19.0 / npm 11.9.0: 38 syntax-checked JavaScript files, **341 tests** (110 newly added), all 20 separately repeated CLI gates, and **20 payload files plus the manifest** with a byte-identical second build. The existing workflow includes the new test files through `node --test`; workflow permissions, pins and steps are unchanged. Hosted results for this exact update are pending publication. The [source verification record](VERIFICATION.md#file-input-source-milestone) separates this Node-based evidence from the unchanged v7 demo and remaining browser QA.
+
 ## What the workflow does
 
 The `verify` job runs on pushes, pull requests, and manual dispatch with an explicit two-version matrix: **24.19.0** (the locally tested baseline recorded in [`.node-version`](../.node-version)) and **24.21.0** (the current official Node 24 LTS release when checked on 2026-10-09). The second version is additional compatibility coverage, not a runtime minimum or a condition for creating this alpha repository. Each job has a ten-minute timeout, at most two matrix jobs run in parallel, and one matrix failure does not cancel the other. A newer run for the same workflow/ref cancels the older run. Both use `ubuntu-24.04`, assert the selected Node version, and record Node/npm versions in their logs.
@@ -63,7 +67,7 @@ node --test tests/release.test.js
 
 ## What a passing distribution check proves
 
-[`scripts/verify-dist.js`](../scripts/verify-dist.js) uses only Node built-ins. Its reviewed `RELEASE_FILES` allowlist is independent of both the build script and the generated manifest. The current source has **19 payload files**, plus `manifest.json`: the tiny experiment and tutorial module add two reviewed files to the earlier 17-file distribution. Historical CI records above retain their original counts.
+[`scripts/verify-dist.js`](../scripts/verify-dist.js) uses only Node built-ins. Its reviewed `RELEASE_FILES` allowlist is independent of both the build script and the generated manifest. The current source has **20 payload files**, plus `manifest.json`: the tiny experiment and tutorial module added two files to the earlier 17-file distribution; the shared browser-safe file-input helper adds one more. Historical CI records above retain their original counts.
 
 - The actual tree contains exactly the allowed files and directories. Additional files, hidden configuration, private examples, unexpected empty directories, non-regular entries, and symbolic links fail verification.
 - The manifest is version `1`, has only `version` and `files`, and lists exactly the payload files with lowercase SHA-256 hashes.

@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import * as scenarioSchema from '../../src/scenario.js';
 import * as experimentSchema from '../../src/experiment.js';
+import * as fileInput from '../../src/file-input.js';
 import { createTutorialExperiment } from '../../src/tutorial.js';
 
 // Execute only checked-in app source with DOM/Worker stand-ins. This covers
@@ -146,10 +147,10 @@ export function application({ workerConstructionError = () => null, mapClass = n
   const windowListeners = new Map();
   const window = { addEventListener(name, handler) { if (!windowListeners.has(name)) windowListeners.set(name, []); windowListeners.get(name).push(handler); } };
   const environment = {
-    ...scenarioSchema, ...experimentSchema, createTutorialExperiment, document, getComputedStyle: computedStyle, NetworkMap: mapClass ? class extends mapClass {
+    ...scenarioSchema, ...experimentSchema, ...fileInput, createTutorialExperiment, document, getComputedStyle: computedStyle, NetworkMap: mapClass ? class extends mapClass {
       constructor(...args) { super(...args); maps.push(this); }
     } : NetworkMap, Worker: FakeWorker,
-    URL, Blob, TextEncoder, performance: { now }, structuredClone,
+    URL, Blob, TextEncoder, TextDecoder, performance: { now }, structuredClone,
     window, requestAnimationFrame(callback) { animationFrames.push(callback); },
     setTimeout(callback, delay) { const id = ++timerId; timers.set(id, { callback, delay }); return id; },
     clearTimeout(id) { timers.delete(id); },
@@ -169,14 +170,14 @@ export function application({ workerConstructionError = () => null, mapClass = n
     latestScenario: () => posted.at(-1).experiment.baseScenario,
     async change(id, value, event = 'change') { element(id).value = String(value); return element(id).emit(event); },
     importFile: file => element('import-input').emit('change', { target: { files: [file], value: '' } }),
-    importExperiment: experiment => element('import-input').emit('change', { target: { files: [{ size: 100, text: async () => JSON.stringify(experiment) }], value: '' } }),
+    importExperiment: experiment => element('import-input').emit('change', { target: { files: [new Blob([JSON.stringify(experiment)], { type: 'application/json' })], value: '' } }),
   };
 }
 
 export function deferredFile() {
   let resolve, reject;
   const value = new Promise((yes, no) => { resolve = yes; reject = no; });
-  return { file: { size: 100, text: () => value }, resolve, reject };
+  return { file: { size: 100, arrayBuffer: () => value }, resolve, reject };
 }
 
 export function minimalScenario(id = 'minimal-directed') {

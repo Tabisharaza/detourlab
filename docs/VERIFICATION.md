@@ -2,6 +2,22 @@
 
 **Current public demo: v7**, deployed October 10, 2026 UTC from tested source `fb08b57`. [Jump to its source mapping and keyboard checks](#v7-modal-keyboard-deployment-and-desktop-checks). The earlier v4/v5/v6 records below are retained as historical evidence.
 
+## File-input source milestone
+
+The October 10, 2026 source update aligns browser/CLI file decoding and adds bounded reads to the legacy runner. It has **not been deployed to the public demo**. The current v7 mapping and browser observations below remain the last live verification.
+
+Local checks used **Node 24.19.0 / npm 11.9.0 / Linux**:
+
+- Lockfile check, syntax checks for **38 JavaScript files**, and **341 tests** passed with zero failures/skips.
+- **110 new tests** include 34 byte-input/handler/CLI regressions and 76 seeded roundtrip/schema tests. The fixed corpus contains 48 experiments and 189 variants, six with empty work, plus 25 malformed mutations.
+- All **20 existing CLI gates** passed in a separate repeated run; they are already part of the full suite, not additional unique tests.
+- **20 distribution payloads plus the manifest** passed exact allowlist, source-byte, license and SHA-256 verification. A second build matched every byte.
+- Nine default/bundled CLI invocations had identical exit codes, stdout bytes and stderr bytes before and after the change. Valid fixture metrics and fingerprints did not change.
+
+Original repros established silent malformed-UTF-8 replacement in the app/legacy CLI, an unwritten FIFO hanging the legacy CLI, and an oversized unknown key producing a multi-megabyte error. The new tests cover strict rejection, valid U+FFFD/BOM handling, exactly 2 MiB versus one byte over, partial/growing-file reads, regular-file enforcement, escaped/bounded diagnostics, and obsolete import results. Node Blob/File and checked-in handler stand-ins are used; no native browser file picker, browser profiling, screen-reader behavior or deployment was tested in this pass.
+
+See [FILE_INPUT.md](FILE_INPUT.md) for the contract and reproduction commands. Hosted CI for this source revision is pending publication; a prior green run is not evidence for the new files. Browser QA [issue #2](https://github.com/Tabisharaza/detourlab/issues/2) stays open.
+
 ## Historical v4 application review
 
 - Application source: `cb554b15d4e8c44a589acce4d5462ebe4538ef7e`

@@ -80,3 +80,7 @@ The CLI accepts bounded JSON experiments and legacy scenario files. Optional thr
 ## Verification boundary
 
 Node tests exercise the exact model, worker protocol, CLI and UI event-handler state through mocked DOM/Worker interfaces. They do not replace real browser, file-picker, mobile, reduced-motion or screen-reader tests. No claim of those checks follows from a passing mocked test.
+
+## File encoding
+
+The app and both CLIs accept UTF-8 JSON with an optional leading BOM, which counts toward the 2 MiB input bound. Malformed UTF-8 is rejected without substituting label characters. Exports have no BOM. [File input and reproducible roundtrips](FILE_INPUT.md) documents error handling, byte acquisition and the remaining native browser QA gap.

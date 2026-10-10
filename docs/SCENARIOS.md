@@ -54,3 +54,7 @@ node scripts/run-scenario.js your-scenario.json --json
 Each runner reports a SHA-256 of its canonicalized validated input. Object keys are sorted; array order remains significant. The experiment runner also accepts a legacy scenario, upgrading it to two variants and fingerprinting that experiment. These fingerprints detect input changes; they are not signatures of trusted authorship.
 
 The original seed-42 metrics are protected by regression tests. Different seeds create different synthetic demand, never a claim about an actual city.
+
+## File encoding
+
+The app and both CLIs accept UTF-8 JSON with an optional leading BOM, which counts toward the 2 MiB input bound. Malformed UTF-8 is rejected without substituting label characters. Exports have no BOM. [File input and reproducible roundtrips](FILE_INPUT.md) documents error handling, byte acquisition and the remaining native browser QA gap.

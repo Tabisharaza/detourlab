@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-import { open } from 'node:fs/promises';
-import { constants } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { EXPERIMENT_LIMITS, canonicalExperiment, parseExperiment, simulateExperiment } from '../src/experiment.js';
+import { canonicalExperiment, parseExperiment, simulateExperiment } from '../src/experiment.js';
+import { formatInputError } from '../src/file-input.js';
+import { readInput } from './read-input.js';
 
 const usage = `DetourLab experiment runner
 
@@ -24,29 +24,6 @@ const thresholdOptions = {
   '--max-extra-late': 'extraLateJobs',
   '--max-unreachable': 'unreachableJobs',
 };
-
-async function boundedRead(file) {
-  // Nonblocking open lets us reject named pipes before a read can wait forever.
-  // It has no effect on ordinary files, whose type and actual byte count follow.
-  const handle = await open(file, constants.O_RDONLY | constants.O_NONBLOCK);
-  try {
-    const info = await handle.stat();
-    if (!info.isFile()) throw new Error('Experiment input must be a regular file.');
-    if (info.size > EXPERIMENT_LIMITS.maxBytes) throw new Error('Experiment import exceeds the 2 MiB limit.');
-    // Bound the actual read too, in case the file grows after stat().
-    const buffer = Buffer.alloc(EXPERIMENT_LIMITS.maxBytes + 1);
-    let length = 0;
-    while (length < buffer.length) {
-      const { bytesRead } = await handle.read(buffer, length, buffer.length - length, length);
-      if (!bytesRead) break;
-      length += bytesRead;
-    }
-    if (length > EXPERIMENT_LIMITS.maxBytes) throw new Error('Experiment import exceeds the 2 MiB limit.');
-    return new TextDecoder('utf-8', { fatal: true }).decode(buffer.subarray(0, length));
-  } finally {
-    await handle.close();
-  }
-}
 
 try {
   const args = process.argv.slice(2);
@@ -74,7 +51,7 @@ try {
     }
     if (!file) throw new Error('An experiment or scenario JSON file is required. Use --help for usage.');
     const thresholds = Object.fromEntries(Object.values(thresholdOptions).filter(metric => Object.hasOwn(selectedThresholds, metric)).map(metric => [metric, selectedThresholds[metric]]));
-    const experiment = parseExperiment(await boundedRead(file));
+    const experiment = parseExperiment(await readInput(file));
     const simulation = simulateExperiment(experiment);
     const variants = simulation.variants.map(variant => {
       const violations = Object.entries(thresholds).filter(([metric, limit]) => variant.delta[metric] > limit).map(([metric, limit]) => ({ metric, actual: variant.delta[metric], limit }));
@@ -106,6 +83,6 @@ try {
     if (!result.passed) process.exitCode = 1;
   }
 } catch (error) {
-  console.error(`DetourLab: ${error.message}`);
+  console.error(`DetourLab: ${formatInputError(error)}`);
   process.exitCode = 2;
 }

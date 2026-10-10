@@ -2,6 +2,7 @@ import { createDemoScenario, createPresets, validateScenario, LIMITS } from './s
 import { experimentFromScenario, validateExperiment, parseExperiment, scenarioForVariant, exportExperiment, EXPERIMENT_LIMITS } from './experiment.js';
 import { NetworkMap } from './map.js';
 import { createTutorialExperiment } from './tutorial.js';
+import { decodeFileInput, FILE_INPUT_MAX_BYTES, formatInputError } from './file-input.js';
 
 const $ = (id) => document.getElementById(id);
 const node = (tag, text, className) => { const element = document.createElement(tag); if (text !== undefined) element.textContent = text; if (className) element.className = className; return element; };
@@ -403,14 +404,14 @@ $('import-input').addEventListener('change', async (event) => {
   const file = event.target.files?.[0]; event.target.value = ''; if (!file || state.lessonActive) return;
   const id = ++importRevision;
   try {
-    if (file.size > LIMITS.maxBytes) throw new Error('File must be at most 2 MiB.');
-    const text = await file.text();
+    if (file.size > FILE_INPUT_MAX_BYTES) throw new Error('File must be at most 2 MiB.');
+    const bytes = await file.arrayBuffer();
     // Newer selections, lesson transitions and Reset supersede asynchronous file reads.
     if (id !== importRevision || state.lessonActive) return;
-    const experiment = parseExperiment(text); loadExperiment(experiment);
+    const experiment = parseExperiment(decodeFileInput(bytes)); loadExperiment(experiment);
     toast(`Loaded “${experiment.name}”. Comparing ${experiment.variants.length} independent variants.`);
   } catch (error) {
-    if (id === importRevision) toast(`Import rejected. ${error.message}`, true);
+    if (id === importRevision) toast(`Import rejected. ${formatInputError(error)}`, true);
   }
 });
 $('variant-select').addEventListener('change', event => selectVariant(event.target.value));
