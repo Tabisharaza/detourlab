@@ -52,6 +52,10 @@ No application error was observed in those exercised flows. This is a bounded fu
 
 Image SHA-256 is recorded in [release checklist](RELEASE_CHECKLIST.md). The image contains only the synthetic application scene and its controls.
 
+## Later source-only rendering change
+
+The paused-scene guard and its [operation-count record](RENDERING.md) were added after the initial source release. Their automated Canvas/app integration tests are Node stand-ins. They have not been deployed to the v4 demo or visually checked in a real browser, and do not extend the desktop-browser coverage above.
+
 ## Known gaps
 
 - Browser-native import/download roundtrip and file-picker cancellation

@@ -4,7 +4,7 @@ import * as experimentSchema from '../../src/experiment.js';
 
 // Execute only checked-in app source with DOM/Worker stand-ins. This covers
 // handler state and result rendering, never browser layout, file pickers or QA.
-export function application({ workerConstructionError = () => null } = {}) {
+export function application({ workerConstructionError = () => null, mapClass = null, now = () => performance.now() } = {}) {
   const created = [];
   class Element {
     constructor(tag = 'div') {
@@ -60,7 +60,7 @@ export function application({ workerConstructionError = () => null } = {}) {
     return elements.get(id);
   };
   element('closure-time').value = '300'; element('road-direction').value = 'both';
-  const posted = [], workers = [], maps = [], timers = new Map();
+  const posted = [], workers = [], maps = [], timers = new Map(), animationFrames = [];
   let timerId = 0;
   const document = {
     getElementById: element, createElement: tag => new Element(tag),
@@ -69,7 +69,7 @@ export function application({ workerConstructionError = () => null } = {}) {
   };
   class NetworkMap {
     constructor(_element, state, handlers) { this.width = 800; this.state = state; this.handlers = handlers; maps.push(this); }
-    invalidate() {} render() {}
+    invalidate() {} invalidateFrame() {} render() {}
   }
   class FakeWorker {
     constructor(url, options) {
@@ -89,9 +89,11 @@ export function application({ workerConstructionError = () => null } = {}) {
     .replace(/^import .*;\n/gm, '')
     .replaceAll('import.meta.url', JSON.stringify(url.href));
   const environment = {
-    ...scenarioSchema, ...experimentSchema, document, NetworkMap, Worker: FakeWorker,
-    URL, Blob, TextEncoder, performance, structuredClone,
-    window: { addEventListener() {} }, requestAnimationFrame() {},
+    ...scenarioSchema, ...experimentSchema, document, NetworkMap: mapClass ? class extends mapClass {
+      constructor(...args) { super(...args); maps.push(this); }
+    } : NetworkMap, Worker: FakeWorker,
+    URL, Blob, TextEncoder, performance: { now }, structuredClone,
+    window: { addEventListener() {} }, requestAnimationFrame(callback) { animationFrames.push(callback); },
     setTimeout(callback, delay) { const id = ++timerId; timers.set(id, { callback, delay }); return id; },
     clearTimeout(id) { timers.delete(id); },
   };
@@ -99,6 +101,8 @@ export function application({ workerConstructionError = () => null } = {}) {
   new Function(...Object.keys(environment), source)(...Object.values(environment));
   return {
     element, document, created, posted, workers, timers,
+    stepAnimationFrame(timestamp) { const callbacks = animationFrames.splice(0); for (const callback of callbacks) callback(timestamp); return callbacks.length; },
+    pendingAnimationFrames: () => animationFrames.length,
     map: maps[0], state: maps[0].state,
     latestWorker: () => workers.at(-1),
     latestExperiment: () => posted.at(-1).experiment,

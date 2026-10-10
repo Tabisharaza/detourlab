@@ -151,18 +151,18 @@ function computationFailed(message) {
 function cancelComputation(message = 'Run canceled. Your variants are preserved.') {
   revision += 1; clearTimeout(workerTimeout); worker?.terminate(); worker = null; state.pending = false; setPlaying(false);
   state.allResults = null; state.baseline = null; state.disrupted = null; clearResults(); computationFailed(message);
-  $('status-line').textContent = message; $('comparison-status').textContent = message; $('cancel-run').hidden = true; updateVariants(); map.invalidate();
+  $('status-line').textContent = message; $('comparison-status').textContent = message; $('cancel-run').hidden = true; updateVariants(); map.invalidateFrame();
 }
 function showSelectedResult() {
   const selected = state.allResults?.variants.find(variant => variant.id === state.selectedVariantId);
-  if (!selected) { state.baseline = null; state.disrupted = null; map.invalidate(); return; }
+  if (!selected) { state.baseline = null; state.disrupted = null; map.invalidateFrame(); return; }
   state.baseline = state.allResults.baseline; state.disrupted = selected.result;
   if (!state.selectedVehicle || !state.disrupted.vehicles.some(vehicle => vehicle.id === state.selectedVehicle)) state.selectedVehicle = state.disrupted.vehicles[0]?.id ?? null;
   $('vehicle-select').replaceChildren(...state.disrupted.vehicles.map(vehicle => { const option = node('option', `${vehicle.id.toUpperCase()} · ${vehicle.jobs.length} deliveries`); option.value = vehicle.id; return option; }));
   $('vehicle-select').value = state.selectedVehicle;
   const duration = Math.max(state.baseline.durationS, ...state.allResults.variants.map(variant => variant.result.durationS), 1);
   $('timeline').max = String(duration); $('duration-label').textContent = clock(duration); setTime(Math.min(state.time, duration));
-  updateMetrics(); updateInspector(); updateVariants(); map.invalidate();
+  updateMetrics(); updateInspector(); updateVariants(); map.invalidateFrame();
 }
 function compute() {
   const id = ++revision;
@@ -235,7 +235,7 @@ function updateInspector() {
     const row = node('div'); row.append(node('strong', `Stop ${String(index + 1).padStart(2, '0')}`), node('small', job.status === 'unreachable' ? 'NO PATH' : job.status === 'late' ? `+${Math.ceil((job.arrivalS - job.dueTimeS) / 60)} min` : 'ON TIME'));
     item.append(row, node('p', job.status === 'unreachable' ? `Due ${clock(job.dueTimeS)} · skipped` : `Arrived ${clock(job.arrivalS)} · due ${clock(job.dueTimeS)}`)); return item;
   }));
-  updateVehicleStatus(); map.invalidate();
+  updateVehicleStatus(); map.invalidateFrame();
 }
 function loadExperiment(experiment) {
   importRevision += 1; setPlaying(false); state.experiment = validateExperiment(experiment); state.selectedVariantId = state.experiment.variants[0].id;
@@ -249,7 +249,7 @@ $('closure-time').addEventListener('change', (event) => { $('closure-time-label'
 $('toggle-road').addEventListener('click', () => toggleRoad($('road-select').value));
 $('edit-roads').setAttribute('aria-pressed', 'false');
 $('edit-roads').addEventListener('click', () => { state.editing = !state.editing; $('edit-roads').setAttribute('aria-pressed', String(state.editing)); $('map-help').textContent = state.editing ? 'Click a road to edit the selected direction in this variant' : 'Click a vehicle to inspect its route'; });
-for (const view of ['disruption', 'baseline', 'compare']) $('view-' + view).addEventListener('click', () => { state.view = view; for (const other of ['disruption', 'baseline', 'compare']) { $('view-' + other).classList.toggle('active', other === view); $('view-' + other).setAttribute('aria-pressed', String(other === view)); } map.invalidate(); });
+for (const view of ['disruption', 'baseline', 'compare']) $('view-' + view).addEventListener('click', () => { state.view = view; for (const other of ['disruption', 'baseline', 'compare']) { $('view-' + other).classList.toggle('active', other === view); $('view-' + other).setAttribute('aria-pressed', String(other === view)); } map.invalidateFrame(); });
 $('vehicle-select').addEventListener('change', (event) => { state.selectedVehicle = event.target.value; updateInspector(); });
 $('play-button').addEventListener('click', () => { if (state.time >= Number($('timeline').max)) setTime(0); setPlaying(!state.playing); });
 $('timeline').addEventListener('input', (event) => { setPlaying(false); setTime(event.target.value); });

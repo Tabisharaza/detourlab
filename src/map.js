@@ -5,15 +5,31 @@ const distanceToSegment = (p, a, b) => { const dx = b.x - a.x, dy = b.y - a.y; c
 
 export class NetworkMap {
   constructor(canvas, state, events) {
-    this.canvas = canvas; this.ctx = canvas.getContext('2d'); this.state = state; this.events = events; this.width = 1; this.height = 1; this.dirty = true; this.vehiclePoints = [];
+    this.canvas = canvas; this.ctx = canvas.getContext('2d'); this.state = state; this.events = events; this.width = 1; this.height = 1; this.dpr = 1; this.dirty = true; this.frameDirty = true; this.vehiclePoints = [];
     this.background = document.createElement('canvas'); this.reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    new ResizeObserver(() => { const { width, height } = canvas.getBoundingClientRect(); this.width = width; this.height = height; this.dpr = Math.min(devicePixelRatio || 1, 2); canvas.width = Math.round(width * this.dpr); canvas.height = Math.round(height * this.dpr); this.dirty = true; }).observe(canvas);
+    canvas.addEventListener('contextrestored', () => this.invalidateFrame());
+    this.background.addEventListener('contextrestored', () => this.invalidate());
+    this.resize();
+    new ResizeObserver(() => this.resize()).observe(canvas);
     canvas.addEventListener('pointermove', (event) => { const p = this.pointer(event); const edge = this.nearestRoad(p); if (this.state.editing && edge && edge.distance < 10) this.events.onHover(`${edge.edge.roadName} · click to toggle`, p.x, p.y); else this.events.onHover('', 0, 0); });
     canvas.addEventListener('pointerleave', () => this.events.onHover('', 0, 0));
     canvas.addEventListener('click', (event) => { const p = this.pointer(event); if (this.state.editing) { const edge = this.nearestRoad(p); if (edge && edge.distance < 16) this.events.onRoad(edge.edge.id); } else { const vehicle = [...this.vehiclePoints].sort((a, b) => Math.hypot(a.x - p.x, a.y - p.y) - Math.hypot(b.x - p.x, b.y - p.y))[0]; if (vehicle && Math.hypot(vehicle.x - p.x, vehicle.y - p.y) < 20) this.events.onVehicle(vehicle.id); } });
   }
   pointer(event) { const rect = this.canvas.getBoundingClientRect(); return { x: event.clientX - rect.left, y: event.clientY - rect.top }; }
-  invalidate() { this.dirty = true; }
+  // Scenario/result objects are replaced by the app. In-place scene edits still
+  // use invalidate(); overlay-only edits can preserve the cached background.
+  invalidate() { this.dirty = true; this.invalidateFrame(); }
+  invalidateFrame() { this.frameDirty = true; }
+  resize() {
+    const { width, height } = this.canvas.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
+    const pixelWidth = Math.round(width * dpr), pixelHeight = Math.round(height * dpr);
+    if (this.width === width && this.height === height && this.dpr === dpr && this.canvas.width === pixelWidth && this.canvas.height === pixelHeight) return;
+    this.width = width; this.height = height; this.dpr = dpr;
+    // Assigning either canvas dimension erases its pixels, even at the same size.
+    if (this.canvas.width !== pixelWidth) this.canvas.width = pixelWidth;
+    if (this.canvas.height !== pixelHeight) this.canvas.height = pixelHeight;
+    this.invalidate();
+  }
   project(x, y, lift = 0) { return { x: this.offsetX + (x - y * .51) * this.scale, y: this.offsetY + (y * .64 + x * .245) * this.scale - lift }; }
   nearestRoad(p) { if (!this.edgePoints) return null; let best = null; for (const item of this.edgePoints) { const distance = distanceToSegment(p, item.a, item.b); if (!best || distance < best.distance) best = { ...item, distance }; } return best; }
   path(ctx, points, fill, stroke, width = 1) { if (!points.length) return; ctx.beginPath(); points.forEach((point, i) => i ? ctx.lineTo(point.x, point.y) : ctx.moveTo(point.x, point.y)); ctx.closePath(); if (fill) { ctx.fillStyle = fill; ctx.fill(); } if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = width; ctx.stroke(); } }
@@ -80,7 +96,9 @@ export class NetworkMap {
       if (!this.closureGeometries.has(key)) this.closureGeometries.set(key, []);
       this.closureGeometries.get(key).push({edge,atS});
     }
+    this.sceneState = { scenario, zoom, width: this.width, height: this.height, dpr: this.dpr, pixelWidth: this.canvas.width, pixelHeight: this.canvas.height };
     this.dirty = false;
+    this.invalidateFrame();
   }
   position(vehicle) {
     const source = this.vehicleMap.get(vehicle.id); let last = this.nodeMap.get(source.startNode);
@@ -100,10 +118,17 @@ export class NetworkMap {
     if (!dashed) { ctx.save();ctx.strokeStyle=color;ctx.lineWidth=3;ctx.shadowColor=color;ctx.shadowBlur=7;ctx.beginPath();for(const segment of vehicle.segments){if(segment.startS>this.state.time||segment.endS<this.state.time-90)continue;const a=this.nodeMap.get(segment.from),b=this.nodeMap.get(segment.to),t=Math.min(1,(this.state.time-segment.startS)/(segment.endS-segment.startS)),p=this.project(a.x,a.y),q=this.project(a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t);ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);}ctx.stroke();ctx.restore(); }
   }
   render() {
-    if (!this.width || !this.state.scenario.nodes.length) return;
-    if (this.dirty) this.buildScene();
-    const ctx=this.ctx;ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,this.canvas.width,this.canvas.height);ctx.drawImage(this.background,0,0);ctx.setTransform(this.dpr,0,0,this.dpr,0,0);
+    // A DPR change can happen without a CSS-size ResizeObserver notification.
+    // Only that transition needs a layout read; unchanged frames stay O(1).
+    if (this.dpr !== Math.min(devicePixelRatio || 1, 2)) this.resize();
+    if (!this.width || !this.height || !this.state.scenario.nodes.length) return false;
+    const scene = this.sceneState;
+    if (this.dirty || !scene || scene.scenario !== this.state.scenario || scene.zoom !== this.state.zoom || scene.width !== this.width || scene.height !== this.height || scene.dpr !== this.dpr || scene.pixelWidth !== this.canvas.width || scene.pixelHeight !== this.canvas.height) this.buildScene();
     const { baseline, disrupted, selectedVehicle, view, scenario, time }=this.state;
+    const frame = this.renderedFrame;
+    if (!this.frameDirty && frame && frame.state === this.state && frame.baseline === baseline && frame.disrupted === disrupted && frame.selectedVehicle === selectedVehicle && frame.view === view && frame.time === time) return false;
+    this.frameDirty = true;
+    const ctx=this.ctx;ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,this.canvas.width,this.canvas.height);ctx.drawImage(this.background,0,0);ctx.setTransform(this.dpr,0,0,this.dpr,0,0);
     const selected=disrupted?.vehicles.find(v=>v.id===selectedVehicle),base=baseline?.vehicles.find(v=>v.id===selectedVehicle);
     if (view==='baseline'||view==='compare') this.drawRoute(base,colors.teal,true);
     if (view!=='baseline') this.drawRoute(selected,colors.lime,false);
@@ -133,5 +158,10 @@ export class NetworkMap {
     this.vehiclePoints=[];
     const drawVehicles=(run,ghost)=>{if(!run)return;for(const vehicle of run.vehicles){const p=this.position(vehicle);if(!ghost)this.vehiclePoints.push({...p,id:vehicle.id});const isSelected=vehicle.id===selectedVehicle;ctx.save();ctx.globalAlpha=ghost?.45:1;ctx.beginPath();ctx.arc(p.x,p.y,isSelected?4.5:2.5,0,Math.PI*2);ctx.fillStyle=ghost?colors.teal:isSelected?colors.lime:'#bad4d6';ctx.shadowColor=isSelected?colors.lime:colors.teal;ctx.shadowBlur=isSelected?12:3;ctx.fill();ctx.shadowBlur=0;if(isSelected){ctx.beginPath();ctx.arc(p.x,p.y,8,0,Math.PI*2);ctx.strokeStyle=ghost?colors.teal:'#c6f988aa';ctx.lineWidth=1;ctx.stroke();if(!ghost){ctx.font='8px ui-monospace, monospace';const text=vehicle.id.toUpperCase(),w=ctx.measureText(text).width;ctx.fillStyle='#112c25ee';ctx.fillRect(p.x+11,p.y-19,w+12,17);ctx.strokeStyle='#6b985e';ctx.strokeRect(p.x+11,p.y-19,w+12,17);ctx.fillStyle='#d4f6b6';ctx.fillText(text,p.x+17,p.y-7);}}ctx.restore();}};
     if(view==='compare')drawVehicles(baseline,true);drawVehicles(view==='baseline'?baseline:disrupted,false);
+    // Retain hit points on skipped frames and publish the signature only after a
+    // complete paint, so a failed/interrupted render can be retried.
+    this.renderedFrame = { state: this.state, baseline, disrupted, selectedVehicle, view, time };
+    this.frameDirty = false;
+    return true;
   }
 }

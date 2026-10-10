@@ -115,3 +115,7 @@ Start with a small reproducible scenario or an improvement that makes results ea
 [A/B Street](https://github.com/a-b-street/abstreet), [Eclipse SUMO](https://github.com/eclipse-sumo/sumo), [VROOM](https://github.com/VROOM-Project/vroom), and [kepler.gl](https://github.com/keplergl/kepler.gl) address adjacent planning, simulation, optimization and visualization problems. DetourLab focuses on a small, inspectable disruption experiment and a portable regression fixture. Their code and datasets are not included here.
 
 **Status:** early synthetic workbench. The desktop demo and automated suite have been checked; browser file-picker roundtrips, mobile, reduced-motion emulation and screen-reader auditing remain open. The [initial public release](docs/PUBLICATION.md) passed GitHub-hosted CI on both pinned Node versions, with 173 tests per job and the 20 CLI gates repeated separately. This does not close the browser QA gaps. No adoption, production-readiness or Trending claim is made.
+
+### Source renderer update
+
+The current source skips unchanged paused Canvas paints while preserving playback redraws. [Reproducible operation counts and limitations](docs/RENDERING.md) document the change. The live demo remains v4 pending browser verification of this update.
