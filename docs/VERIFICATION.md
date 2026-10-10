@@ -1,6 +1,6 @@
 # Verification record
 
-**Current public demo: v6**, deployed October 10, 2026 UTC from tested source `359570c`. [Jump to its source mapping and desktop checks](#v6-tiny-lesson-deployment-and-desktop-checks). The earlier v4/v5 records below are retained as historical evidence.
+**Current public demo: v7**, deployed October 10, 2026 UTC from tested source `fb08b57`. [Jump to its source mapping and keyboard checks](#v7-modal-keyboard-deployment-and-desktop-checks). The earlier v4/v5/v6 records below are retained as historical evidence.
 
 ## Historical v4 application review
 
@@ -114,11 +114,39 @@ The actual screenshot `docs/images/tiny-lesson-desktop.jpg` was captured at appr
 
 The native deployment receipt, source/package comparisons and browser interactions are separate evidence. No independent CDN-served byte comparison was performed for v6; the earlier v5 manifest-request restriction was not retried or bypassed. No file chooser, browser import/export roundtrip, DevTools, console audit, mobile emulation, screen reader, cross-browser matrix or browser performance profiling was exercised in this pass. The in-app built-in example does not close the native file-import gap.
 
+## V7 modal keyboard deployment and desktop checks
+
+On **October 10, 2026 at 09:44:29 UTC**, the existing public URL was updated to **v7**. Saved v6, v5 and v4 versions remain available for rollback.
+
+- Tested public source: [`fb08b57457eb70abe107eca0cab41f6f3d30261f`](https://github.com/Tabisharaza/detourlab/commit/fb08b57457eb70abe107eca0cab41f6f3d30261f)
+- Public source tree: `6f304bd496fe40b40893b74d8ae735e6ce40cd2b`; all **75 files**, regular-file modes, sizes and Git blob hashes matched the checked source archive
+- Hosting source revision: `9c49632005e1089f69e211ee0af1ed9a9ddc1e84`; all 75 public files matched, with hosting configuration kept separate
+- [CI run 38042346894](https://github.com/Tabisharaza/detourlab/actions/runs/38042346894): success on Node 24.19.0/npm 11.17.0 and Node 24.21.0/npm 11.19.0, with **231 tests per job**, **33 JavaScript syntax checks**, **20 CLI gates separately repeated**, and byte-identical rebuilds
+- Distribution: **19 payload files plus `manifest.json`**, all matched byte-for-byte between the checked build and packaged deployment. Manifest SHA-256: `b82e73a1994004bbe40b210fa4d4dba329d9f1d6ac0ae4d5c27b578b86811b4f`
+
+Eleven focused tests were added to the prior 220. Independent review repeated the aggregate checks and passed 15 further adversarial focus scenarios. It found a stale native-Escape close notification that could steal focus from a newer page control; that finding was fixed and regression-tested before publication. The routing engine, renderer, validators, Worker, tutorial data, dependencies and CI configuration are byte-unchanged. The shared UI harness now models actual element ancestry and queued close notifications; it remains a stand-in, not a browser DOM implementation.
+
+The starting v6 behavior was checked in real cloud Chrome around **09:30 UTC**: lesson Tab moved Cancel → Start → BODY → Cancel, and Shift+Tab from Cancel also reached BODY. The guide had no accessible name and its forward sequence likewise reached BODY. Native Escape already worked and was preserved.
+
+After v7 deployment, real cloud Chrome checks at approximately **09:44–09:47 UTC**, with a reported **1180×757 CSS-pixel viewport**, established:
+
+- The guide has the accessible name **Rehearse the disruption.** Its heading receives initial focus at scroll position 0, with a visible 2 px lime outline. Space scrolls its content without starting the underlying simulation.
+- From the heading, Tab reaches Close guide. Forward and reverse boundary navigation then stays between Close guide and Try a tiny example. Escape restores How it works.
+- The lesson opens with Cancel focused. Forward and reverse boundary navigation stays between Cancel and Start. Escape restores Try a tiny example. No BODY focus stop appeared in the 11 ordinary Tab/Shift+Tab presses recorded across these two initial sequences.
+- Opening the guide through Model assumptions and activating Close guide restores Model assumptions, keeping the unfinished variant name and the 118-late city result.
+- Guide → lesson confirmation → Start keeps focus on Cancel, then Clear roads. The clear plan reports 200 m and zero late jobs; keyboard activation of the 10-second plan reports 260 m, one late job and A → B → D → C.
+- During the lesson, the guide's example entry is disabled. Four recorded forward/reverse Tab presses from the heading and single available close button stay on Close guide; Escape still returns to the guide opener.
+- Editing the lesson disables its reference controls; Reset lesson re-enables them and focuses Clear roads. Return restores the unfinished city name, focuses the original available entry and subsequently shows the original 118-late result. Immediate metric placeholders during recomputation were not counted as completed results.
+- Three repeated keyboard cancellations retain the same city draft/results and restore the entry focus. Ordinary Reset restores the default variant name and retains focus on Reset experiment.
+
+These are bounded desktop observations, not a complete accessibility audit. The synthetic queued-close races, hidden/disconnected openers and modified-shortcut cases were tested in the source harness, not forcibly injected into the live page. This pass did not use native file import/export, mobile emulation, a screen reader, another browser/platform, DevTools, console logs, performance profiling or an independent CDN asset download. Earlier access restrictions were not retried. See [keyboard behavior and design references](KEYBOARD.md).
+
 ## Known gaps
 
 - Browser-native import/download roundtrip and file-picker cancellation
 - Mobile viewport behavior and reduced-motion preference emulation
 - Screen-reader review and a cross-browser/platform matrix
+- Focus preservation across all dynamically rebuilt editor and result controls beyond these modal/lesson flows
 - Exhaustive visual testing of large imported graphs
 - Named-browser/device before-and-after rendering timings, native resize/context-loss recovery and a console-log audit
 - Independent verification of the exact CDN-served asset bytes

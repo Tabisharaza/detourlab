@@ -71,3 +71,15 @@ These completed gates apply to the [initial public source release](PUBLICATION.m
 Keep incomplete boxes incomplete until the corresponding evidence exists.
 
 See [clean-source publication](PUBLISHING.md) for the fresh-history procedure. Publishing the repository does not establish that every outstanding QA check has passed.
+
+## October 10 modal keyboard and v7 deployment
+
+- [x] Verify reviewed [runtime source fb08b57](https://github.com/Tabisharaza/detourlab/commit/fb08b57457eb70abe107eca0cab41f6f3d30261f) and all 75 public source files.
+- [x] Verify [run 38042346894](https://github.com/Tabisharaza/detourlab/actions/runs/38042346894): both Node jobs passed 231 tests, 20 repeated CLI gates and byte-identical builds.
+- [x] Independently review delayed-close, hidden/disabled opener and repeated-modal focus cases; fix the native-Escape stale-focus finding.
+- [x] Deploy the same public Site as v7; retain v6 rollback and older versions.
+- [x] Exercise [desktop native keyboard flows](VERIFICATION.md#v7-modal-keyboard-deployment-and-desktop-checks): both modal boundaries, initial focus, Escape/Close return, single-control guide, lesson Reset/Return and repeated cancellation.
+- [ ] Extend coverage to screen readers, mobile/responsive viewports and other browsers/platforms.
+- [ ] Verify native file-import/export and broader dynamic-editor focus behavior in a permitted environment.
+
+This scoped milestone does not complete the broader accessibility or native-file checklists above.
