@@ -92,3 +92,13 @@ This scoped milestone does not complete the broader accessibility or native-file
 - [CI run 38055582446](https://github.com/Tabisharaza/detourlab/actions/runs/38055582446) completed successfully for that exact runtime commit. Both Node matrix jobs passed 341 tests, the separately repeated 20 CLI gates and a byte-identical two-build comparison of 20 payloads plus manifest. [CI.md](CI.md#file-input-milestone) records exact jobs and toolchains.
 - Runtime source ZIP: `detourlab-public-source-e9285ee.zip`, 690,525 bytes, 81 members; SHA-256 `9ff54a8f60a8e4a8a61f1d5379cee59903cf9d951e85b5e9b1462973393f3db2`. Every member matches the named remote runtime tree; ZIP integrity passes. No `.git`, `.openai`, provider configuration, generated `dist` or `node_modules` is included.
 - This release updates GitHub source only. The public demo remains v7, and native file-picker/download QA is still open. Later docs may record this evidence; their own CI runs must be checked separately.
+
+## Dynamic editor focus source release — October 10, 2026
+
+- Runtime commit: [`0559eecbf8f4c50a01d4fc608abd2228adbd2f6b`](https://github.com/Tabisharaza/detourlab/commit/0559eecbf8f4c50a01d4fc608abd2228adbd2f6b)
+- Exact remote tree: `71fc63a1609b13ba67d77b65ea5ae898499d96a2`; all **82 files** matched local Git blob hashes, sizes and modes.
+- [Hosted CI 38069928417](https://github.com/Tabisharaza/detourlab/actions/runs/38069928417): both Node 24.19.0/npm 11.17.0 and Node 24.21.0/npm 11.19.0 jobs passed every step. Per job: 39 syntax checks, 357 tests, 20 CLI gates repeated separately, 20 payloads plus manifest and byte-identical rebuilds.
+- Independent source review passed 357 aggregate tests, 44 focused dynamic/modal/workbench checks and 11 additional probes. Exact baseline fails 12 of the 16 new regression tests; four control cases already pass.
+- Runtime source archive: `detourlab-public-source-0559eec.zip`, 698,472 bytes; SHA-256 `063f06fdf1b2c8d04585e7d53ebc16fe165a5e9e2fc3bacaf438b3a6eba14921`. Every member matches the published runtime source; ZIP integrity passes.
+- A documentation-only follow-up records the completed runtime evidence. It does not alter application assets or assert that its own CI passed in advance.
+- No new deployment or browser checks. Public demo remains **v7**. Native Tab/blur ordering, focus visibility during scrolling, assistive technology, file-picker/download and browser performance checks remain separate gaps. The existing stylesheet hides reopen chips; source tests do not make those chips keyboard-reachable.
