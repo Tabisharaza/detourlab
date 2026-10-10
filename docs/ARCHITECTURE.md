@@ -27,6 +27,7 @@ Routing is reconsidered at each edge boundary. A newly closed edge cannot be ent
 - `src/engine.d.ts`: public API types
 - `src/simulation-worker.js`: worker request/result protocol
 - `src/app.js`: UI state, import/export and inspector
+- `src/tutorial.js`: independently copied four-node lesson fixture, checked against the portable JSON example; small-unit presentation belongs to `app.js`
 - `src/map.js`: original procedural district and ledger playback
 - `scripts/run-experiment.js`: multi-variant fingerprints and threshold outcomes
 - `scripts/run-scenario.js`: backward-compatible single-scenario paired-run thresholds
@@ -38,5 +39,7 @@ Routing is reconsidered at each edge boundary. A newly closed edge cannot be ent
 No import executes code or becomes HTML. Text is assigned with `textContent`. Schema identifiers have a restricted alphabet; prototype keys, inherited fields, accessors, unexpected fields and sparse arrays are rejected. JSON parsing is capped at 2 MiB. The renderer is not a security authority; correctness comes from validated engine inputs and its ledgers.
 
 ## Extension points
+
+The optional tiny lesson keeps one validated experiment backup in browser memory, uses the same Worker protocol, and restores the prior workspace when the user returns. It adds no storage or alternate routing path. Reset during the lesson restores its reference fixture; ordinary edits invalidate reference instructions. Starting, resetting or returning supersedes pending imports and worker results. Reloading still clears unsaved work. Small-graph node labels are cached with scene geometry; the dense city renderer remains unchanged.
 
 Add a pure routing policy only behind a stable engine interface and deterministic fixtures. Add real geometry as separately licensed city packs with recorded provenance. Add capacity/time-window optimization through an explicit solver adapter, not an unannounced change to the default model. Rendering, server storage and private integrations should remain optional.

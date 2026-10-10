@@ -6,7 +6,7 @@ import { application, deferredFile, minimalScenario, scenarioText } from './help
 // These execute the production app's real handlers and result-rendering code.
 // Workers and DOM are controlled stand-ins, not a browser or layout assertion.
 const copy = value => structuredClone(value);
-const formatKm = meters => `${(meters / 1000).toFixed(1)} km`;
+const formatKm = meters => meters < 1000 ? `${meters} m` : `${(meters / 1000).toFixed(1)} km`;
 const clock = seconds => `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`;
 const eventInput = (app, index) => app.element('event-list').children[index].children[2].children[1];
 const eventRemove = (app, index) => app.element('event-list').children[index].children[2].children[2];
@@ -30,7 +30,7 @@ async function loaded(experiment = comparisonExperiment()) {
 
 function assertSelectedLedger(app, result, baseline) {
   const metrics = result.metrics;
-  assert.equal(app.element('distance-value').textContent, `${(metrics.distanceM / 1000).toFixed(1)}km`);
+  assert.equal(app.element('distance-value').textContent, formatKm(metrics.distanceM).replace(' ', ''));
   assert.equal(app.element('late-value').textContent, `${metrics.lateJobs}/ ${metrics.totalJobs}`);
   assert.equal(app.element('unreachable-value').textContent, `${metrics.unreachableJobs}stops`);
   assert.equal(app.element('distance-baseline').textContent, `BASE ${formatKm(baseline.metrics.distanceM)}`);
@@ -43,7 +43,7 @@ function assertSelectedLedger(app, result, baseline) {
   assert.equal(app.element('job-list').children.length, vehicle.jobs.length);
   vehicle.jobs.forEach((job, index) => {
     const item = app.element('job-list').children[index];
-    assert.equal(item.children[0].children[1].textContent, job.status === 'unreachable' ? 'NO PATH' : job.status === 'late' ? `+${Math.ceil((job.arrivalS - job.dueTimeS) / 60)} min` : 'ON TIME');
+    assert.equal(item.children[0].children[1].textContent, job.status === 'unreachable' ? 'NO PATH' : job.status === 'late' ? job.arrivalS - job.dueTimeS < 60 ? `+${job.arrivalS - job.dueTimeS} s` : `+${Math.ceil((job.arrivalS - job.dueTimeS) / 60)} min` : 'ON TIME');
     assert.equal(item.children[1].textContent, job.status === 'unreachable' ? `Due ${clock(job.dueTimeS)} · skipped` : `Arrived ${clock(job.arrivalS)} · due ${clock(job.dueTimeS)}`);
   });
 }
@@ -175,7 +175,7 @@ test('all comparison cards and selected ledgers use the actual worker outcomes',
   await card(app, 'blocked').click();
   assert.match(app.element('distance-delta').textContent, /some stops skipped/u);
   assert.equal(app.element('distance-delta').classList.contains('good'), false);
-  assert.match(app.element('comparison-status').textContent, /Open-network baseline: 0\.2 km, 0 late, 0 unreachable/u);
+  assert.match(app.element('comparison-status').textContent, /Open-network baseline: 200 m, 0 late, 0 unreachable/u);
 });
 
 test('variant switching reuses cached results and preserves synchronized replay time', async () => {

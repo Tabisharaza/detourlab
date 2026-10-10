@@ -14,6 +14,16 @@ The bundled city, fleet and demand are entirely synthetic. The app needs no API 
 
 ## Try one experiment
 
+**New here? Start with four junctions.** Use **Try a tiny example** in the app for a one-van lesson you can trace by hand. Three plans share the same job: clear roads, a closure at 10 seconds, and the same closure at 11 seconds. The optional lesson keeps your current experiment in memory so you can return to it; reload still clears unsaved work.
+
+The [tiny experiment walkthrough](docs/EXPERIMENTS.md#tiny-walkthrough-one-second-changes-the-route) explains why the 10-second closure produces a 260 m route and a late arrival at 26 seconds, while the other plans travel 200 m and arrive at 20 seconds. No import or API key is needed to try it in the app. For the same example in Node:
+
+```sh
+node scripts/run-experiment.js examples/minimal-experiment.json --json
+```
+
+For the larger fictional district:
+
 1. Open the [demo](https://detourlab-tabish.tabisharaza.chatgpt.site/). The initial plans are **Market Bridge closure** and **Clear-road control**.
 2. Duplicate the bridge plan and name it **Bridge at ten minutes**.
 3. Change that variant's closure event from **300** to **600** seconds. Other variants keep their schedules.

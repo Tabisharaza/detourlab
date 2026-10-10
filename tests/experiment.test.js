@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 import { LIMITS, validateScenario } from '../src/scenario.js';
 import { simulate } from '../src/engine.js';
 import {
@@ -9,6 +11,7 @@ import {
 } from '../src/experiment.js';
 
 const readJSON = name => JSON.parse(readFileSync(new URL(`../examples/${name}`, import.meta.url), 'utf8'));
+const minimalExperimentSha256 = '7a757f1b53531826e98f44a706d3c6d235986682e6517c3c542f116fa8bf7395';
 const fixture = () => experimentFromScenario(readJSON('minimal-directed.json'));
 const closure = (id = 'closure', edgeIds = ['bc'], atS = 10) => ({ id, edgeIds, atS });
 const bytes = text => Buffer.byteLength(text, 'utf8');
@@ -80,6 +83,93 @@ test('pretty roundtrip reproduces identities, complete ledgers, and metrics exac
   assert.deepEqual(imported, input);
   assert.deepEqual(simulateExperiment(imported), simulateExperiment(input));
   assert.equal(exportExperiment(imported), exported);
+});
+
+test('minimal experiment preserves the original fixture and changes only variant closures', () => {
+  const original = readJSON('minimal-directed.json');
+  const input = readJSON('minimal-experiment.json'), before = structuredClone(input);
+  assert.deepEqual(validateExperiment(freeze(input)), input);
+  assert.equal(input.format, 'detourlab-experiment');
+  assert.equal(input.version, 1);
+  assert.equal(input.id, 'minimal-cutoff-experiment');
+  assert.equal(input.name, 'One second changes the route');
+  assert.deepEqual(original.closures, [closure('bc-closure')]);
+  // This checks every shared field, including graph order, fleet, demand and metadata.
+  assert.deepEqual(input.baseScenario, { ...original, closures: [] });
+  assert.deepEqual(input.variants, [
+    { id: 'clear', name: 'Clear roads', closures: [] },
+    { id: 'close-at-10', name: 'Close at 10 s', closures: [closure('bc-closure', ['bc'], 10)] },
+    { id: 'close-at-11', name: 'Close at 11 s', closures: [closure('bc-closure', ['bc'], 11)] },
+  ]);
+  for (const variant of input.variants) {
+    assert.deepEqual(scenarioForVariant(input, variant.id), { ...original, closures: variant.closures });
+  }
+  assert.deepEqual(parseExperiment(exportExperiment(input)), input);
+  simulateExperiment(input);
+  assert.deepEqual(input, before);
+  assert.deepEqual(readJSON('minimal-directed.json'), original);
+  assert.equal(createHash('sha256').update(canonicalExperiment(input)).digest('hex'), minimalExperimentSha256);
+});
+
+test('minimal experiment hand-checked ledgers distinguish entry cutoff from arrival and service', () => {
+  const clear = {
+    vehicles: [{
+      id: 'van-1',
+      segments: [
+        { edgeId: 'ab', from: 'A', to: 'B', startS: 0, endS: 10, distanceM: 100 },
+        { edgeId: 'bc', from: 'B', to: 'C', startS: 10, endS: 20, distanceM: 100 },
+      ],
+      jobs: [{ id: 'job-1', nodeId: 'C', dueTimeS: 22, arrivalS: 20, completedS: 23, status: 'on-time' }],
+      distanceM: 200, finishS: 23, reroutes: [],
+    }],
+    metrics: { distanceM: 200, lateJobs: 0, unreachableJobs: 0, completedJobs: 1, totalJobs: 1, totalDelayS: 0, onTimeJobs: 1, reroutes: 0, affectedVehicles: 0, totalTravelTimeS: 20 },
+    durationS: 60,
+  };
+  const detour = {
+    vehicles: [{
+      id: 'van-1',
+      segments: [
+        { edgeId: 'ab', from: 'A', to: 'B', startS: 0, endS: 10, distanceM: 100 },
+        { edgeId: 'bd', from: 'B', to: 'D', startS: 10, endS: 18, distanceM: 80 },
+        { edgeId: 'dc', from: 'D', to: 'C', startS: 18, endS: 26, distanceM: 80 },
+      ],
+      jobs: [{ id: 'job-1', nodeId: 'C', dueTimeS: 22, arrivalS: 26, completedS: 29, status: 'late' }],
+      distanceM: 260, finishS: 29,
+      reroutes: [{ atS: 10, nodeId: 'B', jobId: 'job-1', closedEdgeIds: ['bc'], reason: 'closure-blocked-route' }],
+    }],
+    metrics: { distanceM: 260, lateJobs: 1, unreachableJobs: 0, completedJobs: 1, totalJobs: 1, totalDelayS: 4, onTimeJobs: 0, reroutes: 1, affectedVehicles: 1, totalTravelTimeS: 26 },
+    durationS: 60,
+  };
+  const zeroDelta = { distanceM: 0, extraDistancePct: 0, extraLateJobs: 0, unreachableJobs: 0 };
+  const input = readJSON('minimal-experiment.json');
+  const expected = {
+    baseline: clear,
+    variants: [
+      { id: 'clear', name: 'Clear roads', result: clear, delta: zeroDelta },
+      { id: 'close-at-10', name: 'Close at 10 s', result: detour, delta: { distanceM: 60, extraDistancePct: 30, extraLateJobs: 1, unreachableJobs: 0 } },
+      { id: 'close-at-11', name: 'Close at 11 s', result: clear, delta: zeroDelta },
+    ],
+  };
+  assert.deepEqual(simulateExperiment(input), expected);
+  assert.deepEqual(simulateExperiment(parseExperiment(exportExperiment(input))), expected);
+});
+
+test('minimal experiment documented CLI reproduces its fingerprint and every result metric', () => {
+  const run = () => spawnSync(process.execPath, ['scripts/run-experiment.js', 'examples/minimal-experiment.json', '--json'], { cwd: new URL('../', import.meta.url), encoding: 'utf8' });
+  const first = run(), second = run();
+  assert.equal(first.status, 0, first.stderr);
+  assert.equal(second.status, 0, second.stderr);
+  assert.equal(first.stdout, second.stdout);
+  const simulation = simulateExperiment(readJSON('minimal-experiment.json'));
+  assert.deepEqual(JSON.parse(first.stdout), {
+    engineVersion: '0.1.0', experimentId: 'minimal-cutoff-experiment', experimentSha256: minimalExperimentSha256,
+    seed: 1, baseline: simulation.baseline.metrics,
+    variants: simulation.variants.map(variant => ({ id: variant.id, name: variant.name, metrics: variant.result.metrics, delta: variant.delta, passed: true, violations: [] })),
+    thresholds: {}, passed: true, violations: [], warnings: [],
+  });
+  const walkthrough = readFileSync(new URL('../docs/EXPERIMENTS.md', import.meta.url), 'utf8');
+  assert.ok(walkthrough.includes('node scripts/run-experiment.js examples/minimal-experiment.json --json'));
+  assert.ok(walkthrough.includes(minimalExperimentSha256));
 });
 
 test('included multi-variant example preserves its stable IDs and matches direct engine runs', () => {

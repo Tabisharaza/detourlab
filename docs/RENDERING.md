@@ -34,7 +34,7 @@ rm "$reference"
 
 The optional reference path executes local JavaScript. Use only a reviewed renderer revision, never an arbitrary downloaded file. A source ZIP has no Git history; obtain the verified public history separately if reproducing the comparison.
 
-The [recorded counts](evidence/render-counts.json) were produced on October 10, 2026 UTC with Node 24.19.0 on Linux x64. The record contains each renderer's source SHA-256. No browser or device rendering time was measured.
+The [recorded counts](evidence/render-counts.json) were produced for public source `74e0356` on October 10, 2026 UTC with Node 24.19.0 on Linux x64. The record contains each renderer's source SHA-256; those hashes identify that historical comparison, not every later renderer revision. The later tiny-lesson update adds cached node labels only for graphs with at most 12 nodes. No browser or device rendering time was measured.
 
 | Synthetic fixture | Nodes / directed edges / vehicles / jobs | Paused visible clears, before → after | Playing visible clears, before → after |
 | --- | --- | --- | --- |

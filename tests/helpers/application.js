@@ -1,11 +1,14 @@
 import { readFileSync } from 'node:fs';
 import * as scenarioSchema from '../../src/scenario.js';
 import * as experimentSchema from '../../src/experiment.js';
+import { createTutorialExperiment } from '../../src/tutorial.js';
 
 // Execute only checked-in app source with DOM/Worker stand-ins. This covers
 // handler state and result rendering, never browser layout, file pickers or QA.
 export function application({ workerConstructionError = () => null, mapClass = null, now = () => performance.now() } = {}) {
   const created = [];
+  const markup = readFileSync(new URL('../../index.html', import.meta.url), 'utf8');
+  const markupElements = new Map([...markup.matchAll(/<([a-z][\w-]*)\b([^>]*\bid="([^"]+)"[^>]*)>/gu)].map(match => [match[3], { tag: match[1], attributes: match[2] }]));
   class Element {
     constructor(tag = 'div') {
       this.tagName = tag.toUpperCase(); this.children = []; this.listeners = {};
@@ -32,6 +35,7 @@ export function application({ workerConstructionError = () => null, mapClass = n
     addEventListener(name, callback) { (this.listeners[name] ??= []).push(callback); }
     setAttribute(name, value) { this.attributes.set(name, String(value)); }
     getAttribute(name) { return this.attributes.get(name) ?? null; }
+    getClientRects() { return this.hidden || this.style.display === 'none' ? [] : [{}]; }
     replaceChildren(...items) {
       this._text = ''; this.children = []; this.append(...items);
       if (this.tagName === 'SELECT') this.value = items[0]?.value ?? '';
@@ -48,15 +52,26 @@ export function application({ workerConstructionError = () => null, mapClass = n
       }
       return this;
     }
-    emit(name, event = {}) { return Promise.all((this.listeners[name] ?? []).map(callback => callback({ target: this, ...event }))); }
+    emit(name, event = {}) {
+      event.target ??= this; event.defaultPrevented ??= false; event.preventDefault ??= function () { this.defaultPrevented = true; };
+      return Promise.all((this.listeners[name] ?? []).map(callback => callback(event)));
+    }
     click() { return this.disabled ? Promise.resolve([]) : this.emit('click'); }
-    showModal() { this.open = true; }
-    close() { this.open = false; }
+    focus() { if (!this.disabled) document.activeElement = this; }
+    showModal() { if (this.open) return; this._previousFocus = document.activeElement; this.open = true; this.focus(); }
+    close() { if (!this.open) return; this.open = false; this._previousFocus?.focus(); return this.emit('close'); }
+    async escape() { const event = {}; await this.emit('cancel', event); if (!event.defaultPrevented) await this.close(); }
   }
   const elements = new Map();
   const selectIds = new Set(['variant-select', 'road-select', 'road-direction', 'vehicle-select', 'speed']);
   const element = id => {
-    if (!elements.has(id)) elements.set(id, new Element(selectIds.has(id) ? 'select' : 'div'));
+    if (!elements.has(id)) {
+      const markupElement = markupElements.get(id);
+      const item = new Element(markupElement?.tag ?? (selectIds.has(id) ? 'select' : 'div'));
+      for (const match of markupElement?.attributes.matchAll(/([\w-]+)="([^"]*)"/gu) ?? []) { item.setAttribute(match[1], match[2]); if (['value', 'max', 'step', 'type'].includes(match[1])) item[match[1]] = match[2]; }
+      item.hidden = /(?:^|\s)hidden(?:\s|$)/u.test(markupElement?.attributes ?? '');
+      elements.set(id, item);
+    }
     return elements.get(id);
   };
   element('closure-time').value = '300'; element('road-direction').value = 'both';
@@ -88,12 +103,14 @@ export function application({ workerConstructionError = () => null, mapClass = n
   const source = readFileSync(url, 'utf8')
     .replace(/^import .*;\n/gm, '')
     .replaceAll('import.meta.url', JSON.stringify(url.href));
+  const windowListeners = new Map();
+  const window = { addEventListener(name, handler) { if (!windowListeners.has(name)) windowListeners.set(name, []); windowListeners.get(name).push(handler); } };
   const environment = {
-    ...scenarioSchema, ...experimentSchema, document, NetworkMap: mapClass ? class extends mapClass {
+    ...scenarioSchema, ...experimentSchema, createTutorialExperiment, document, NetworkMap: mapClass ? class extends mapClass {
       constructor(...args) { super(...args); maps.push(this); }
     } : NetworkMap, Worker: FakeWorker,
     URL, Blob, TextEncoder, performance: { now }, structuredClone,
-    window: { addEventListener() {} }, requestAnimationFrame(callback) { animationFrames.push(callback); },
+    window, requestAnimationFrame(callback) { animationFrames.push(callback); },
     setTimeout(callback, delay) { const id = ++timerId; timers.set(id, { callback, delay }); return id; },
     clearTimeout(id) { timers.delete(id); },
   };
@@ -101,6 +118,7 @@ export function application({ workerConstructionError = () => null, mapClass = n
   new Function(...Object.keys(environment), source)(...Object.values(environment));
   return {
     element, document, created, posted, workers, timers,
+    windowEvent(name, properties = {}) { const event = { target: document.activeElement, defaultPrevented: false, preventDefault() { this.defaultPrevented = true; }, ...properties }; for (const handler of windowListeners.get(name) ?? []) handler(event); return event; },
     stepAnimationFrame(timestamp) { const callbacks = animationFrames.splice(0); for (const callback of callbacks) callback(timestamp); return callbacks.length; },
     pendingAnimationFrames: () => animationFrames.length,
     map: maps[0], state: maps[0].state,

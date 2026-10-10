@@ -43,3 +43,12 @@ Real city packs are a separate extension. They need provenance, source date, lic
 Canvas makes the initial district lightweight and visually explorable. Keyboard-accessible selects, event fields, result cards and textual delivery outcomes expose core controls outside the map. This is useful groundwork, not a completed accessibility audit.
 
 Paused scenes still enter the animation loop, but the [redraw guard](RENDERING.md) skips unchanged visible paints. Browser timing and accessible road search remain concrete improvement opportunities; see the issue drafts. A different renderer should continue consuming the same validated ledgers.
+
+
+## 8. Offer a reversible small example
+
+The optional lesson loads the same four-node experiment checked by Node, with three closure schedules and one assigned delivery. It uses the ordinary validation, Worker, result cards and route inspector rather than a separate animation or hard-coded metric result. The explanation is reference text: editing the experiment marks it modified and disables the reference step controls until Reset lesson.
+
+Starting requires an explicit choice. One independently validated in-memory backup retains the previous experiment and selected controls; returning recomputes its results and leaves playback paused. Reset inside the lesson restores the lesson, not the city, and keeps the backup. Import is disabled until returning so a separate file cannot silently replace the retained workspace. The backup is not durable storage: reload or closing the page clears it, and the dialog says so.
+
+Metre-scale distances, second-scale lateness, capped textual routes for small graphs and cached junction labels make the example inspectable without relying only on map color. These are targeted usability changes, not a completed screen-reader or mobile audit.

@@ -1,21 +1,31 @@
 import { createDemoScenario, createPresets, validateScenario, LIMITS } from './scenario.js';
 import { experimentFromScenario, validateExperiment, parseExperiment, scenarioForVariant, exportExperiment, EXPERIMENT_LIMITS } from './experiment.js';
 import { NetworkMap } from './map.js';
+import { createTutorialExperiment } from './tutorial.js';
 
 const $ = (id) => document.getElementById(id);
 const node = (tag, text, className) => { const element = document.createElement(tag); if (text !== undefined) element.textContent = text; if (className) element.className = className; return element; };
 const clock = (seconds) => { const value = Math.max(0, Math.floor(seconds)); return `${String(Math.floor(value / 60)).padStart(2, '0')}:${String(value % 60).padStart(2, '0')}`; };
-const km = (meters) => `${(meters / 1000).toFixed(1)} km`;
+const distanceParts = (meters) => meters < 1000 ? [String(Number(meters.toPrecision(6))), 'm'] : [(meters / 1000).toFixed(1), 'km'];
+const distanceText = (meters) => distanceParts(meters).join(' ');
+const latenessText = (seconds) => seconds < 60 ? `+${Number(seconds.toPrecision(12))} s` : `+${Math.ceil(seconds / 60)} min`;
 function createInitialExperiment() { const experiment = experimentFromScenario(createDemoScenario(42)); experiment.variants[0].name = 'Market Bridge closure'; return experiment; }
 const initialExperiment = createInitialExperiment();
 const initialScenario = scenarioForVariant(initialExperiment, initialExperiment.variants[0].id);
-const state = { experiment: initialExperiment, selectedVariantId: initialExperiment.variants[0].id, allResults: null, scenario: initialScenario, baseline: null, disrupted: null, time: 360, playing: false, speed: 60, selectedVehicle: null, view: 'disruption', editing: false, zoom: 1, pending: true };
+const state = { experiment: initialExperiment, selectedVariantId: initialExperiment.variants[0].id, allResults: null, scenario: initialScenario, baseline: null, disrupted: null, time: 360, playing: false, speed: 60, selectedVehicle: null, view: 'disruption', editing: false, zoom: 1, pending: true, lessonActive: false, lessonModified: false };
 let worker;
 let revision = 0;
 let importRevision = 0;
 let workerTimeout;
 let toastTimeout;
 let initial = true;
+let lessonBackup = null;
+let lessonDialogFocus = null;
+const lessonSteps = [
+  { id: 'clear', time: 0, story: 'With clear roads, the van takes A → B → C: 200 m and arrival at 20 s, before the 22 s deadline. Its run finishes at 23 s because delivery service takes 3 more seconds.' },
+  { id: 'close-at-10', time: 10, story: 'At 10 s the van reaches B. B → C closes at that exact instant, so entry is blocked. It takes A → B → D → C instead: 260 m, arrival at 26 s, and 4 s late. The run finishes at 29 s, including 3 s of service.' },
+  { id: 'close-at-11', time: 11, story: 'At 11 s the van is already on B → C: it entered at 10 s. It finishes that edge even though it closes. A → B → C stays 200 m, with arrival at 20 s and no late delivery. The run finishes at 23 s, including 3 s of service.' },
+];
 let roads = [];
 let edgesById = new Map();
 let roadPairs = new Map();
@@ -28,13 +38,17 @@ const map = new NetworkMap($('network-map'), state, {
 function toast(message, error = false) { const el = $('toast'); el.textContent = message; el.classList.toggle('error', error); el.hidden = false; clearTimeout(toastTimeout); toastTimeout = setTimeout(() => { el.hidden = true; }, error ? 9000 : 4500); }
 function setPlaying(value) { state.playing = value; $('play-button').textContent = value ? 'Ⅱ' : '▶'; $('play-button').setAttribute('aria-label', value ? 'Pause simulation' : 'Play simulation'); }
 function setTime(value) { state.time = Math.max(0, Math.min(Number($('timeline').max), Number(value))); $('timeline').value = String(Math.floor(state.time)); $('clock-label').textContent = clock(state.time); updateVehicleStatus(); }
+function setView(view) { state.view = view; for (const other of ['disruption', 'baseline', 'compare']) { $('view-' + other).classList.toggle('active', other === view); $('view-' + other).setAttribute('aria-pressed', String(other === view)); } map.invalidateFrame(); }
+function setEditing(value) { state.editing = value; $('edit-roads').setAttribute('aria-pressed', String(value)); $('map-help').textContent = value ? 'Click a road to edit the selected direction in this variant' : 'Click a vehicle to inspect its route'; }
 function closedIds() { return new Set(state.scenario.closures.flatMap(closure => closure.edgeIds)); }
 function closureAt() { return Number($('closure-time').value); }
 function pairsFor(id) { const edge = edgesById.get(id); return edge ? roadPairs.get([edge.from, edge.to].sort().join('|')) || [] : []; }
 function activeVariant() { return state.experiment.variants.find(variant => variant.id === state.selectedVariantId); }
 function changedExperiment(experiment, selectedId = state.selectedVariantId) {
+  const validated = validateExperiment(experiment);
   importRevision += 1;
-  state.experiment = validateExperiment(experiment);
+  state.experiment = validated;
+  if (state.lessonActive) state.lessonModified = true;
   state.selectedVariantId = selectedId;
   state.scenario = scenarioForVariant(state.experiment, selectedId);
   updateControls(); compute();
@@ -68,11 +82,11 @@ function selectVariant(id) {
   state.selectedVariantId = id; state.scenario = scenarioForVariant(state.experiment, id);
   updateControls(); showSelectedResult();
 }
-function updateVariants() {
+function updateVariants(preserveName = false) {
   $('experiment-name').textContent = state.experiment.name;
   $('variant-select').replaceChildren(...state.experiment.variants.map(variant => { const option = node('option', variant.name); option.value = variant.id; return option; }));
   $('variant-select').value = state.selectedVariantId;
-  $('variant-name').value = activeVariant().name;
+  if (!preserveName) $('variant-name').value = activeVariant().name;
   $('variant-limit').textContent = `${state.experiment.variants.length} / ${EXPERIMENT_LIMITS.maxVariants} variants · edits stay independent`;
   $('duplicate-variant').disabled = state.experiment.variants.length >= EXPERIMENT_LIMITS.maxVariants;
   $('delete-variant').disabled = state.experiment.variants.length <= EXPERIMENT_LIMITS.minVariants;
@@ -84,7 +98,7 @@ function updateVariants() {
     const numbers = node('div');
     if (result) {
       const metrics = result.result.metrics;
-      numbers.append(node('span', km(metrics.distanceM)), node('span', `${metrics.lateJobs} late`), node('span', `${metrics.unreachableJobs} unreachable`));
+      numbers.append(node('span', distanceText(metrics.distanceM)), node('span', `${metrics.lateJobs} late`), node('span', `${metrics.unreachableJobs} unreachable`));
       const skipped = metrics.unreachableJobs > state.allResults.baseline.metrics.unreachableJobs;
       button.classList.toggle('has-skips', skipped);
       button.append(numbers, node('small', skipped ? `${metrics.completedJobs}/${metrics.totalJobs} completed · skipped work reduces distance` : `${result.delta.extraDistancePct > 0 ? '+' : ''}${result.delta.extraDistancePct.toFixed(1)}% distance · ${metrics.completedJobs}/${metrics.totalJobs} completed`));
@@ -135,12 +149,13 @@ function updateControls() {
   }));
   const closedRoads = roads.filter(edge => pairsFor(edge.id).some(id => closed.has(id)));
   $('closed-roads').replaceChildren(...closedRoads.map(edge => { const button = node('button', `${edge.roadName} ×`, 'closure-chip'); button.title = `Reopen ${edge.roadName}, ${edge.from} to ${edge.to}`; button.setAttribute('aria-label', button.title); button.addEventListener('click', () => toggleRoad(edge.id, true)); return button; }));
-  updateVariants(); updateEvents(); map.invalidate();
+  updateVariants(); updateEvents(); updateLesson(); map.invalidate();
 }
 function clearResults() {
   for (const id of ['distance', 'late', 'unreachable']) { $(id + '-value').textContent = '—'; $(id + '-delta').textContent = 'Calculating…'; $(id + '-baseline').textContent = ''; }
   for (const id of ['route-baseline-distance', 'route-scenario-distance', 'route-baseline-time', 'route-scenario-time']) $(id).textContent = '—';
   $('route-reason').textContent = 'Calculating this experiment. No previous results are shown.';
+  $('route-path').textContent = ''; $('route-path').hidden = true;
   $('job-list').replaceChildren(); $('job-count').textContent = ''; $('vehicle-status').textContent = 'Calculating…';
 }
 function computationFailed(message) {
@@ -151,7 +166,7 @@ function computationFailed(message) {
 function cancelComputation(message = 'Run canceled. Your variants are preserved.') {
   revision += 1; clearTimeout(workerTimeout); worker?.terminate(); worker = null; state.pending = false; setPlaying(false);
   state.allResults = null; state.baseline = null; state.disrupted = null; clearResults(); computationFailed(message);
-  $('status-line').textContent = message; $('comparison-status').textContent = message; $('cancel-run').hidden = true; updateVariants(); map.invalidateFrame();
+  $('status-line').textContent = message; $('comparison-status').textContent = message; $('cancel-run').hidden = true; updateVariants(true); map.invalidateFrame();
 }
 function showSelectedResult() {
   const selected = state.allResults?.variants.find(variant => variant.id === state.selectedVariantId);
@@ -162,12 +177,12 @@ function showSelectedResult() {
   $('vehicle-select').value = state.selectedVehicle;
   const duration = Math.max(state.baseline.durationS, ...state.allResults.variants.map(variant => variant.result.durationS), 1);
   $('timeline').max = String(duration); $('duration-label').textContent = clock(duration); setTime(Math.min(state.time, duration));
-  updateMetrics(); updateInspector(); updateVariants(); map.invalidateFrame();
+  updateMetrics(); updateInspector(); updateVariants(true); map.invalidateFrame();
 }
 function compute() {
   const id = ++revision;
   clearTimeout(workerTimeout); worker?.terminate();
-  state.pending = true; state.allResults = null; state.baseline = null; state.disrupted = null; clearResults(); updateVariants();
+  state.pending = true; state.allResults = null; state.baseline = null; state.disrupted = null; clearResults(); updateVariants(true);
   $('status-line').textContent = 'Calculating one baseline and all independent variants…';
   $('comparison-status').textContent = `Running ${state.experiment.variants.length} variants with identical network and demand…`;
   $('status-line').parentElement.setAttribute('aria-busy', 'true'); $('cancel-run').hidden = false;
@@ -179,10 +194,10 @@ function compute() {
     if (id !== revision || data.id !== revision || worker !== currentWorker) return;
     clearTimeout(workerTimeout); state.pending = false; $('status-line').parentElement.setAttribute('aria-busy', 'false'); $('cancel-run').hidden = true;
     currentWorker.terminate(); if (worker === currentWorker) worker = null;
-    if (data.error) { computationFailed(data.error); toast(`The experiment could not run: ${data.error}`, true); $('status-line').textContent = 'Experiment failed. Edit or import a smaller experiment.'; $('comparison-status').textContent = 'No partial results shown. ' + data.error; updateVariants(); return; }
+    if (data.error) { computationFailed(data.error); toast(`The experiment could not run: ${data.error}`, true); $('status-line').textContent = 'Experiment failed. Edit or import a smaller experiment.'; $('comparison-status').textContent = 'No partial results shown. ' + data.error; updateVariants(true); return; }
     state.allResults = { baseline: data.baseline, variants: data.variants }; showSelectedResult();
     $('status-line').textContent = `${state.scenario.jobs.length} shared orders · ${state.experiment.variants.length} variants · synchronized replay`;
-    $('comparison-status').textContent = `Open-network baseline: ${km(data.baseline.metrics.distanceM)}, ${data.baseline.metrics.lateJobs} late, ${data.baseline.metrics.unreachableJobs} unreachable. Cards show final modeled outcomes.`;
+    $('comparison-status').textContent = `Open-network baseline: ${distanceText(data.baseline.metrics.distanceM)}, ${data.baseline.metrics.lateJobs} late, ${data.baseline.metrics.unreachableJobs} unreachable. Cards show final modeled outcomes.`;
     if (initial) { initial = false; document.documentElement.dataset.ready = 'true'; }
     document.documentElement.dataset.revision = String(revision);
   };
@@ -199,7 +214,8 @@ function metric(id, value, unit, base, delta, suffix) {
 function updateMetrics() {
   const a = state.baseline.metrics, b = state.disrupted.metrics;
   const percentage = a.distanceM ? Math.round((b.distanceM - a.distanceM) / a.distanceM * 100) : 0;
-  metric('distance', (b.distanceM / 1000).toFixed(1), 'km', km(a.distanceM), percentage, '% vs baseline');
+  const [distance, unit] = distanceParts(b.distanceM);
+  metric('distance', distance, unit, distanceText(a.distanceM), percentage, '% vs baseline');
   metric('late', b.lateJobs, `/ ${b.totalJobs}`, a.lateJobs, b.lateJobs - a.lateJobs, ' deliveries');
   metric('unreachable', b.unreachableJobs, 'stops', a.unreachableJobs, b.unreachableJobs - a.unreachableJobs, ' unreachable');
   $('distance-value').closest('.metric-card').title = 'Final traveled fleet distance. With unreachable stops, a shorter distance may reflect skipped work rather than improvement.';
@@ -217,7 +233,7 @@ function updateInspector() {
   const vehicle = state.disrupted.vehicles.find(v => v.id === state.selectedVehicle);
   const base = state.baseline.vehicles.find(v => v.id === state.selectedVehicle); if (!vehicle || !base) return;
   $('vehicle-name').textContent = vehicle.id.toUpperCase();
-  $('route-baseline-distance').textContent = km(base.distanceM); $('route-scenario-distance').textContent = km(vehicle.distanceM);
+  $('route-baseline-distance').textContent = distanceText(base.distanceM); $('route-scenario-distance').textContent = distanceText(vehicle.distanceM);
   const start = state.scenario.vehicles.find(v => v.id === vehicle.id).startTimeS;
   $('route-baseline-time').textContent = `${clock(base.finishS - start)} elapsed`; $('route-scenario-time').textContent = `${clock(vehicle.finishS - start)} elapsed`;
   const unreachable = vehicle.jobs.filter(job => job.status === 'unreachable').length;
@@ -227,29 +243,100 @@ function updateInspector() {
   let reason = 'This vehicle keeps its original route. The selected closure does not change the shortest available path at its arrival times.';
   if (!state.scenario.closures.length) reason = 'All roads remain open. Both runs use identical demand, dispatch times, and delivery order, so their results match.';
   else if (unreachable) reason = `${unreachable} assigned ${unreachable === 1 ? 'stop is' : 'stops are'} disconnected when this vehicle tries to route there. Each is recorded as unreachable; the vehicle stays at its current junction and tries the next stop.`;
-  else if (changed) reason = `${reroutes.length} routing ${reroutes.length === 1 ? 'decision' : 'decisions'} changed after a closure. ${difference > 0 ? `${km(difference)} of extra travel` : 'A different path'} connects the same stops in the same order. Roads already entered are completed before rerouting.`;
+  else if (changed) reason = `${reroutes.length} routing ${reroutes.length === 1 ? 'decision' : 'decisions'} changed after a closure. ${difference > 0 ? `${distanceText(difference)} of extra travel` : 'A different path'} connects the same stops in the same order. Roads already entered are completed before rerouting.`;
   $('route-reason').textContent = reason;
+  $('route-path').hidden = state.scenario.nodes.length > 12;
+  if (!$('route-path').hidden) {
+    const segments = vehicle.segments.slice(0, 24);
+    const path = segments.length ? [segments[0].from, ...segments.map(segment => segment.to)] : [state.scenario.vehicles.find(item => item.id === vehicle.id).startNode];
+    $('route-path').textContent = `Computed path: ${path.join(' → ')}${vehicle.segments.length > segments.length ? ' → …' : ''}`;
+  } else $('route-path').textContent = '';
   $('job-count').textContent = `${vehicle.jobs.length} STOPS · FINAL OUTCOMES`;
   $('job-list').replaceChildren(...vehicle.jobs.map((job, index) => {
     const item = node('li', undefined, `job-item ${job.status === 'on-time' ? 'done' : job.status}`);
-    const row = node('div'); row.append(node('strong', `Stop ${String(index + 1).padStart(2, '0')}`), node('small', job.status === 'unreachable' ? 'NO PATH' : job.status === 'late' ? `+${Math.ceil((job.arrivalS - job.dueTimeS) / 60)} min` : 'ON TIME'));
+    const row = node('div'); row.append(node('strong', `Stop ${String(index + 1).padStart(2, '0')}`), node('small', job.status === 'unreachable' ? 'NO PATH' : job.status === 'late' ? latenessText(job.arrivalS - job.dueTimeS) : 'ON TIME'));
     item.append(row, node('p', job.status === 'unreachable' ? `Due ${clock(job.dueTimeS)} · skipped` : `Arrived ${clock(job.arrivalS)} · due ${clock(job.dueTimeS)}`)); return item;
   }));
   updateVehicleStatus(); map.invalidateFrame();
 }
-function loadExperiment(experiment) {
-  importRevision += 1; setPlaying(false); state.experiment = validateExperiment(experiment); state.selectedVariantId = state.experiment.variants[0].id;
-  state.scenario = scenarioForVariant(state.experiment, state.selectedVariantId); state.baseline = null; state.disrupted = null; state.allResults = null; state.selectedVehicle = null; state.time = 0; state.zoom = 1;
-  map.invalidate(); makeRoads(); updateControls(); compute();
+function loadExperiment(experiment, workspace = {}) {
+  const validated = validateExperiment(experiment);
+  importRevision += 1; setPlaying(false); state.experiment = validated;
+  state.selectedVariantId = validated.variants.some(variant => variant.id === workspace.selectedVariantId) ? workspace.selectedVariantId : validated.variants[0].id;
+  state.scenario = scenarioForVariant(validated, state.selectedVariantId); state.baseline = null; state.disrupted = null; state.allResults = null;
+  state.selectedVehicle = workspace.selectedVehicle ?? null; state.time = workspace.time ?? 0; state.zoom = workspace.zoom ?? 1;
+  if (workspace.speed !== undefined) state.speed = workspace.speed;
+  $('speed').value = String(state.speed);
+  setView(workspace.view ?? state.view); setEditing(workspace.editing ?? state.editing);
+  $('closure-time').step = state.lessonActive ? '1' : '60';
+  if (workspace.closureTime !== undefined) $('closure-time').value = workspace.closureTime;
+  if (workspace.roadDirection !== undefined) $('road-direction').value = workspace.roadDirection;
+  // Establish the new timeline before setting time; a previous tiny run must not
+  // clamp the restored experiment's replay position while its worker is pending.
+  $('timeline').max = String(workspace.timelineMax ?? Math.max(state.scenario.durationS ?? 1, state.time, 1));
+  setTime(state.time); map.invalidate(); makeRoads(); updateControls();
+  if (roads.some(road => road.id === workspace.roadId)) $('road-select').value = workspace.roadId;
+  if (workspace.variantName !== undefined) $('variant-name').value = workspace.variantName;
+  compute();
 }
 function loadScenario(scenario) { loadExperiment(experimentFromScenario(scenario)); }
+
+function updateLesson() {
+  $('lesson-panel').hidden = !state.lessonActive;
+  $('import-button').disabled = state.lessonActive;
+  $('lesson-import-help').hidden = !state.lessonActive;
+  $('reset-button').textContent = state.lessonActive ? '↺ Reset lesson' : '↺ Reset experiment';
+  $('closure-time').step = state.lessonActive ? '1' : '60';
+  for (const id of ['try-example-button', 'quick-example-button', 'guide-example-button']) $(id).disabled = state.lessonActive;
+  for (const step of lessonSteps) {
+    const button = $('lesson-' + step.id);
+    button.disabled = state.lessonModified || !state.experiment.variants.some(variant => variant.id === step.id);
+    button.setAttribute('aria-pressed', String(state.lessonActive && !state.lessonModified && state.selectedVariantId === step.id));
+  }
+  const step = lessonSteps.find(item => item.id === state.selectedVariantId);
+  $('lesson-story').textContent = state.lessonModified ? 'Your edits changed the example; reset lesson to repeat.' : step?.story ?? '';
+}
+function showLessonConfirmation(source) {
+  if (state.lessonActive || $('lesson-dialog').open) return;
+  setPlaying(false);
+  lessonDialogFocus = source === $('guide-example-button') ? $('try-example-button') : source;
+  if ($('guide-dialog').open) $('guide-dialog').close();
+  $('lesson-dialog').showModal(); $('lesson-cancel').focus();
+}
+function resetLesson() {
+  if (!state.lessonActive || !lessonBackup) return;
+  state.lessonModified = false;
+  loadExperiment(createTutorialExperiment(), { selectedVariantId: 'clear', time: 0, speed: 1, view: 'compare', zoom: 1, editing: false, closureTime: '10', roadDirection: 'forward' });
+}
+function startLesson() {
+  if (!$('lesson-dialog').open || state.lessonActive || lessonBackup) return;
+  // Only the confirmed transition takes an independently validated snapshot.
+  // Opening, Cancel and native Escape leave experiments and workers untouched.
+  lessonBackup = {
+    experiment: validateExperiment(state.experiment),
+    workspace: { selectedVariantId: state.selectedVariantId, time: state.time, speed: state.speed, view: state.view, zoom: state.zoom, selectedVehicle: state.selectedVehicle, editing: state.editing, closureTime: $('closure-time').value, roadDirection: $('road-direction').value, roadId: $('road-select').value, variantName: $('variant-name').value, timelineMax: $('timeline').max },
+  };
+  state.lessonActive = true;
+  resetLesson();
+  lessonDialogFocus = $('lesson-clear'); $('lesson-dialog').close();
+  toast('Tiny example ready. Your previous experiment is kept in memory until you return.');
+}
+function returnToExperiment() {
+  if (!state.lessonActive || !lessonBackup) return;
+  const backup = lessonBackup;
+  state.lessonActive = false; state.lessonModified = false;
+  loadExperiment(backup.experiment, backup.workspace);
+  lessonBackup = null;
+  $('try-example-button').focus();
+  toast('Your experiment and view are restored. Playback is paused; results are being recomputed.');
+}
 
 $('closure-time').addEventListener('input', (event) => { $('closure-time-label').textContent = clock(event.target.value); });
 $('closure-time').addEventListener('change', (event) => { $('closure-time-label').textContent = clock(event.target.value); });
 $('toggle-road').addEventListener('click', () => toggleRoad($('road-select').value));
 $('edit-roads').setAttribute('aria-pressed', 'false');
-$('edit-roads').addEventListener('click', () => { state.editing = !state.editing; $('edit-roads').setAttribute('aria-pressed', String(state.editing)); $('map-help').textContent = state.editing ? 'Click a road to edit the selected direction in this variant' : 'Click a vehicle to inspect its route'; });
-for (const view of ['disruption', 'baseline', 'compare']) $('view-' + view).addEventListener('click', () => { state.view = view; for (const other of ['disruption', 'baseline', 'compare']) { $('view-' + other).classList.toggle('active', other === view); $('view-' + other).setAttribute('aria-pressed', String(other === view)); } map.invalidateFrame(); });
+$('edit-roads').addEventListener('click', () => setEditing(!state.editing));
+for (const view of ['disruption', 'baseline', 'compare']) $('view-' + view).addEventListener('click', () => setView(view));
 $('vehicle-select').addEventListener('change', (event) => { state.selectedVehicle = event.target.value; updateInspector(); });
 $('play-button').addEventListener('click', () => { if (state.time >= Number($('timeline').max)) setTime(0); setPlaying(!state.playing); });
 $('timeline').addEventListener('input', (event) => { setPlaying(false); setTime(event.target.value); });
@@ -258,17 +345,17 @@ $('replay-button').addEventListener('click', () => { setPlaying(false); setTime(
 $('zoom-in').addEventListener('click', () => { state.zoom = Math.min(2.5, state.zoom * 1.2); map.invalidate(); });
 $('zoom-out').addEventListener('click', () => { state.zoom = Math.max(.65, state.zoom / 1.2); map.invalidate(); });
 $('zoom-reset').addEventListener('click', () => { state.zoom = 1; map.invalidate(); });
-$('reset-button').addEventListener('click', () => { importRevision += 1; state.editing = false; $('edit-roads').setAttribute('aria-pressed', 'false'); $('map-help').textContent = 'Click a vehicle to inspect its route'; state.view = 'disruption'; $('view-disruption').click(); $('closure-time').value = '300'; loadExperiment(createInitialExperiment()); toast('Original experiment restored: seed 42, Market Bridge closure.'); });
+$('reset-button').addEventListener('click', () => { if (state.lessonActive) { resetLesson(); toast('Lesson reset. Your previous experiment is still kept in memory.'); return; } setEditing(false); setView('disruption'); $('closure-time').value = '300'; loadExperiment(createInitialExperiment()); toast('Original experiment restored: seed 42, Market Bridge closure.'); });
 $('export-button').addEventListener('click', () => { const serialized = exportExperiment(state.experiment); const blob = new Blob([serialized], { type: 'application/json' }); const url = URL.createObjectURL(blob); const link = node('a'); link.href = url; link.download = `detourlab-experiment-${state.experiment.id}.json`; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); toast('All variants exported. Reproduce them with the experiment CLI.'); });
-$('import-button').addEventListener('click', () => $('import-input').click());
+$('import-button').addEventListener('click', () => { if (!state.lessonActive) $('import-input').click(); });
 $('import-input').addEventListener('change', async (event) => {
-  const file = event.target.files?.[0]; event.target.value = ''; if (!file) return;
+  const file = event.target.files?.[0]; event.target.value = ''; if (!file || state.lessonActive) return;
   const id = ++importRevision;
   try {
     if (file.size > LIMITS.maxBytes) throw new Error('File must be at most 2 MiB.');
     const text = await file.text();
-    // Newer selections and Reset supersede an outstanding asynchronous file read.
-    if (id !== importRevision) return;
+    // Newer selections, lesson transitions and Reset supersede asynchronous file reads.
+    if (id !== importRevision || state.lessonActive) return;
     const experiment = parseExperiment(text); loadExperiment(experiment);
     toast(`Loaded “${experiment.name}”. Comparing ${experiment.variants.length} independent variants.`);
   } catch (error) {
@@ -293,9 +380,24 @@ $('delete-variant').addEventListener('click', () => {
 });
 $('cancel-run').addEventListener('click', () => { importRevision += 1; cancelComputation(); });
 $('run-experiment').addEventListener('click', () => { importRevision += 1; compute(); });
+for (const id of ['try-example-button', 'quick-example-button', 'guide-example-button']) $(id).addEventListener('click', () => showLessonConfirmation($(id)));
+$('lesson-start').addEventListener('click', startLesson);
+$('lesson-cancel').addEventListener('click', () => $('lesson-dialog').close());
+$('lesson-dialog').addEventListener('close', () => {
+  const target = lessonDialogFocus;
+  lessonDialogFocus = null;
+  // A responsive entry can disappear while the dialog is open. Never restore
+  // focus to that hidden trigger; the scene entry remains available at all sizes.
+  (target?.getClientRects().length ? target : $('try-example-button')).focus();
+});
+$('return-experiment').addEventListener('click', returnToExperiment);
+for (const step of lessonSteps) $('lesson-' + step.id).addEventListener('click', () => {
+  if (!state.lessonActive || state.lessonModified || !state.experiment.variants.some(variant => variant.id === step.id)) return;
+  setPlaying(false); selectVariant(step.id); setView('compare'); setTime(step.time);
+});
 for (const id of ['guide-button', 'assumptions-button']) $(id).addEventListener('click', () => { setPlaying(false); $('guide-dialog').showModal(); });
 $('guide-dialog').addEventListener('click', (event) => { if (event.target === $('guide-dialog')) { const bounds = event.target.getBoundingClientRect(); if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) event.target.close(); } });
-window.addEventListener('keydown', (event) => { if (event.code === 'Space' && !['INPUT','BUTTON','SELECT','TEXTAREA'].includes(document.activeElement.tagName) && !$('guide-dialog').open) { event.preventDefault(); $('play-button').click(); } });
+window.addEventListener('keydown', (event) => { if (event.code === 'Space' && !['INPUT','BUTTON','SELECT','TEXTAREA'].includes(document.activeElement.tagName) && !$('guide-dialog').open && !$('lesson-dialog').open) { event.preventDefault(); $('play-button').click(); } });
 document.addEventListener('visibilitychange', () => { if (document.hidden) setPlaying(false); });
 let previous = performance.now();
 function frame(now) { const delta = Math.min((now - previous) / 1000, .1); previous = now; if (state.playing && !state.pending) { setTime(state.time + delta * state.speed); if (state.time >= Number($('timeline').max)) setPlaying(false); } map.render(now); requestAnimationFrame(frame); }

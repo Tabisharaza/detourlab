@@ -12,6 +12,39 @@ Required top-level fields:
 
 `closures` has the original scenario semantics: each `{id, edgeIds, atS}` closes its directed edges permanently from that cutoff. A vehicle already on an edge finishes it. All variants use the base scenario's exact dispatch times, speeds, distances, vehicle assignments, delivery sequence and deadlines.
 
+## Tiny walkthrough: one second changes the route
+
+[`examples/minimal-experiment.json`](../examples/minimal-experiment.json) compares exactly three variants on the four-node network from [`minimal-directed.json`](../examples/minimal-directed.json). The original scenario file is unchanged. Its graph, vehicle, job, metadata and order are copied exactly into `baseScenario`, with only `closures` cleared. Each variant supplies its own closure schedule:
+
+| Variant ID | Closure | Distance | Arrival | Service complete | Job status | Completed / unreachable |
+| --- | --- | --- | --- | --- | --- | --- |
+| `clear` | None | 200 m | 20 s | 23 s | On time | 1 / 0 |
+| `close-at-10` | `bc` at 10 s | 260 m | 26 s | 29 s | Late | 1 / 0 |
+| `close-at-11` | `bc` at 11 s | 200 m | 20 s | 23 s | On time | 1 / 0 |
+
+Check the arithmetic by hand:
+
+1. The van enters `ab` at 0 s and reaches B at 10 s: 100 m in 10 s.
+2. With clear roads, it enters `bc` at 10 s and reaches C at 20 s: another 100 m in 10 s, totaling 200 m.
+3. A closure at **10 s** blocks that exact entry to `bc`. The van reroutes once at B, taking `bd` from 10–18 s (80 m), then `dc` from 18–26 s (80 m). Total: 100 + 80 + 80 = 260 m, arriving 4 s after the 22 s deadline.
+4. A closure at **11 s** occurs after the van entered `bc` at 10 s. It finishes that edge at 20 s without a reroute. Closures prevent entry; they do not interrupt travel already in progress.
+
+The deadline is an **arrival** deadline. The job's 3 s service time makes the van finish at 23 s or 29 s; finishing service after 22 s does not make the 20 s arrival late. Both clear roads and the 11 s variant match the baseline: zero extra distance and zero extra late jobs. The 10 s variant adds 60 m (30%) and one late job. All three complete the same one job with zero unreachable jobs, so the distance comparison covers equal completed work.
+
+From the repository root, reproduce the metrics and fingerprint with:
+
+```sh
+node scripts/run-experiment.js examples/minimal-experiment.json --json
+```
+
+The JSON reports `experimentId: "minimal-cutoff-experiment"` and this canonical `experimentSha256`:
+
+```text
+7a757f1b53531826e98f44a706d3c6d235986682e6517c3c542f116fa8bf7395
+```
+
+This hashes the validated experiment, including labels and array order, rather than the raw file's whitespace. The CLI reports aggregate metrics; the hand-checkable route, arrival and service ledgers above are protected by `tests/experiment.test.js`.
+
 ## Validation
 
 Imports and exports are limited to 2 MiB UTF-8. IDs and foreign references are checked; variants have unique IDs and closure events are unique within each variant. Plain records and arrays only: unknown/inherited/accessor/prototype properties are rejected. Aggregate limits cap the experiment at 8,000 closure records, 48,000 closure edge references and 500,000 returned route segments, including the baseline and clear-road copies. These supplement the scenario's graph and operation bounds. Export uses readable JSON when it fits and compact JSON otherwise.

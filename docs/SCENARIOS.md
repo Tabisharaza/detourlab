@@ -2,6 +2,8 @@
 
 A scenario is a self-contained JSON object. All fields shown in the examples are required; unknown keys are rejected. See `examples/minimal-directed.json` for the smallest complete example and `src/engine.d.ts` for API types.
 
+For a hand-checkable comparison of clear roads and closures one second apart, follow the [tiny experiment walkthrough](EXPERIMENTS.md#tiny-walkthrough-one-second-changes-the-route). It reuses this minimal scenario's graph, vehicle and job unchanged.
+
 | Field | Meaning |
 | --- | --- |
 | `version` | Exactly `1` |

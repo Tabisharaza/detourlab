@@ -55,7 +55,7 @@ node --test tests/release.test.js
 
 ## What a passing distribution check proves
 
-[`scripts/verify-dist.js`](../scripts/verify-dist.js) uses only Node built-ins. Its reviewed `RELEASE_FILES` allowlist is independent of both the build script and the generated manifest. The current release has **17 payload files**, plus `manifest.json`.
+[`scripts/verify-dist.js`](../scripts/verify-dist.js) uses only Node built-ins. Its reviewed `RELEASE_FILES` allowlist is independent of both the build script and the generated manifest. The current source has **19 payload files**, plus `manifest.json`: the tiny experiment and tutorial module add two reviewed files to the earlier 17-file distribution. Historical CI records above retain their original counts.
 
 - The actual tree contains exactly the allowed files and directories. Additional files, hidden configuration, private examples, unexpected empty directories, non-regular entries, and symbolic links fail verification.
 - The manifest is version `1`, has only `version` and `files`, and lists exactly the payload files with lowercase SHA-256 hashes.

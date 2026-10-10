@@ -29,6 +29,32 @@ function assertPoint(actual, expected) {
   assert.ok(Math.abs(actual.y - expected.y) < 1e-9, `y: ${actual.y} != ${expected.y}`);
 }
 
+test('small scene labels identify actual nodes and remain cached on paused frames', t => {
+  const f = fixture(t); f.map.render();
+  const labels = f.background.operations.filter(op => op.method === 'fillText');
+  assert.deepEqual(labels.map(op => op.args[0]), ['A', 'B', 'C', 'D']);
+  for (const [index, label] of labels.entries()) {
+    const n = f.state.scenario.nodes[index], p = f.map.project(n.x, n.y);
+    assert.deepEqual(label.args, [n.id, p.x, p.y + 24]);
+  }
+  f.env.reset(); assert.equal(f.map.render(), false);
+  assert.equal(f.background.operationCount, 0);
+});
+
+test('small node labels are length-bounded and dense scenes keep labels suppressed', t => {
+  const f = fixture(t);
+  const oldId = f.state.scenario.nodes[0].id, longId = 'a'.repeat(96);
+  f.state.scenario.nodes[0].id = longId;
+  for (const e of f.state.scenario.edges) { if (e.from === oldId) e.from = longId; if (e.to === oldId) e.to = longId; }
+  f.state.scenario.vehicles[0].startNode = longId;
+  f.state.baseline = null; f.state.disrupted = null;
+  f.map.render();
+  assert.equal(f.background.operations.find(op => op.method === 'fillText').args[0], 'a'.repeat(17) + '…');
+  for (let i = 4; i < 13; i += 1) f.state.scenario.nodes.push({ id: `extra-${i}`, x: i, y: i });
+  f.env.reset(); f.map.invalidate(); f.map.render();
+  assert.equal(f.background.count('fillText'), 0);
+});
+
 function assertOneOverlayPaint(f) {
   assert.equal(f.map.render(), true);
   assert.equal(f.ctx.count('clearRect'), 1);

@@ -16,6 +16,7 @@ export const RELEASE_FILES = Object.freeze([
   'examples/meridian-default.json',
   'examples/meridian-experiment.json',
   'examples/minimal-directed.json',
+  'examples/minimal-experiment.json',
   'index.html',
   'public/favicon.svg',
   'src/app.js',
@@ -27,6 +28,7 @@ export const RELEASE_FILES = Object.freeze([
   'src/scenario.js',
   'src/simulation-worker.js',
   'src/style.css',
+  'src/tutorial.js',
 ]);
 
 const allowedFiles = new Set([...RELEASE_FILES, 'manifest.json']);

@@ -88,6 +88,19 @@ export class NetworkMap {
       const label = (text,x,y,angle = .24) => { const p=this.project(x,y); ctx.save();ctx.translate(p.x,p.y);ctx.rotate(angle);ctx.font=`${Math.max(6,Math.min(8,this.scale*.35))}px ui-monospace, monospace`;ctx.fillStyle='#a2bbc170';ctx.textAlign='center';ctx.fillText(text,0,0);ctx.restore(); };
       label('OLD QUARTER',4,1);label('NORTH BANK',17,1);label('MARKET DISTRICT',17,9);label('SOUTH WORKS',6,16.8);label('MERIDIAN RIVER',11.5,7,1.01);
     }
+    // Small examples should be traceable by hand. Cache bounded, literal node
+    // labels with the scene; dense city networks keep their existing rendering.
+    if (scenario.nodes.length <= 12) {
+      ctx.save(); ctx.font = 'bold 11px ui-monospace, monospace'; ctx.textAlign = 'center';
+      for (const node of scenario.nodes) {
+        const p = this.project(node.x, node.y);
+        const label = node.id.length > 18 ? `${node.id.slice(0, 17)}…` : node.id;
+        const width = ctx.measureText(label).width + 12;
+        ctx.fillStyle = '#10212ef2'; ctx.fillRect(p.x - width / 2, p.y + 10, width, 20);
+        ctx.fillStyle = '#e4efe4'; ctx.fillText(label, p.x, p.y + 24);
+      }
+      ctx.restore();
+    }
     const earliest = new Map();
     for (const closure of scenario.closures) for (const id of closure.edgeIds) earliest.set(id, Math.min(earliest.get(id) ?? Infinity, closure.atS));
     this.closureGeometries = new Map();
