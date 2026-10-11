@@ -1,6 +1,6 @@
 # Verification record
 
-**Current public demo: v7**, deployed October 10, 2026 UTC from tested source `fb08b57`. [Jump to its source mapping and keyboard checks](#v7-modal-keyboard-deployment-and-desktop-checks). The earlier v4/v5/v6 records below are retained as historical evidence.
+**Current public demo: v8**, deployed October 11, 2026 UTC from tested public source `ffe3d15`. [Jump to the v8 source/deployment record and verification limits](#v8-source-parity-deployment). The earlier v4/v5/v6/v7 records remain historical evidence; v8 has not yet received native browser QA.
 
 ## Dynamic editor focus source milestone
 
@@ -10,13 +10,13 @@ The original source removed focused controls during card selection, event editin
 
 Local verification used **Node 24.19.0 / npm 11.9.0 / Linux**: **39 JavaScript syntax checks, 357 tests with zero failures/skips, 20 separately repeated CLI gates, and 20 distribution payloads plus manifest**, with a byte-identical second build. The 16 new tests are included in the 357, and the repeated CLI tests are not additional unique tests. They cover retained node identity, blur-time body/new-target behavior, first/middle/last/only-event removal, same-action fallback, variant-scoped handlers, presets/chips, unavailable targets, worker terminal/stale updates, newer modal focus and variant-count boundaries.
 
-[Runtime source `0559eecbf8f4c50a01d4fc608abd2228adbd2f6b`](https://github.com/Tabisharaza/detourlab/commit/0559eecbf8f4c50a01d4fc608abd2228adbd2f6b) passed [hosted run 38069928417](https://github.com/Tabisharaza/detourlab/actions/runs/38069928417). Both Node 24.19.0/npm 11.17.0 and Node 24.21.0/npm 11.19.0 jobs completed every step successfully, passing 357 tests, separately repeating 20 CLI gates and verifying byte-identical 20-payload builds plus manifest. The exact 82-file remote tree is `71fc63a1609b13ba67d77b65ea5ae898499d96a2`. **No browser or Sites deployment was performed in this pass.** The public demo remains v7; native Tab/blur ordering, scrolling/focus visibility and assistive-technology checks remain unverified for this new change. The [keyboard guide](KEYBOARD.md) provides the separate browser checklist. The existing stylesheet hides the reopen-chip list; its source-handler tests do not establish ordinary keyboard reachability. Existing native import/download and browser performance gaps remain open.
+[Runtime source `0559eecbf8f4c50a01d4fc608abd2228adbd2f6b`](https://github.com/Tabisharaza/detourlab/commit/0559eecbf8f4c50a01d4fc608abd2228adbd2f6b) passed [hosted run 38069928417](https://github.com/Tabisharaza/detourlab/actions/runs/38069928417). Both Node 24.19.0/npm 11.17.0 and Node 24.21.0/npm 11.19.0 jobs completed every step successfully, passing 357 tests, separately repeating 20 CLI gates and verifying byte-identical 20-payload builds plus manifest. The exact 82-file remote tree is `71fc63a1609b13ba67d77b65ea5ae898499d96a2`. **No browser or Sites deployment was performed in that source-review pass.** The demo was then v7; v8 later deployed the tested source as recorded below. Native Tab/blur ordering, scrolling/focus visibility and assistive-technology checks remain unverified for this new change. The [keyboard guide](KEYBOARD.md) provides the separate browser checklist. The existing stylesheet hides the reopen-chip list; its source-handler tests do not establish ordinary keyboard reachability. Existing native import/download and browser performance gaps remain open.
 
 The clean runtime-source archive `detourlab-public-source-0559eec.zip` contains exactly 82 remote-matched files and passes ZIP integrity checks. It excludes Git/provider metadata and generated output. Size: 698,472 bytes; SHA-256: `063f06fdf1b2c8d04585e7d53ebc16fe165a5e9e2fc3bacaf438b3a6eba14921`. A later documentation-only commit records these outcomes without changing the runtime.
 
 ## File-input source milestone
 
-The October 10, 2026 source update aligns browser/CLI file decoding and adds bounded reads to the legacy runner. It has **not been deployed to the public demo**. The current v7 mapping and browser observations below remain the last live verification.
+The October 10, 2026 source update aligns browser/CLI file decoding and adds bounded reads to the legacy runner. It was not deployed during that source-review pass. The v8 deployment below later includes these fixes. The v7 observations remain the last native-browser verification, rather than a test of the newer file-entry code.
 
 Local checks used **Node 24.19.0 / npm 11.9.0 / Linux**:
 
@@ -201,3 +201,26 @@ Canonical experiment SHA-256:
 | all-bridges-05 | 145680 | 0 | 57 | 135 |
 
 The reduced distance and zero late count in `all-bridges-05` coexist with 57 skipped jobs. They do not establish an equal-service improvement.
+
+## v8 source-parity deployment
+
+On **October 11, 2026 at 06:59:54 UTC**, Sites reported a successful public deployment at the unchanged URL:
+
+https://detourlab-tabish.tabisharaza.chatgpt.site
+
+### Source and package mapping
+
+- Tested public GitHub source: [`ffe3d15fb06bcf45222ead0172f703dca90c6f3a`](https://github.com/Tabisharaza/detourlab/commit/ffe3d15fb06bcf45222ead0172f703dca90c6f3a), tree `9ea7814dd5eeb7c9244441cdf224a2d6285a687c`.
+- [CI run 38070113506](https://github.com/Tabisharaza/detourlab/actions/runs/38070113506) passed all 357 tests on both pinned Node versions. The 82-file source archive was independently compared against every remote file path, Git blob hash, size and mode before deployment.
+- Hosting source commit: `24038d94811998599edb79b62873d6b6ede5c3fc`. Every public source file is byte-identical to the tested GitHub source; the only additional tracked file is the existing hosting identity/configuration. Hosting history was not copied into GitHub.
+- Saved version: **8**. Deployment: `appgdep_6acb33e3803c8191a948aade812b17f9`. Saved-version readback confirms the hosting commit; Site readback confirms the configured public audience and unchanged URL. Versions **4, 5, 6 and 7** remain available in the version history for rollback.
+- Fresh local check on Node 24.19.0/npm 11.9.0: **39 JavaScript syntax checks, 357 tests, 20 separately repeated CLI tests, and 20 distribution payloads plus manifest**. All passed; the second build matched every byte.
+- The submitted deployment archive contains those **21 built files plus hosting metadata**. Each built file was compared byte-for-byte with the verified distribution before saving. The distribution manifest SHA-256 is `6012caf851b7c9aed8b3ac1391fcbf57aac1136a982ebb1640e9277cdd9253f3`.
+
+### What was not verified
+
+No browser was used for this deployment. Native file-picker/download roundtrips, the newer dynamic keyboard controls, native Tab/blur ordering, scrolling focus visibility, assistive technology, reduced-motion emulation and browser performance remain separate gaps. Earlier screenshots describe their named historical versions; no new screenshot is presented as v8 evidence.
+
+An unauthenticated HTTP request to the public root returned **403** from this checking environment. No alternate credentials, headers or asset retries were used. Downloading the saved deployment archive for independent post-save inspection was also unavailable. Therefore, this record establishes native deployment success, saved-version provenance and the submitted package's source-byte mapping; it does **not** establish a successful direct HTTP smoke test or CDN-served byte hashes. The saved archive's reported storage hash is not represented as the local gzip hash.
+
+The next acceptance step is a permitted browser check of v8's main workflow and newly deployed import/keyboard fixes, retaining the synthetic-only QA checklist in [issue #2](https://github.com/Tabisharaza/detourlab/issues/2) and [KEYBOARD.md](KEYBOARD.md). The existing file-picker/DevTools restrictions were not retried or bypassed.

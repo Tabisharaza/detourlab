@@ -28,7 +28,7 @@ Comparison cards and closure-editor controls update when their data or calculati
 
 Fallback focus is tied to the control being removed or disabled, not an earlier click or worker request. A later result must not move focus away from another input, playback control or open dialog. Surviving controls do not need a focus call. No delayed focus timer, positive `tabindex` or custom Tab order is added.
 
-This is a source-only improvement. The v7 public demo still uses the earlier runtime; see the [verification record](VERIFICATION.md) for deployment status. Native blur/Tab ordering, visible focus after scrolling and assistive-technology behavior require a separate browser review.
+This tested source improvement is deployed in v8; see the [deployment record](VERIFICATION.md#v8-source-parity-deployment) for the exact mapping and verification limits. Native blur/Tab ordering, visible focus after scrolling and assistive-technology behavior require a separate browser review.
 
 ## Implementation and regression checks
 

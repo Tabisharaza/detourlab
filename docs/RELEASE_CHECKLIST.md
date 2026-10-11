@@ -91,7 +91,7 @@ This scoped milestone does not complete the broader accessibility or native-file
 - Independent original-fixture checks confirmed malformed-byte rejection across all three entry points, retained UI state/results, BOM consistency, FIFO rejection, bounded/escaped errors and unchanged valid CLI output.
 - [CI run 38055582446](https://github.com/Tabisharaza/detourlab/actions/runs/38055582446) completed successfully for that exact runtime commit. Both Node matrix jobs passed 341 tests, the separately repeated 20 CLI gates and a byte-identical two-build comparison of 20 payloads plus manifest. [CI.md](CI.md#file-input-milestone) records exact jobs and toolchains.
 - Runtime source ZIP: `detourlab-public-source-e9285ee.zip`, 690,525 bytes, 81 members; SHA-256 `9ff54a8f60a8e4a8a61f1d5379cee59903cf9d951e85b5e9b1462973393f3db2`. Every member matches the named remote runtime tree; ZIP integrity passes. No `.git`, `.openai`, provider configuration, generated `dist` or `node_modules` is included.
-- This release updates GitHub source only. The public demo remains v7, and native file-picker/download QA is still open. Later docs may record this evidence; their own CI runs must be checked separately.
+- This release updated GitHub source only. The public demo was then v7; v8 later deployed the tested source, while native file-picker/download QA remains open. Later docs may record this evidence; their own CI runs must be checked separately.
 
 ## Dynamic editor focus source release — October 10, 2026
 
@@ -101,4 +101,13 @@ This scoped milestone does not complete the broader accessibility or native-file
 - Independent source review passed 357 aggregate tests, 44 focused dynamic/modal/workbench checks and 11 additional probes. Exact baseline fails 12 of the 16 new regression tests; four control cases already pass.
 - Runtime source archive: `detourlab-public-source-0559eec.zip`, 698,472 bytes; SHA-256 `063f06fdf1b2c8d04585e7d53ebc16fe165a5e9e2fc3bacaf438b3a6eba14921`. Every member matches the published runtime source; ZIP integrity passes.
 - A documentation-only follow-up records the completed runtime evidence. It does not alter application assets or assert that its own CI passed in advance.
-- No new deployment or browser checks. Public demo remains **v7**. Native Tab/blur ordering, focus visibility during scrolling, assistive technology, file-picker/download and browser performance checks remain separate gaps. The existing stylesheet hides reopen chips; source tests do not make those chips keyboard-reachable.
+- No new deployment or browser checks. The public demo was then **v7**; the tested source was later deployed in **v8**. Native Tab/blur ordering, focus visibility during scrolling, assistive technology, file-picker/download and browser performance checks remain separate gaps. The existing stylesheet hides reopen chips; source tests do not make those chips keyboard-reachable.
+
+## v8 deployment parity — October 11, 2026
+
+- Existing public Site updated successfully at 06:59:54 UTC; URL unchanged.
+- Public source `ffe3d15` / 82 matched files maps to hosting commit `24038d94811998599edb79b62873d6b6ede5c3fc`, saved version 8 and deployment `appgdep_6acb33e3803c8191a948aade812b17f9`.
+- Fresh 357-test check, 39 syntax checks, 20 repeated CLI tests and exact 20-payload-plus-manifest reproducible build passed.
+- Submitted package verified locally against that build; saved version/commit, public audience and v4–v7 rollback history read back.
+- Direct HTTP root check returned 403; saved-artifact download was unavailable. Neither failure was bypassed. CDN byte verification and all new native browser checks remain pending.
+- No new runtime edits were made beyond the already-tested source. Audience, integrations, account permissions and runtime settings were unchanged. [Full deployment evidence](VERIFICATION.md#v8-source-parity-deployment).
