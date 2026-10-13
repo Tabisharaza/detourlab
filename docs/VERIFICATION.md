@@ -2,6 +2,14 @@
 
 **Current public demo: v8**, deployed October 11, 2026 UTC from tested public source `ffe3d15`. [Jump to the v8 source/deployment record and verification limits](#v8-source-parity-deployment). The earlier v4/v5/v6/v7 records remain historical evidence; v8 has not yet received native browser QA.
 
+## CLI human-label presentation milestone
+
+The October 13, 2026 CLI-only correction makes control characters visible when formatting scenario, experiment and variant names in human reports. Schema-valid CR/newline/tab, C1 and bidi characters previously appeared verbatim and could distort report lines. The formatter escapes its documented controls as lowercase `\uXXXX` and doubles literal backslashes. It does not truncate valid names after escape expansion. This is captured-output evidence, not a terminal-emulator test, command-execution claim or comprehensive Unicode-spoofing defense.
+
+Local checks on Node **24.19.0 / npm 11.9.0 / Linux** passed **384 tests** and **44 syntax checks**, including 18 new formatter/subprocess tests. All 85 selected formatter control code points and all 56 schema-accepted members are exercised. Nine of the 13 new subprocess tests fail on the previous reporters; four preserve existing behavior. Forty-two pre/post comparisons (26 ordinary commands and 16 crafted JSON commands) retained their exact exit codes, stdout and stderr bytes. The existing 29 CLI argument/threshold gates were also repeated separately.
+
+JSON bytes, decoded values, canonical hashes, schemas and engine metrics remain unchanged. JSON is still machine-readable data, not terminal-sanitized text; downstream display consumers need their own presentation rules. All 20 browser payloads plus manifest remain byte-identical to the retained v8 package and a second build. No Site deployment or browser verification is part of this change. See [FILE_INPUT.md](FILE_INPUT.md#human-cli-label-display) for reproduction commands and boundaries.
+
 ## CLI argument-contract source milestone
 
 On October 13, 2026, the two headless runners were moved to a shared argument parser after reproducing three legacy-runner problems: duplicate thresholds silently used the last value, inherited names such as `constructor` could produce a bogus threshold and run the default demo, and flag order changed JSON/violation ordering. Both runners now reject duplicate thresholds, recognize only their own option keys, and report thresholds in a fixed metric order. Input schemas, simulation results, canonical input hashes and ordinary output schemas are unchanged. See [the CLI contract and reproduction](EXPERIMENTS.md#headless-runner).

@@ -4,6 +4,7 @@ import { canonicalExperiment, parseExperiment, simulateExperiment } from '../src
 import { formatInputError } from '../src/file-input.js';
 import { readInput } from './read-input.js';
 import { parseArguments } from './cli-arguments.js';
+import { formatCliLabel } from './cli-display.js';
 
 const usage = `DetourLab experiment runner
 
@@ -46,10 +47,10 @@ try {
     if (json) {
       console.log(JSON.stringify(result, null, 2));
     } else {
-      console.log(`\nDETOURLAB / ${experiment.name}\nExperiment ${experiment.id} · seed ${result.seed}\nSHA-256 ${result.experimentSha256}\n`);
+      console.log(`\nDETOURLAB / ${formatCliLabel(experiment.name)}\nExperiment ${experiment.id} · seed ${result.seed}\nSHA-256 ${result.experimentSha256}\n`);
       console.log(`Clear-road baseline: ${(result.baseline.distanceM / 1000).toFixed(2)} km · ${result.baseline.lateJobs} late · ${result.baseline.unreachableJobs} unreachable · ${result.baseline.completedJobs}/${result.baseline.totalJobs} completed`);
       for (const variant of variants) {
-        console.log(`\n${variant.name} [${variant.id}]\n${(variant.metrics.distanceM / 1000).toFixed(2)} km · ${variant.metrics.lateJobs} late · ${variant.metrics.unreachableJobs} unreachable · ${variant.metrics.completedJobs}/${variant.metrics.totalJobs} completed\nDelta: ${variant.delta.extraDistancePct >= 0 ? '+' : ''}${variant.delta.extraDistancePct}% distance · ${variant.delta.extraLateJobs >= 0 ? '+' : ''}${variant.delta.extraLateJobs} late`);
+        console.log(`\n${formatCliLabel(variant.name)} [${variant.id}]\n${(variant.metrics.distanceM / 1000).toFixed(2)} km · ${variant.metrics.lateJobs} late · ${variant.metrics.unreachableJobs} unreachable · ${variant.metrics.completedJobs}/${variant.metrics.totalJobs} completed\nDelta: ${variant.delta.extraDistancePct >= 0 ? '+' : ''}${variant.delta.extraDistancePct}% distance · ${variant.delta.extraLateJobs >= 0 ? '+' : ''}${variant.delta.extraLateJobs} late`);
         console.log(variant.passed ? 'PASS: all requested thresholds met' : `FAIL: ${variant.violations.map(item => `${item.metric} ${item.actual} > ${item.limit}`).join('; ')}`);
       }
       for (const warning of warnings) console.log(`\nCAUTION [${warning.variantId}]: ${warning.message}`);

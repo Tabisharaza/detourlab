@@ -21,6 +21,14 @@ Displayed file error bodies are limited to 512 UTF-16 code units (plus a fixed U
 
 Both CLIs report invalid input on stderr and exit **2**, without emitting a successful result to stdout. Their success (`0`) and threshold-failure (`1`) behavior is unchanged. For portable files and the multi-variant schema, see [SCENARIOS.md](SCENARIOS.md) and [EXPERIMENTS.md](EXPERIMENTS.md).
 
+## Human CLI label display
+
+The human-readable runners escape scenario, experiment and variant names at the output boundary. C0 controls (`U+0000–001F`), DEL/C1 (`U+007F–009F`), `U+061C`, `U+200E–200F`, line/paragraph separators and bidi controls in `U+2028–202E`, and `U+2066–206F` become visible lowercase `\uXXXX` text. This keeps an accepted name's carriage returns, newlines, tabs and these controls from adding report lines or acting as display controls. Literal backslashes are doubled: an actual `U+202E` displays as `\u202e`, while literal backslash-u text displays as `\\u202e`. Other characters, including ordinary Unicode and emoji, are preserved. Valid names are already bounded to 120 UTF-16 code units; their escaped display is not truncated.
+
+This presentation rule does not change accepted input, stored labels, canonical hashes, simulation metrics, thresholds or exit codes. `--json` retains its existing bytes and decoded values. It is machine-readable data, **not terminal-sanitized presentation**: JSON serialization escapes C0 controls but may leave C1 and bidi characters literal. Consumers that display JSON values must apply their own presentation rules. Browser rendering and portable exports are unchanged.
+
+`tests/cli-display-format.test.js` enumerates the formatter's control ranges and checks ordinary Unicode, literal escapes and full-length expansion. `tests/cli-display.test.js` runs both actual CLI subprocesses, including legacy scenario upgrade, success/threshold failure, and unchanged machine data. These are captured-output checks, not terminal-emulator testing or a general Unicode-spoofing guarantee.
+
 ## Why this changed
 
 Before this milestone, the app and legacy scenario runner decoded malformed UTF-8 by replacing bad bytes, while the experiment runner rejected the same file. A corrupt byte within a JSON label could therefore be accepted, exported and permanently changed without notice. The legacy runner also read the entire input before checking its size, and could wait indefinitely on an unwritten FIFO. Large or control-bearing unknown property names could produce excessively long or terminal-active error text.
@@ -33,6 +41,7 @@ The fix aligns acquisition/decoding and presentation at the entry points. It doe
 npm ci --ignore-scripts --no-audit --no-fund
 npm run check
 node --test tests/file-input.test.js tests/file-input-cli.test.js tests/import-roundtrip.test.js
+node --test tests/cli-display-format.test.js tests/cli-display.test.js
 node --test tests/cli.test.js tests/experiment-cli.test.js
 node scripts/verify-dist.js
 ```

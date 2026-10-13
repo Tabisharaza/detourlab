@@ -1,5 +1,11 @@
 # CI and release verification
 
+## CLI human-label presentation milestone
+
+The October 13, 2026 local check used Node **24.19.0 / npm 11.9.0 / Linux** and passed **384 tests** and **44 JavaScript syntax checks**. Eighteen new tests cover escaped controls and literal backslashes in human reports while preserving JSON data, hashes and ordinary output. Of the 13 subprocess tests, nine fail against the previous reporters and four are compatibility controls; the other five test the new formatter directly. The existing workflow discovers all 18 through `node --test`; its separate argument/threshold gate remains **29 repeated tests**, not 47.
+
+The change is confined to CLI presentation, tests and documentation. Browser source, package dependencies, workflow permissions/pins and schemas are unchanged. See [the display contract](FILE_INPUT.md#human-cli-label-display) and [verification record](VERIFICATION.md#cli-human-label-presentation-milestone). Local checks are separate from hosted CI and the outstanding native browser review.
+
 ## CLI argument-contract milestone
 
 The October 13, 2026 local check used Node **24.19.0 / npm 11.9.0 / Linux** and passed **366 tests**, **41 JavaScript syntax checks**, and **29 separately repeated CLI gates**. The nine new actual-process regressions are included in the full suite; the repeated gates are not additional unique tests. They cover all three duplicate threshold flags, argument-order stability, inherited-property filenames and the existing default/help behavior. Four of these tests fail against the prior `b2f9997` source and five serve as compatibility controls. Eight ordinary runner invocations retain byte-identical stdout/stderr and exit codes.
