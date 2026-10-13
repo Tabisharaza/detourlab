@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { canonicalExperiment, parseExperiment, simulateExperiment } from '../src/experiment.js';
 import { formatInputError } from '../src/file-input.js';
 import { readInput } from './read-input.js';
+import { parseArguments } from './cli-arguments.js';
 
 const usage = `DetourLab experiment runner
 
@@ -15,42 +16,16 @@ Usage: node scripts/run-experiment.js experiment.json [options]
   --help                         Show this help
 
 Version-1 scenario files are upgraded to supplied and clear-road variants.
+Each threshold may be supplied once. Flag order does not affect results.
 Threshold failures exit 1; invalid input or failed simulation exits 2.
 Signed distance differences can fall when jobs are skipped. Compare completed and
 unreachable jobs; a shorter traveled distance does not establish an improvement.`;
 
-const thresholdOptions = {
-  '--max-extra-distance-pct': 'extraDistancePct',
-  '--max-extra-late': 'extraLateJobs',
-  '--max-unreachable': 'unreachableJobs',
-};
-
 try {
-  const args = process.argv.slice(2);
-  if (args.includes('--help')) {
+  const { help, file, json, thresholds } = parseArguments(process.argv.slice(2), { requireFile: true });
+  if (help) {
     console.log(usage);
   } else {
-    let file;
-    let json = false;
-    const selectedThresholds = {};
-    for (let index = 0; index < args.length; index += 1) {
-      const arg = args[index];
-      if (arg === '--json') { json = true; continue; }
-      if (Object.hasOwn(thresholdOptions, arg)) {
-        const raw = args[++index];
-        const value = Number(raw);
-        if (raw === undefined || raw.trim() === '' || !Number.isFinite(value) || value < 0) throw new Error(`${arg} requires a finite nonnegative number.`);
-        const metric = thresholdOptions[arg];
-        if (Object.hasOwn(selectedThresholds, metric)) throw new Error(`${arg} may only be supplied once.`);
-        selectedThresholds[metric] = value;
-        continue;
-      }
-      if (arg.startsWith('-')) throw new Error(`Unknown option: ${arg}`);
-      if (file) throw new Error('Only one experiment file is allowed.');
-      file = arg;
-    }
-    if (!file) throw new Error('An experiment or scenario JSON file is required. Use --help for usage.');
-    const thresholds = Object.fromEntries(Object.values(thresholdOptions).filter(metric => Object.hasOwn(selectedThresholds, metric)).map(metric => [metric, selectedThresholds[metric]]));
     const experiment = parseExperiment(await readInput(file));
     const simulation = simulateExperiment(experiment);
     const variants = simulation.variants.map(variant => {

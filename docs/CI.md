@@ -1,6 +1,12 @@
 # CI and release verification
 
-## Status
+## CLI argument-contract milestone
+
+The October 13, 2026 local check used Node **24.19.0 / npm 11.9.0 / Linux** and passed **366 tests**, **41 JavaScript syntax checks**, and **29 separately repeated CLI gates**. The nine new actual-process regressions are included in the full suite; the repeated gates are not additional unique tests. They cover all three duplicate threshold flags, argument-order stability, inherited-property filenames and the existing default/help behavior. Four of these tests fail against the prior `b2f9997` source and five serve as compatibility controls. Eight ordinary runner invocations retain byte-identical stdout/stderr and exit codes.
+
+The workflow now explicitly repeats `tests/cli-arguments.test.js` with the existing CLI gates. Node/action pins, permissions and other steps are unchanged. All **20 distribution payloads plus manifest** remain byte-identical to the v8 package; no browser application source was changed. Two local builds also matched every byte. Check [Actions](https://github.com/Tabisharaza/detourlab/actions) for the hosted result tied to the exact source commit; local results do not establish hosted execution or native browser QA.
+
+## Historical onboarding status
 
 The v6 onboarding milestone [`359570c`](https://github.com/Tabisharaza/detourlab/commit/359570c81260b17778e3e8291128e2191ff149d2) passed [run 38039735868](https://github.com/Tabisharaza/detourlab/actions/runs/38039735868) on **2026-10-10 UTC**. Both matrix jobs passed **220 tests**, separately repeated the **20 CLI gates**, verified **19 payload files plus the manifest**, and reproduced every build byte. Toolchains were Node 24.19.0/npm 11.17.0 (job 114177411256) and Node 24.21.0/npm 11.19.0 (job 114177411223); all steps succeeded. The [v6 verification record](VERIFICATION.md#v6-tiny-lesson-deployment-and-desktop-checks) separates real browser checks from stand-ins. This evidence names that exact milestone commit, not every later docs change.
 
@@ -32,7 +38,7 @@ The `verify` job runs on pushes, pull requests, and manual dispatch with an expl
 
 1. `npm ci --ignore-scripts --no-audit --no-fund` checks the committed lockfile without running installation lifecycle scripts or contacting the npm audit service. The current lockfile contains only this project: there are no third-party packages to install.
 2. `npm run check` syntax-checks JavaScript, runs the complete Node test suite, and builds `dist/`.
-3. `node --test tests/cli.test.js tests/experiment-cli.test.js` explicitly repeats the CLI regression gates. Both runners must report success with exit `0`, threshold violations with exit `1` and usable result output, and invalid input with exit `2`. Experiment coverage also exercises every variant, exact threshold boundaries, canonical hashes, malformed/oversized inputs, and deterministic budget failures.
+3. `node --test tests/cli.test.js tests/experiment-cli.test.js tests/cli-arguments.test.js` explicitly repeats the CLI regression gates. Both runners must report success with exit `0`, threshold violations with exit `1` and usable result output, and invalid input with exit `2`. Experiment coverage also exercises every variant, exact threshold boundaries, canonical hashes, malformed/oversized inputs, and deterministic budget failures.
 4. `node scripts/verify-dist.js` validates the built distribution. The job copies that first build to a temporary directory, rebuilds, and verifies the new tree against the copy.
 5. `git diff --exit-code && git diff --cached --exit-code` checks that verification did not change tracked source in the clean checkout. Ignored build output is expected; this is not a general check for arbitrary untracked files.
 
@@ -47,7 +53,7 @@ node --version
 npm --version
 npm ci --ignore-scripts --no-audit --no-fund
 npm run check
-node --test tests/cli.test.js tests/experiment-cli.test.js
+node --test tests/cli.test.js tests/experiment-cli.test.js tests/cli-arguments.test.js
 node scripts/verify-dist.js
 ```
 

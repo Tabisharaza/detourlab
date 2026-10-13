@@ -2,6 +2,14 @@
 
 **Current public demo: v8**, deployed October 11, 2026 UTC from tested public source `ffe3d15`. [Jump to the v8 source/deployment record and verification limits](#v8-source-parity-deployment). The earlier v4/v5/v6/v7 records remain historical evidence; v8 has not yet received native browser QA.
 
+## CLI argument-contract source milestone
+
+On October 13, 2026, the two headless runners were moved to a shared argument parser after reproducing three legacy-runner problems: duplicate thresholds silently used the last value, inherited names such as `constructor` could produce a bogus threshold and run the default demo, and flag order changed JSON/violation ordering. Both runners now reject duplicate thresholds, recognize only their own option keys, and report thresholds in a fixed metric order. Input schemas, simulation results, canonical input hashes and ordinary output schemas are unchanged. See [the CLI contract and reproduction](EXPERIMENTS.md#headless-runner).
+
+Local checks on Node **24.19.0 / npm 11.9.0 / Linux** passed **366 tests**, **41 syntax checks** and **29 separately repeated CLI tests**. All nine new actual-process tests pass; four fail on the preceding `b2f9997` source and five preserve existing behavior. Eight ordinary success/threshold-failure runner invocations retained their exact exit status, stdout and stderr bytes. All 20 browser distribution payloads plus manifest match the retained v8 package, and a second build matched every byte.
+
+This is CLI-only work. The live demo remains v8, and the native file-picker/download, keyboard and rendering-profile checks remain open. No browser, deployment, new dependency, schema relaxation or engine change is included. Historical hosted CI records below remain tied to their named commits; a passing local check is not a hosted CI claim.
+
 ## Dynamic editor focus source milestone
 
 This October 10, 2026 source update keeps surviving comparison cards, event inputs/Remove controls, presets and reopen chips in place during updates. Focus moves only when its control is removed or a focused Duplicate/Remove action becomes disabled at a variant limit. Closure callbacks read the current variant/event state, including repeated edits. The engine, schemas, file decoding and rendering model are unchanged.

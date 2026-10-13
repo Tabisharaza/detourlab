@@ -75,6 +75,17 @@ Cards show final outcomes for the entire run. Playback shows positions at the se
 
 The CLI accepts bounded JSON experiments and legacy scenario files. Optional thresholds apply independently to every variant: `--max-extra-distance-pct`, `--max-extra-late`, and `--max-unreachable`. A threshold failure exits 1; malformed input/arguments exit 2. The original single-scenario runner remains available.
 
+Both runners share one argument parser. `--help` preserves its existing precedence: it shows usage without validating other arguments or reading input. Otherwise, supply each threshold at most once, even when repeating the same value: duplicates exit 2 before reading a file or returning metrics. Threshold and violation fields use distance, lateness, then unreachable order regardless of flag order. The scenario runner still defaults to the seed-42 demo when no file is supplied; the experiment runner requires a file. Bare filenames such as `constructor` are treated as filenames, never inherited option names.
+
+For example, the following rejects an ambiguous check rather than silently allowing the later value to weaken it:
+
+```sh
+node scripts/run-scenario.js examples/minimal-directed.json --max-extra-late 0 --max-extra-late 100 --json
+# Exit 2; stderr: DetourLab: --max-extra-late may only be supplied once.
+```
+
+Use one `--max-extra-late 0` to receive the actual failing metrics (exit 1), or one `--max-extra-late 1` to allow this fixture's one extra late delivery (exit 0).
+
 `canonicalExperiment()` sorts object keys and preserves array order; Node computes SHA-256 from this input. This is a reproducibility fingerprint, not a signature or proof of data trustworthiness.
 
 ## Verification boundary
