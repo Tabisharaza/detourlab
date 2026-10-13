@@ -10,6 +10,10 @@ Local checks on Node **24.19.0 / npm 11.9.0 / Linux** passed **384 tests** and *
 
 JSON bytes, decoded values, canonical hashes, schemas and engine metrics remain unchanged. JSON is still machine-readable data, not terminal-sanitized text; downstream display consumers need their own presentation rules. All 20 browser payloads plus manifest remain byte-identical to the retained v8 package and a second build. No Site deployment or browser verification is part of this change. See [FILE_INPUT.md](FILE_INPUT.md#human-cli-label-display) for reproduction commands and boundaries.
 
+[Source `211fcfd`](https://github.com/Tabisharaza/detourlab/commit/211fcfdbb4dc1fc448faf0bfefd3072f8af8cf67) passed [hosted run 38361085167](https://github.com/Tabisharaza/detourlab/actions/runs/38361085167) on October 13, 2026 UTC. Both jobs completed every step successfully: Node 24.19.0/npm 11.17.0 (job 115175182591) and Node 24.21.0/npm 11.19.0 (job 115175182370). Each passed 384 tests, repeated 29 CLI gates, syntax-checked 44 JavaScript files, and reproduced every byte of the 20 payloads plus manifest. This record is tied to that CLI source commit, not later documentation changes or browser behavior.
+
+All 87 source files were verified against remote tree `66874fa8b11bb63449fd28fd9d555ff3d802fd41`. The documentation follow-up records this verified result without changing CLI or browser behavior.
+
 ## CLI argument-contract source milestone
 
 On October 13, 2026, the two headless runners were moved to a shared argument parser after reproducing three legacy-runner problems: duplicate thresholds silently used the last value, inherited names such as `constructor` could produce a bogus threshold and run the default demo, and flag order changed JSON/violation ordering. Both runners now reject duplicate thresholds, recognize only their own option keys, and report thresholds in a fixed metric order. Input schemas, simulation results, canonical input hashes and ordinary output schemas are unchanged. See [the CLI contract and reproduction](EXPERIMENTS.md#headless-runner).
