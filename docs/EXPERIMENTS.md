@@ -1,5 +1,7 @@
 # Experiment format v1
 
+[Versioned JSON Schemas and editor authoring](JSON_SCHEMAS.md) provide early structural feedback. Runtime validation remains authoritative; do not add `$schema` to input documents.
+
 An experiment compares 2–6 named closure variants over one shared network, fleet and ordered demand. It does not regenerate jobs per variant or optimize job assignment.
 
 Required top-level fields:

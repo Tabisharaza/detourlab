@@ -57,7 +57,7 @@ npm start -- --dist  # Preview the built distribution
 npm run benchmark    # Named-machine timing of the original paired fixture
 ```
 
-The app has zero runtime and development npm dependencies. The lockfile is included. CI validates it with `npm ci --ignore-scripts --no-audit --no-fund`; this is optional for local use. Node 24.2.0 is the API floor for the release verifier, not a tested-minimum claim. Local checks used Node 24.19.0. [The initial public release passed hosted CI](https://github.com/Tabisharaza/detourlab/actions/runs/37995893928) on Node 24.19.0 and 24.21.0; the latter is additional verified coverage, not a required installed version. See [CI and reproducibility](docs/CI.md).
+The app and its core checks have zero npm dependencies. An optional, separately locked schema/editor checker lives under `tools/schema-check`; it is not needed to run the app. The root lockfile is included. CI validates it with `npm ci --ignore-scripts --no-audit --no-fund`; this is optional for local use. Node 24.2.0 is the API floor for the release verifier, not a tested-minimum claim. Local checks used Node 24.19.0. [The initial public release passed hosted CI](https://github.com/Tabisharaza/detourlab/actions/runs/37995893928) on Node 24.19.0 and 24.21.0; the latter is additional verified coverage, not a required installed version. See [CI and reproducibility](docs/CI.md).
 
 ## Reproduce all variants
 
@@ -92,6 +92,12 @@ The original single-scenario runner remains available:
 ```sh
 npm run scenario -- examples/meridian-default.json --json
 ```
+
+## Author a portable input
+
+Use a filename ending in `.scenario.json` or `.experiment.json` inside this checkout to get scoped JSON Schema diagnostics, completion and unit-rich hover help in VS Code. The [authoring guide](docs/JSON_SCHEMAS.md) includes small valid examples and explains the checks that still require the runtime. Do not add `$schema` to your data files: the import format remains strict.
+
+The two original Draft-07 schemas share definitions, resolve locally and describe the existing v1 formats. The separately pinned [optional checker](tools/schema-check/package.json) tests structural acceptance and the JSON language service; app startup remains dependency-free.
 
 ## What is here
 

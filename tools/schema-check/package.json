@@ -1,0 +1,15 @@
+{
+  "name": "detourlab-schema-check",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Optional offline JSON Schema and editor-language-service verification",
+  "scripts": {
+    "verify": "node --check verify.mjs && node --check editor-check.mjs && node --test verify.mjs editor-check.mjs"
+  },
+  "devDependencies": {
+    "ajv": "8.20.0",
+    "vscode-json-languageservice": "5.7.2"
+  }
+}

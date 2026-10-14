@@ -1,5 +1,7 @@
 # Scenario format v1
 
+[Versioned JSON Schemas and editor authoring](JSON_SCHEMAS.md) provide early structural feedback. Runtime validation remains authoritative; do not add `$schema` to input documents.
+
 A scenario is a self-contained JSON object. All fields shown in the examples are required; unknown keys are rejected. See `examples/minimal-directed.json` for the smallest complete example and `src/engine.d.ts` for API types.
 
 For a hand-checkable comparison of clear roads and closures one second apart, follow the [tiny experiment walkthrough](EXPERIMENTS.md#tiny-walkthrough-one-second-changes-the-route). It reuses this minimal scenario's graph, vehicle and job unchanged.

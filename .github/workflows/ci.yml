@@ -55,6 +55,11 @@ jobs:
       - name: Exercise CLI success, threshold-failure, and invalid-input gates
         run: node --test tests/cli.test.js tests/experiment-cli.test.js tests/cli-arguments.test.js
 
+      - name: Verify optional schema and editor tooling
+        run: |
+          npm ci --prefix tools/schema-check --ignore-scripts --no-audit --no-fund
+          npm run verify --prefix tools/schema-check
+
       - name: Verify and reproduce every distribution byte
         run: |
           node scripts/verify-dist.js

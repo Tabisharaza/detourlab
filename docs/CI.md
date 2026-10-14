@@ -1,5 +1,13 @@
 # CI and release verification
 
+## Portable scenario authoring milestone
+
+The October 14, 2026 local check used **Node 24.19.0 / npm 11.9.0 / Linux**. The existing core suite passed **384 tests** and **44 JavaScript syntax checks**, with the **29 CLI gates** repeated separately. The isolated optional checker passed **120 additional tests**: 86 structural/runtime-boundary cases and 34 JSON language-service cases, plus syntax checks for its two `.mjs` files. Repeated gates are not extra unique tests. Core checks also passed with the optional dependencies absent.
+
+CI now installs the optional checker from its separate lockfile with lifecycle scripts disabled, then runs it on both existing Node versions. Ajv 8.20.0 and vscode-json-languageservice 5.7.2 are exact direct pins; the lockfile fixes 11 packages total. Root package dependencies, Node/action pins and read-only workflow permissions are unchanged. See [the authoring contract](JSON_SCHEMAS.md) and [tool dependency notices](../tools/schema-check/THIRD_PARTY_NOTICES.md).
+
+Both local builds and all **20 payloads plus manifest** match the retained v8 distribution byte-for-byte. These checks use validator/language-service APIs, not a native editor or browser. Hosted CI for this milestone must be checked on its exact published commit; prior successful runs do not verify this new optional job step.
+
 ## CLI human-label presentation milestone
 
 The October 13, 2026 local check used Node **24.19.0 / npm 11.9.0 / Linux** and passed **384 tests** and **44 JavaScript syntax checks**. Eighteen new tests cover escaped controls and literal backslashes in human reports while preserving JSON data, hashes and ordinary output. Of the 13 subprocess tests, nine fail against the previous reporters and four are compatibility controls; the other five test the new formatter directly. The existing workflow discovers all 18 through `node --test`; its separate argument/threshold gate remains **29 repeated tests**, not 47.
@@ -42,11 +50,12 @@ The October 10, 2026 file-input source update passed local checks on Node 24.19.
 
 The `verify` job runs on pushes, pull requests, and manual dispatch with an explicit two-version matrix: **24.19.0** (the locally tested baseline recorded in [`.node-version`](../.node-version)) and **24.21.0** (the current official Node 24 LTS release when checked on 2026-10-09). The second version is additional compatibility coverage, not a runtime minimum or a condition for creating this alpha repository. Each job has a ten-minute timeout, at most two matrix jobs run in parallel, and one matrix failure does not cancel the other. A newer run for the same workflow/ref cancels the older run. Both use `ubuntu-24.04`, assert the selected Node version, and record Node/npm versions in their logs.
 
-1. `npm ci --ignore-scripts --no-audit --no-fund` checks the committed lockfile without running installation lifecycle scripts or contacting the npm audit service. The current lockfile contains only this project: there are no third-party packages to install.
+1. `npm ci --ignore-scripts --no-audit --no-fund` checks the committed lockfile without running installation lifecycle scripts or contacting the npm audit service. The root lockfile contains only this project; no app dependencies are installed in this step.
 2. `npm run check` syntax-checks JavaScript, runs the complete Node test suite, and builds `dist/`.
 3. `node --test tests/cli.test.js tests/experiment-cli.test.js tests/cli-arguments.test.js` explicitly repeats the CLI regression gates. Both runners must report success with exit `0`, threshold violations with exit `1` and usable result output, and invalid input with exit `2`. Experiment coverage also exercises every variant, exact threshold boundaries, canonical hashes, malformed/oversized inputs, and deterministic budget failures.
-4. `node scripts/verify-dist.js` validates the built distribution. The job copies that first build to a temporary directory, rebuilds, and verifies the new tree against the copy.
-5. `git diff --exit-code && git diff --cached --exit-code` checks that verification did not change tracked source in the clean checkout. Ignored build output is expected; this is not a general check for arbitrary untracked files.
+4. `npm ci --prefix tools/schema-check --ignore-scripts --no-audit --no-fund` installs the separately locked optional validator/editor packages. `npm run verify --prefix tools/schema-check` syntax-checks its two files and runs the offline schema/language-service corpus. Installation needs the npm registry; the tests allow only local schema loading.
+5. `node scripts/verify-dist.js` validates the built distribution. The job copies that first build to a temporary directory, rebuilds, and verifies the new tree against the copy.
+6. `git diff --exit-code && git diff --cached --exit-code` checks that verification did not change tracked source in the clean checkout. Ignored build output is expected; this is not a general check for arbitrary untracked files.
 
 The workflow only grants `contents: read`. Checkout does not persist credentials. It uses no repository secrets, write permissions, publishing steps, deployment environments, artifact uploads, dependency cache, or privileged pull-request trigger. The actions may use GitHub's short-lived, read-only job token for fetching source and Node. Running CI still executes the submitted code; the workflow is not a sandbox for safely running a malicious program on a personal machine.
 
@@ -60,6 +69,9 @@ npm --version
 npm ci --ignore-scripts --no-audit --no-fund
 npm run check
 node --test tests/cli.test.js tests/experiment-cli.test.js tests/cli-arguments.test.js
+# Optional authoring-tool checks, required for schema/editor changes and hosted CI:
+npm ci --prefix tools/schema-check --ignore-scripts --no-audit --no-fund
+npm run verify --prefix tools/schema-check
 node scripts/verify-dist.js
 ```
 

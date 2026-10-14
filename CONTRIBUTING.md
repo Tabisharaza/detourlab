@@ -14,6 +14,17 @@ npm run experiment -- examples/meridian-experiment.json --json
 
 No package installation is needed for the app. `npm ci --ignore-scripts --no-audit --no-fund` checks the dependency-free lockfile and matches CI setup. [CI.md](docs/CI.md) explains the exact workflow.
 
+## Edit a scenario or schema
+
+See [JSON_SCHEMAS.md](docs/JSON_SCHEMAS.md) for scoped editor associations and the difference between structural diagnostics and authoritative runtime validation. If changing the schemas or their editor integration, also run:
+
+```sh
+npm ci --prefix tools/schema-check --ignore-scripts --no-audit --no-fund
+npm run verify --prefix tools/schema-check
+```
+
+This optional package is isolated from the app and core checks. Its [lockfile](tools/schema-check/package-lock.json) pins validator/language-service dependencies, with [license notices](tools/schema-check/THIRD_PARTY_NOTICES.md). Tests must load local schema files only, must not coerce or mutate inputs, and must retain explicit runtime-only rejection cases instead of claiming universal parity. Report native editor or browser checks separately.
+
 ## Choose a scope
 
 Start with [open contribution issues](https://github.com/Tabisharaza/detourlab/issues). [Additional issue scopes](docs/ISSUE_DRAFTS.md) include reproducible problems, acceptance criteria and explicit non-goals, and distinguish published issues from proposals. Before adding a solver, city dataset, dependency or storage service, propose the interface and its effect on licensing, privacy and reproducibility.

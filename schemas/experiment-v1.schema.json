@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/Tabisharaza/detourlab/main/schemas/experiment-v1.schema.json",
+  "title": "DetourLab experiment v1",
+  "description": "Two to six closure variants over one unchanged network, fleet and ordered demand. This original MIT-licensed schema checks JSON structure; DetourLab runtime validation remains authoritative for references, record-ID uniqueness, UTF-8 size, UTF-16 string lengths, aggregate limits and safety checks.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "version", "id", "name", "baseScenario", "variants"],
+  "properties": {
+    "format": {
+      "title": "Experiment format marker",
+      "description": "Identifies an experiment document rather than a legacy scenario.",
+      "const": "detourlab-experiment"
+    },
+    "version": {
+      "title": "Experiment format version",
+      "description": "The experiment format version is exactly 1.",
+      "const": 1
+    },
+    "id": {
+      "title": "Experiment ID",
+      "description": "Portable identity for this experiment.",
+      "allOf": [{ "$ref": "scenario-v1.schema.json#/definitions/identifier" }]
+    },
+    "name": {
+      "title": "Experiment name",
+      "description": "Nonblank display label. The runtime limit is 120 UTF-16 code units.",
+      "allOf": [{ "$ref": "scenario-v1.schema.json#/definitions/label" }]
+    },
+    "baseScenario": {
+      "title": "Shared clear-road scenario",
+      "description": "Complete scenario v1 with closures: []. Every variant uses exactly this geometry, fleet, dispatch times, ordered demand and deadlines. Place closure events in variants only.",
+      "allOf": [
+        { "$ref": "scenario-v1.schema.json" },
+        {
+          "type": "object",
+          "properties": {
+            "closures": {
+              "title": "Empty base closure schedule",
+              "description": "Must be empty; closure schedules belong to variants.",
+              "type": "array",
+              "maxItems": 0
+            }
+          }
+        }
+      ]
+    },
+    "variants": {
+      "title": "Closure variants",
+      "description": "2–6 named schedules over the shared scenario. The runtime checks unique variant IDs, at most 8000 closure records and at most 48000 closure edge references across all variants.",
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 6,
+      "items": { "$ref": "#/definitions/variant" }
+    }
+  },
+  "definitions": {
+    "variant": {
+      "title": "Closure variant",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "closures"],
+      "properties": {
+        "id": {
+          "title": "Variant ID",
+          "description": "Unique within this experiment's variants. The runtime checks uniqueness.",
+          "allOf": [{ "$ref": "scenario-v1.schema.json#/definitions/identifier" }]
+        },
+        "name": {
+          "title": "Variant name",
+          "description": "Nonblank display label. The runtime limit is 120 UTF-16 code units.",
+          "allOf": [{ "$ref": "scenario-v1.schema.json#/definitions/label" }]
+        },
+        "closures": {
+          "title": "Variant closure schedule",
+          "description": "An empty array is a clear-road control. All edge IDs must reference the shared base scenario; the runtime checks those references and aggregate experiment limits.",
+          "allOf": [{ "$ref": "scenario-v1.schema.json#/definitions/closureList" }]
+        }
+      }
+    }
+  }
+}

@@ -6,7 +6,7 @@ These scopes were prepared before publication. Selected work is now public:
 - [#2: Real desktop-browser import/export roundtrips](https://github.com/Tabisharaza/detourlab/issues/2), a bounded subset of scope 1 below
 - [#3: Profile and avoid redraws of unchanged paused scenes](https://github.com/Tabisharaza/detourlab/issues/3), based on scope 4 below
 
-The numbered headings below are draft scope numbers, not GitHub issue numbers. Other scopes remain proposals; none implies an assignment or delivery commitment. Use each public issue's own acceptance criteria when contributing.
+The numbered headings below are draft scope numbers, not GitHub issue numbers. Scope 3 is implemented as documented below; other unimplemented scopes remain proposals. None implies an assignment or delivery commitment. Use each public issue's own acceptance criteria when contributing.
 
 ## 1. Exercise file roundtrips and interruptions in a real browser
 
@@ -43,7 +43,9 @@ The numbered headings below are draft scope numbers, not GitHub issue numbers. O
 
 ## 3. Publish formal scenario and experiment JSON Schemas
 
-**Problem:** Runtime validation is strict, but editors cannot currently offer schema-backed completion or early diagnostics.
+**Status:** Implemented on October 14, 2026: [two versioned schemas, scoped editor associations and an optional structural/language-service checker](JSON_SCHEMAS.md). Native editor-window verification is not claimed. The original scope and acceptance criteria remain below for context.
+
+**Original problem:** Runtime validation is strict, but editors could not offer schema-backed completion or early diagnostics.
 
 **Suggested scope:** Versioned schemas for scenario v1 and experiment v1, paired with documentation and parity tests. Keep runtime validation authoritative for procedural checks that JSON Schema cannot express.
 

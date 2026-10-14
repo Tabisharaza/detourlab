@@ -2,6 +2,16 @@
 
 **Current public demo: v8**, deployed October 11, 2026 UTC from tested public source `ffe3d15`. [Jump to the v8 source/deployment record and verification limits](#v8-source-parity-deployment). The earlier v4/v5/v6/v7 records remain historical evidence; v8 has not yet received native browser QA.
 
+## Portable scenario authoring milestone
+
+The October 14, 2026 source adds original Draft-07 scenario/experiment schemas, scoped local editor associations and a separately locked optional verification tool. It changes no runtime modules, fixtures, root dependencies, input/export format or engine metrics. The [authoring guide](JSON_SCHEMAS.md) explains early diagnostics and the definitive CLI path.
+
+Local Node **24.19.0 / npm 11.9.0 / Linux** checks passed **384 core tests**, **44 core syntax checks**, and **120 additional optional tests** (86 schema/runtime-boundary tests plus 34 JSON language-service tests). The tool also syntax-checks its two `.mjs` files. The existing 29 CLI gates were repeated separately; they are already part of the core suite. Core checks also passed without the optional package's dependencies installed.
+
+The corpus checks all five fixtures, required/unknown fields, numeric/list/identifier/string bounds, empty base closures, offline reference loading, scoped file associations, diagnostics, completion and contextual hover. Schema-pass/runtime-reject cases intentionally preserve the boundary for foreign keys, duplicate record IDs, aggregate/byte budgets and Unicode code-point versus UTF-16-unit length. Language-service testing exposed generic hover descriptions for arrival deadlines and cutoffs; contextual schema annotations now pass those checks. No native editor-window, terminal, browser or assistive-technology coverage is claimed.
+
+All 20 browser distribution payloads and the manifest remain byte-identical to the retained v8 package and to a second build. No Site deployment was needed for this authoring-only change. The live demo remains v8, and its native browser QA gaps remain open. The optional packages are not shipped in the distribution; [their notices](../tools/schema-check/THIRD_PARTY_NOTICES.md) are separate from application attribution. Publication and hosted CI must be verified for the exact source commit rather than inferred from these local checks.
+
 ## CLI human-label presentation milestone
 
 The October 13, 2026 CLI-only correction makes control characters visible when formatting scenario, experiment and variant names in human reports. Schema-valid CR/newline/tab, C1 and bidi characters previously appeared verbatim and could distort report lines. The formatter escapes its documented controls as lowercase `\uXXXX` and doubles literal backslashes. It does not truncate valid names after escape expansion. This is captured-output evidence, not a terminal-emulator test, command-execution claim or comprehensive Unicode-spoofing defense.

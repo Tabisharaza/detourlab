@@ -1,0 +1,284 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/Tabisharaza/detourlab/main/schemas/scenario-v1.schema.json",
+  "title": "DetourLab scenario v1",
+  "description": "A bounded directed network, fleet, ordered jobs and permanent closures. This original MIT-licensed schema checks JSON structure; DetourLab runtime validation remains authoritative for references, record-ID uniqueness, UTF-8 size, UTF-16 string lengths and safety checks.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "id", "name", "seed", "description", "nodes", "edges", "vehicles", "jobs", "closures", "durationS"],
+  "properties": {
+    "version": {
+      "title": "Scenario format version",
+      "description": "The scenario format version is exactly 1.",
+      "const": 1
+    },
+    "id": {
+      "title": "Scenario ID",
+      "description": "Portable identity for this scenario.",
+      "allOf": [{ "$ref": "#/definitions/identifier" }]
+    },
+    "name": {
+      "title": "Scenario name",
+      "description": "Nonblank display label. The runtime limit is 120 UTF-16 code units.",
+      "allOf": [{ "$ref": "#/definitions/label" }]
+    },
+    "seed": {
+      "title": "Fixture seed",
+      "description": "Unsigned 32-bit integer. Import preserves supplied geometry and demand; it does not regenerate them from this seed.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "description": {
+      "title": "Scenario description",
+      "description": "Nonblank explanation of the scenario. The runtime limit is 4000 UTF-16 code units.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000,
+      "pattern": "\\S",
+      "not": { "pattern": "[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F]" }
+    },
+    "nodes": {
+      "title": "Network nodes",
+      "description": "One to 2000 planar coordinates. Node IDs must be unique; the runtime checks that separately.",
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 2000,
+      "items": { "$ref": "#/definitions/node" }
+    },
+    "edges": {
+      "title": "Directed roads",
+      "description": "Up to 8000 directed edges. A reverse direction exists only when supplied as another edge. The runtime checks unique edge IDs and node references.",
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 8000,
+      "items": { "$ref": "#/definitions/edge" }
+    },
+    "vehicles": {
+      "title": "Fleet",
+      "description": "One to 100 vehicles with fixed start nodes and dispatch times. The runtime checks unique vehicle IDs and node references.",
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100,
+      "items": { "$ref": "#/definitions/vehicle" }
+    },
+    "jobs": {
+      "title": "Ordered delivery jobs",
+      "description": "Up to 2000 jobs. Each vehicle serves its jobs in their relative array order. The runtime checks unique job IDs and node/vehicle references.",
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 2000,
+      "items": { "$ref": "#/definitions/job" }
+    },
+    "closures": {
+      "title": "Permanent closure events",
+      "description": "An empty array means clear roads. A repeated edge across different events is allowed; its earliest cutoff wins.",
+      "allOf": [{ "$ref": "#/definitions/closureList" }]
+    },
+    "durationS": {
+      "title": "Minimum playback horizon (seconds)",
+      "description": "Greater than zero and at most 604800 seconds (7 days). Work continues until finished even when it exceeds this playback horizon.",
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 604800
+    }
+  },
+  "definitions": {
+    "identifier": {
+      "title": "Safe identifier",
+      "description": "1–96 ASCII characters; start with a letter or digit, followed by letters, digits, underscore, period, colon or hyphen. Reserved prototype-related values are prohibited.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 96,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+      "not": { "enum": ["__proto__", "prototype", "constructor"] }
+    },
+    "label": {
+      "title": "Display label",
+      "description": "Nonblank text with no U+0000–U+0008, U+000B, U+000C or U+000E–U+001F controls. Tab, line feed and carriage return are allowed. Schema maxLength counts Unicode code points; the runtime's 120-character limit counts UTF-16 code units.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "pattern": "\\S",
+      "not": { "pattern": "[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F]" }
+    },
+    "coordinate": {
+      "title": "Planar coordinate",
+      "description": "Arbitrary planar units, from -1000000 to 1000000 inclusive. Coordinate spacing does not determine road distance or travel time.",
+      "type": "number",
+      "minimum": -1000000,
+      "maximum": 1000000
+    },
+    "timestamp": {
+      "title": "Seconds after scenario start",
+      "description": "A fractional or whole number of seconds, from 0 to 604800 inclusive (7 days). This is not a wall-clock timestamp.",
+      "type": "number",
+      "minimum": 0,
+      "maximum": 604800
+    },
+    "node": {
+      "title": "Network node",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "x", "y"],
+      "properties": {
+        "id": {
+          "title": "Node ID",
+          "description": "Unique within the scenario's nodes; edges, vehicles and jobs reference this ID.",
+          "allOf": [{ "$ref": "#/definitions/identifier" }]
+        },
+        "x": {
+          "title": "X coordinate",
+          "description": "Horizontal position in arbitrary planar units.",
+          "allOf": [{ "$ref": "#/definitions/coordinate" }]
+        },
+        "y": {
+          "title": "Y coordinate",
+          "description": "Vertical position in arbitrary planar units.",
+          "allOf": [{ "$ref": "#/definitions/coordinate" }]
+        }
+      }
+    },
+    "edge": {
+      "title": "Directed road edge",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "from", "to", "distanceM", "travelTimeS", "roadName"],
+      "properties": {
+        "id": {
+          "title": "Edge ID",
+          "description": "Unique within the scenario's edges; closures reference this ID.",
+          "allOf": [{ "$ref": "#/definitions/identifier" }]
+        },
+        "from": {
+          "title": "Origin node ID",
+          "description": "ID of an existing node where this directed edge begins. The runtime checks the reference.",
+          "allOf": [{ "$ref": "#/definitions/identifier" }]
+        },
+        "to": {
+          "title": "Destination node ID",
+          "description": "ID of an existing node where this directed edge ends. No reverse edge is implied.",
+          "allOf": [{ "$ref": "#/definitions/identifier" }]
+        },
+        "distanceM": {
+          "title": "Edge distance (meters)",
+          "description": "Modeled distance in meters, from 0.01 to 1000000 inclusive; independent of node-coordinate spacing.",
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 1000000
+        },
+        "travelTimeS": {
+          "title": "Edge travel time (seconds)",
+          "description": "Modeled traversal time in seconds, from 0.1 to 86400 inclusive (1 day).",
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 86400
+        },
+        "roadName": {
+          "title": "Road name",
+          "description": "Nonblank display label; different directed edges may share a road name.",
+          "allOf": [{ "$ref": "#/definitions/label" }]
+        }
+      }
+    },
+    "vehicle": {
+      "title": "Vehicle",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "startNode", "startTimeS"],
+      "properties": {
+        "id": {
+          "title": "Vehicle ID",
+          "description": "Unique within the fleet; jobs reference this ID for their fixed assignment.",
+          "allOf": [{ "$ref": "#/definitions/identifier" }]
+        },
+        "startNode": {
+          "title": "Start node ID",
+          "description": "ID of an existing node where the vehicle starts. The runtime checks the reference.",
+          "allOf": [{ "$ref": "#/definitions/identifier" }]
+        },
+        "startTimeS": {
+          "title": "Dispatch time (seconds)",
+          "description": "Seconds after scenario start when this vehicle becomes available.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 604800
+        }
+      }
+    },
+    "job": {
+      "title": "Delivery job",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "nodeId", "vehicleId", "dueTimeS", "serviceTimeS"],
+      "properties": {
+        "id": {
+          "title": "Job ID",
+          "description": "Unique within the scenario's jobs.",
+          "allOf": [{ "$ref": "#/definitions/identifier" }]
+        },
+        "nodeId": {
+          "title": "Delivery node ID",
+          "description": "ID of an existing destination node. The runtime checks the reference.",
+          "allOf": [{ "$ref": "#/definitions/identifier" }]
+        },
+        "vehicleId": {
+          "title": "Assigned vehicle ID",
+          "description": "ID of an existing vehicle. Its jobs retain their relative order in the jobs array.",
+          "allOf": [{ "$ref": "#/definitions/identifier" }]
+        },
+        "dueTimeS": {
+          "title": "Arrival deadline (seconds)",
+          "description": "Seconds after scenario start by which the vehicle must arrive. Arrival exactly at the deadline is on time; service completion is not the deadline test.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 604800
+        },
+        "serviceTimeS": {
+          "title": "Service duration (seconds)",
+          "description": "Time spent serving the job after arrival, from 0 to 86400 seconds inclusive (1 day).",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 86400
+        }
+      }
+    },
+    "closure": {
+      "title": "Permanent closure event",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "edgeIds", "atS"],
+      "properties": {
+        "id": {
+          "title": "Closure event ID",
+          "description": "Unique within this scenario's closure list or this experiment variant's closure list. The runtime checks uniqueness.",
+          "allOf": [{ "$ref": "#/definitions/identifier" }]
+        },
+        "edgeIds": {
+          "title": "Affected directed edge IDs",
+          "description": "1–8000 distinct IDs of existing directed edges. The runtime checks graph references. Repeating an edge in different events is allowed.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8000,
+          "uniqueItems": true,
+          "items": { "$ref": "#/definitions/identifier" }
+        },
+        "atS": {
+          "title": "Closure cutoff (seconds)",
+          "description": "Seconds after scenario start when affected edges close permanently. Entry exactly at the cutoff is blocked; a vehicle already on an edge finishes it.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 604800
+        }
+      }
+    },
+    "closureList": {
+      "title": "Closure schedule",
+      "description": "0–8000 permanent closure events. Event IDs must be unique within this list; the runtime checks that separately.",
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 8000,
+      "items": { "$ref": "#/definitions/closure" }
+    }
+  }
+}

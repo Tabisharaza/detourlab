@@ -6,6 +6,10 @@ One shared network and demand set supports 2–6 named variants, independent per
 
 The current app deliberately retains fixed job assignment, fixed order and assumed edge costs. See [verified behavior and gaps](VERIFICATION.md).
 
+## Implemented: portable scenario authoring
+
+Original [Draft-07 scenario and experiment schemas](JSON_SCHEMAS.md) provide scoped editor diagnostics, completion and explanatory hover. A separately locked optional checker covers structural acceptance, explicit runtime-only limits and actual JSON language-service behavior. The engine, import/export contract and dependency-free app startup are unchanged. Native editor/browser checks are separate from this automated evidence.
+
 ## Release-readiness gates
 
 1. Publish a truthful README, live demo link, actual screenshot and model assumptions.
@@ -19,7 +23,6 @@ The current app deliberately retains fixed job assignment, fixed order and assum
 ## Next useful contributions
 
 - Searchable, keyboard-friendly road selection and stronger non-map explanations
-- Versioned JSON Schemas with parity tests against the runtime validators
 - Actual browser interruption/import/export coverage
 - Paused-render and large-fixture profiling, with repeatable measurements
 - Additional independent routing oracles and cross-browser deterministic fixtures

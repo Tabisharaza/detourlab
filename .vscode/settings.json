@@ -1,0 +1,21 @@
+{
+  "json.schemas": [
+    {
+      "fileMatch": [
+        "/examples/meridian-default.json",
+        "/examples/meridian-all-bridges.json",
+        "/examples/minimal-directed.json",
+        "/**/*.scenario.json"
+      ],
+      "url": "./schemas/scenario-v1.schema.json"
+    },
+    {
+      "fileMatch": [
+        "/examples/meridian-experiment.json",
+        "/examples/minimal-experiment.json",
+        "/**/*.experiment.json"
+      ],
+      "url": "./schemas/experiment-v1.schema.json"
+    }
+  ]
+}
