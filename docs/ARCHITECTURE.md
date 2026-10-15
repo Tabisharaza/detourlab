@@ -1,6 +1,6 @@
 # Architecture
 
-DetourLab deliberately starts with the smallest inspectable runtime: browser ES modules, Canvas 2D, a module Worker, and Node 24. There are no npm dependencies or external services. A renderer upgrade should preserve the scenario/engine boundary.
+DetourLab deliberately starts with the smallest inspectable runtime: browser ES modules, Canvas 2D, a module Worker, and Node 24. The application runtime has no npm dependencies or external services; optional schema-check tooling is isolated under `tools/`. A renderer upgrade should preserve the scenario/engine boundary.
 
 ## Data flow
 
@@ -31,6 +31,7 @@ Routing is reconsidered at each edge boundary. A newly closed edge cannot be ent
 - `src/map.js`: original procedural district and ledger playback
 - `scripts/run-experiment.js`: multi-variant fingerprints and threshold outcomes
 - `scripts/run-scenario.js`: backward-compatible single-scenario paired-run thresholds
+- `scripts/explain-experiment.js` and `scripts/job-impact.js`: bounded Node-only job outcome reports over the unchanged whole-experiment results
 - `tests/`: engine, schema, CLI and integration tests
 - `examples/`: portable, original JSON experiments
 

@@ -99,6 +99,17 @@ Use a filename ending in `.scenario.json` or `.experiment.json` inside this chec
 
 The two original Draft-07 schemas share definitions, resolve locally and describe the existing v1 formats. The separately pinned [optional checker](tools/schema-check/package.json) tests structural acceptance and the JSON language service; app startup remains dependency-free.
 
+## Inspect which deliveries changed
+
+```sh
+node scripts/explain-experiment.js examples/meridian-experiment.json --variant market-05
+node scripts/explain-experiment.js examples/minimal-experiment.json --variant close-at-10 --json
+```
+
+The [job-impact report](docs/JOB_IMPACT.md) compares each delivery’s status, arrival, service completion and lateness with the clear-road baseline. In Meridian, 125 arrivals change but only 118 jobs become late; seven deliveries arrive later while still meeting their deadlines. Unreachable timings remain explicit nulls.
+
+The human view shows the first 20 changed jobs and says how many are omitted; versioned JSON includes all jobs and the input fingerprint. It uses the same bounded simulation as the threshold runner and does not infer per-job routes or complete closure causality.
+
 ## What is here
 
 - 432 junctions, 1,614 directed edges, 24 vehicles and 192 seeded jobs in the default district
@@ -108,6 +119,7 @@ The two original Draft-07 schemas share definitions, resolve locally and describ
 - A selected vehicle's baseline/disrupted overlay, shared replay time, pause, speed and zoom
 - Cancel/rerun, terminated superseded workers and stale-result/import guards
 - Bounded experiment JSON, backward-compatible scenario imports and deterministic CLI thresholds
+- Headless per-job impact reports with complete status transitions and comparable timing differences
 - Original procedural geometry, a buildless UI, a module Worker and Node-native tests
 
 ## Model assumptions
@@ -126,7 +138,7 @@ This alpha is for reproducible network experiments. It has not been validated fo
 
 Imported files are parsed in browser memory. The app sends no scenario data, analytics, external font requests or map-service calls. Export is a user-initiated local download. Reloading clears unsaved work. A hosting provider may still process ordinary web-request metadata.
 
-Source file entry points reject malformed UTF-8 and limit inputs to 2 MiB, with strict fields, foreign-key checks, finite numeric bounds and prototype/accessor rejection. Both CLIs use bounded regular-file reads; [the file-input guide](docs/FILE_INPUT.md) explains encoding, safe errors and reproducible roundtrip tests. Engine and experiment work budgets fail explicitly. The browser terminates a whole-experiment calculation after 30 seconds. These limits reduce resource-exhaustion risk; they do not establish an unlimited-input or security guarantee. See [SECURITY.md](SECURITY.md) and the [format limits](docs/EXPERIMENTS.md).
+Source file entry points reject malformed UTF-8 and limit inputs to 2 MiB, with strict fields, foreign-key checks, finite numeric bounds and prototype/accessor rejection. All three CLI entry points use bounded regular-file reads; [the file-input guide](docs/FILE_INPUT.md) explains encoding, safe errors and reproducible roundtrip tests. Engine and experiment work budgets fail explicitly. The browser terminates a whole-experiment calculation after 30 seconds. These limits reduce resource-exhaustion risk; they do not establish an unlimited-input or security guarantee. See [SECURITY.md](SECURITY.md) and the [format limits](docs/EXPERIMENTS.md).
 
 Application code, procedural geometry and fixtures use the [MIT license](LICENSE). No third-party map data is bundled. Future real city packs need separate provenance and data-license handling. See [attribution](THIRD_PARTY_NOTICES.md).
 
@@ -144,7 +156,7 @@ The current source skips unchanged paused Canvas paints while preserving playbac
 
 ### File-input source update
 
-The current source rejects malformed UTF-8 consistently, bounds both CLI reads and makes hostile file errors short and safe to display. The [deterministic regression corpus](docs/FILE_INPUT.md) covers 48 experiments and 189 variants. [Hosted CI for `e9285ee`](https://github.com/Tabisharaza/detourlab/actions/runs/38055582446) passed 341 tests on both pinned Node versions; [the verification record](docs/VERIFICATION.md#file-input-source-milestone) records the exact scope. These fixes are deployed in v8. The native file-picker QA gap remains open.
+The current source rejects malformed UTF-8 consistently, bounds all three CLI reads and makes hostile file errors short and safe to display. The [deterministic regression corpus](docs/FILE_INPUT.md) covers 48 experiments and 189 variants. [Hosted CI for `e9285ee`](https://github.com/Tabisharaza/detourlab/actions/runs/38055582446) passed 341 tests on both pinned Node versions; [the verification record](docs/VERIFICATION.md#file-input-source-milestone) records the exact scope. These fixes are deployed in v8. The native file-picker QA gap remains open.
 
 ### Dynamic editor keyboard update
 

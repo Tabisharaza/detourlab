@@ -96,4 +96,14 @@ Node tests exercise the exact model, worker protocol, CLI and UI event-handler s
 
 ## File encoding
 
-The app and both CLIs accept UTF-8 JSON with an optional leading BOM, which counts toward the 2 MiB input bound. Malformed UTF-8 is rejected without substituting label characters. Exports have no BOM. [File input and reproducible roundtrips](FILE_INPUT.md) documents error handling, byte acquisition and the remaining native browser QA gap.
+The app and all three CLI entry points accept UTF-8 JSON with an optional leading BOM, which counts toward the 2 MiB input bound. Malformed UTF-8 is rejected without substituting label characters. Exports have no BOM. [File input and reproducible roundtrips](FILE_INPUT.md) documents error handling, byte acquisition and the remaining native browser QA gap.
+
+## Inspect individual job outcomes
+
+Use the separate [job-impact explainer](JOB_IMPACT.md) after a threshold failure or to inspect a named variant:
+
+```sh
+node scripts/explain-experiment.js examples/meridian-experiment.json --variant market-05 --json
+```
+
+It reports all per-job status and timing differences, including changed arrivals that remain on time and unreachable work with null timing comparisons. Its successful exit means a report was produced, not that thresholds passed. The existing runner above retains its original flags and output.

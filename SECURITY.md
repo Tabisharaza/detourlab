@@ -6,7 +6,7 @@ DetourLab is an early browser-local simulation app. It has no app account system
 
 - JSON is data; imported labels are rendered with `textContent`, not HTML.
 - Validators copy plain records and reject unknown fields, unsafe identifiers, inherited/accessor/prototype properties, sparse or modified arrays, invalid references and non-finite values.
-- Browser file input and both CLIs reject malformed UTF-8 and are bounded at 2 MiB, including an optional leading BOM. Both CLIs require regular files and bound bytes actually read; the browser checks reported and returned byte sizes.
+- Browser file input and all three CLI entry points reject malformed UTF-8 and are bounded at 2 MiB, including an optional leading BOM. All three CLI entry points require regular files and bound bytes actually read; the browser checks reported and returned byte sizes.
 - File-error presentation escapes control characters and limits message length. These are entry-point controls; library callers that supply already-decoded strings remain responsible for their decoding choice. See [file-input behavior and verification limits](docs/FILE_INPUT.md).
 - No imported script, URL fetch, map tile or plugin is executed.
 
@@ -41,3 +41,5 @@ Enabling a private-reporting feature is optional and is not a condition for publ
 ## Public fixtures and reports
 
 Use synthetic or independently sanitized scenarios. Never commit passwords, API keys, tokens, real customer addresses, employee information or precise private fleet routes. The demo needs none of them. Reproduction reports should include a minimal fixture, expected/actual behavior and runtime version, with secrets and personal data removed.
+
+The Node-only job-impact explainer caps its complete pretty JSON report at 4 MiB including the final newline. It runs under the existing whole-experiment budgets before emitting output; no partial report is printed on failure. Machine JSON preserves original label data and still needs safe handling by downstream displays. See [the report contract](docs/JOB_IMPACT.md).

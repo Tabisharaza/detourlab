@@ -59,4 +59,4 @@ The original seed-42 metrics are protected by regression tests. Different seeds 
 
 ## File encoding
 
-The app and both CLIs accept UTF-8 JSON with an optional leading BOM, which counts toward the 2 MiB input bound. Malformed UTF-8 is rejected without substituting label characters. Exports have no BOM. [File input and reproducible roundtrips](FILE_INPUT.md) documents error handling, byte acquisition and the remaining native browser QA gap.
+The app and all three CLI entry points accept UTF-8 JSON with an optional leading BOM, which counts toward the 2 MiB input bound. Malformed UTF-8 is rejected without substituting label characters. Exports have no BOM. [File input and reproducible roundtrips](FILE_INPUT.md) documents error handling, byte acquisition and the remaining native browser QA gap.

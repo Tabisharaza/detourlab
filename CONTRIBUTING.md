@@ -25,6 +25,8 @@ npm run verify --prefix tools/schema-check
 
 This optional package is isolated from the app and core checks. Its [lockfile](tools/schema-check/package-lock.json) pins validator/language-service dependencies, with [license notices](tools/schema-check/THIRD_PARTY_NOTICES.md). Tests must load local schema files only, must not coerce or mutate inputs, and must retain explicit runtime-only rejection cases instead of claiming universal parity. Report native editor or browser checks separately.
 
+For the headless job-impact workflow, run `node --test tests/job-impact.test.js tests/job-impact-cli.test.js`. Preserve original job order, engine status/tolerance semantics and explicit nulls for unreachable timings. [JOB_IMPACT.md](docs/JOB_IMPACT.md) defines the report contract and its limits.
+
 ## Choose a scope
 
 Start with [open contribution issues](https://github.com/Tabisharaza/detourlab/issues). [Additional issue scopes](docs/ISSUE_DRAFTS.md) include reproducible problems, acceptance criteria and explicit non-goals, and distinguish published issues from proposals. Before adding a solver, city dataset, dependency or storage service, propose the interface and its effect on licensing, privacy and reproducibility.

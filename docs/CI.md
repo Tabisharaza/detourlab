@@ -1,5 +1,14 @@
 # CI and release verification
 
+## Headless job-impact milestone
+
+Local checks on **October 15, 2026**, using **Node 24.19.0 / npm 11.9.0 / Linux**, passed **432 core tests**, **120 optional authoring tests**, **48 core JavaScript syntax checks** and the optional tool’s two syntax checks. The 48 new tests comprise 20 report tests and 28 actual CLI subprocess tests. CI now separately repeats the new CLI cases alongside the existing gates: **57 repeated tests**, not additional unique tests.
+
+The command exposes job status and timing differences hidden by aggregate counts. In the reference Meridian comparison, 125 arrivals change while 118 jobs become late. Null unreachable comparisons, engine deadline tolerance, original job order and the whole-experiment budgets remain explicit. The output-size guard is tested at an injected smaller bound; a full 2000-job valid input is also checked under the real 4 MiB output limit. See [the report contract and exact examples](JOB_IMPACT.md).
+
+Ten existing runner invocations retain byte-identical stdout/stderr and exit codes. Both builds, all 20 payloads and the manifest match the retained v8 distribution byte-for-byte. No browser module, input schema, root dependency, Node/action pin, workflow permission or Site deployment changes. Independent review passed the new and full core suites; native browser and terminal-emulator coverage remain separate. Hosted CI for this new source must be checked on its exact published commit.
+
+
 ## Portable scenario authoring milestone
 
 The October 14, 2026 local check used **Node 24.19.0 / npm 11.9.0 / Linux**. The existing core suite passed **384 tests** and **44 JavaScript syntax checks**, with the **29 CLI gates** repeated separately. The isolated optional checker passed **120 additional tests**: 86 structural/runtime-boundary cases and 34 JSON language-service cases, plus syntax checks for its two `.mjs` files. Repeated gates are not extra unique tests. Core checks also passed with the optional dependencies absent.
@@ -52,7 +61,7 @@ The `verify` job runs on pushes, pull requests, and manual dispatch with an expl
 
 1. `npm ci --ignore-scripts --no-audit --no-fund` checks the committed lockfile without running installation lifecycle scripts or contacting the npm audit service. The root lockfile contains only this project; no app dependencies are installed in this step.
 2. `npm run check` syntax-checks JavaScript, runs the complete Node test suite, and builds `dist/`.
-3. `node --test tests/cli.test.js tests/experiment-cli.test.js tests/cli-arguments.test.js` explicitly repeats the CLI regression gates. Both runners must report success with exit `0`, threshold violations with exit `1` and usable result output, and invalid input with exit `2`. Experiment coverage also exercises every variant, exact threshold boundaries, canonical hashes, malformed/oversized inputs, and deterministic budget failures.
+3. `node --test tests/cli.test.js tests/experiment-cli.test.js tests/cli-arguments.test.js tests/job-impact-cli.test.js` explicitly repeats the CLI regression gates. Both runners must report success with exit `0`, threshold violations with exit `1` and usable result output, and invalid input with exit `2`. Experiment coverage also exercises every variant, exact threshold boundaries, canonical hashes, malformed/oversized inputs, and deterministic budget failures. The job-impact CLI repeats its diagnostic-output, selection, byte/label and budget checks; exit 0 there means a report was produced, not that thresholds passed.
 4. `npm ci --prefix tools/schema-check --ignore-scripts --no-audit --no-fund` installs the separately locked optional validator/editor packages. `npm run verify --prefix tools/schema-check` syntax-checks its two files and runs the offline schema/language-service corpus. Installation needs the npm registry; the tests allow only local schema loading.
 5. `node scripts/verify-dist.js` validates the built distribution. The job copies that first build to a temporary directory, rebuilds, and verifies the new tree against the copy.
 6. `git diff --exit-code && git diff --cached --exit-code` checks that verification did not change tracked source in the clean checkout. Ignored build output is expected; this is not a general check for arbitrary untracked files.
@@ -68,7 +77,7 @@ node --version
 npm --version
 npm ci --ignore-scripts --no-audit --no-fund
 npm run check
-node --test tests/cli.test.js tests/experiment-cli.test.js tests/cli-arguments.test.js
+node --test tests/cli.test.js tests/experiment-cli.test.js tests/cli-arguments.test.js tests/job-impact-cli.test.js
 # Optional authoring-tool checks, required for schema/editor changes and hosted CI:
 npm ci --prefix tools/schema-check --ignore-scripts --no-audit --no-fund
 npm run verify --prefix tools/schema-check

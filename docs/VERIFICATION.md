@@ -2,6 +2,14 @@
 
 **Current public demo: v8**, deployed October 11, 2026 UTC from tested public source `ffe3d15`. [Jump to the v8 source/deployment record and verification limits](#v8-source-parity-deployment). The earlier v4/v5/v6/v7 records remain historical evidence; v8 has not yet received native browser QA.
 
+## Headless job-impact milestone
+
+Local checks on **October 15, 2026**, using **Node 24.19.0 / npm 11.9.0 / Linux**, passed **432 core tests**, **120 optional authoring tests**, **48 core JavaScript syntax checks** and the optional tool’s two syntax checks. The 48 new tests comprise 20 report tests and 28 actual CLI subprocess tests. CI now separately repeats the new CLI cases alongside the existing gates: **57 repeated tests**, not additional unique tests.
+
+The command exposes job status and timing differences hidden by aggregate counts. In the reference Meridian comparison, 125 arrivals change while 118 jobs become late. Null unreachable comparisons, engine deadline tolerance, original job order and the whole-experiment budgets remain explicit. The output-size guard is tested at an injected smaller bound; a full 2000-job valid input is also checked under the real 4 MiB output limit. See [the report contract and exact examples](JOB_IMPACT.md).
+
+Ten existing runner invocations retain byte-identical stdout/stderr and exit codes. Both builds, all 20 payloads and the manifest match the retained v8 distribution byte-for-byte. No browser module, input schema, root dependency, Node/action pin, workflow permission or Site deployment changes. Independent review passed the new and full core suites; native browser and terminal-emulator coverage remain separate. Hosted CI for this new source must be checked on its exact published commit.
+
 ## Portable scenario authoring milestone
 
 The October 14, 2026 source adds original Draft-07 scenario/experiment schemas, scoped local editor associations and a separately locked optional verification tool. It changes no runtime modules, fixtures, root dependencies, input/export format or engine metrics. The [authoring guide](JSON_SCHEMAS.md) explains early diagnostics and the definitive CLI path.
