@@ -1,0 +1,42 @@
+{
+  "format": "detourlab-experiment",
+  "version": 1,
+  "id": "net-lateness-mask",
+  "name": "When net late counts hide a newly late delivery",
+  "baseScenario": {
+    "version": 1,
+    "id": "net-lateness-network",
+    "name": "Five-node gate example",
+    "seed": 1,
+    "description": "Original synthetic fixed-sequence example. Skipped work offsets a new late delivery in aggregate counts.",
+    "durationS": 200,
+    "nodes": [
+      { "id": "A", "x": 0, "y": 0 },
+      { "id": "B", "x": 2, "y": 0 },
+      { "id": "C", "x": 1, "y": 1 },
+      { "id": "D", "x": 4, "y": 0 },
+      { "id": "E", "x": 5, "y": 0 }
+    ],
+    "edges": [
+      { "id": "ab", "from": "A", "to": "B", "travelTimeS": 10, "distanceM": 10, "roadName": "Direct road" },
+      { "id": "ac", "from": "A", "to": "C", "travelTimeS": 8, "distanceM": 8, "roadName": "Detour start" },
+      { "id": "cb", "from": "C", "to": "B", "travelTimeS": 8, "distanceM": 8, "roadName": "Detour finish" },
+      { "id": "de", "from": "D", "to": "E", "travelTimeS": 10, "distanceM": 10, "roadName": "Service road outbound" },
+      { "id": "ed", "from": "E", "to": "D", "travelTimeS": 10, "distanceM": 10, "roadName": "Service road return" }
+    ],
+    "vehicles": [
+      { "id": "one", "startNode": "A", "startTimeS": 0 },
+      { "id": "two", "startNode": "D", "startTimeS": 0 }
+    ],
+    "jobs": [
+      { "id": "newly-late", "vehicleId": "one", "nodeId": "B", "dueTimeS": 12, "serviceTimeS": 0 },
+      { "id": "skipped", "vehicleId": "two", "nodeId": "E", "dueTimeS": 200, "serviceTimeS": 100 },
+      { "id": "previously-late", "vehicleId": "two", "nodeId": "D", "dueTimeS": 50, "serviceTimeS": 0 }
+    ],
+    "closures": []
+  },
+  "variants": [
+    { "id": "clear", "name": "Clear-road control", "closures": [] },
+    { "id": "cut", "name": "Close direct and outbound roads", "closures": [{ "id": "cut-zero", "edgeIds": ["ab", "de"], "atS": 0 }] }
+  ]
+}

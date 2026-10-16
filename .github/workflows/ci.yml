@@ -53,7 +53,7 @@ jobs:
         run: npm run check
 
       - name: Exercise CLI success, threshold-failure, and invalid-input gates
-        run: node --test tests/cli.test.js tests/experiment-cli.test.js tests/cli-arguments.test.js tests/job-impact-cli.test.js
+        run: node --test tests/cli.test.js tests/experiment-cli.test.js tests/cli-arguments.test.js tests/job-impact-cli.test.js tests/job-gates-cli.test.js
 
       - name: Verify optional schema and editor tooling
         run: |

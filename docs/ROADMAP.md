@@ -14,6 +14,10 @@ Original [Draft-07 scenario and experiment schemas](JSON_SCHEMAS.md) provide sco
 
 The [job-impact explainer](JOB_IMPACT.md) shows which jobs change status, arrival or service completion for a chosen variant, with an explicit transition matrix, null unreachable comparisons and bounded complete JSON. It exposes same-status arrival shifts hidden by aggregate lateness without inferring per-job paths or complete causal attribution. Browser inspection and accessibility gates remain separate.
 
+## Implemented: per-job regression gates
+
+[Opt-in headless gates](JOB_GATES.md) reject newly late deliveries and excessive worst-case comparable arrival slip. They retain existing aggregate semantics and explicitly fail a requested timing gate when no comparable evidence exists. They do not change the model or browser app.
+
 ## Release-readiness gates
 
 1. Publish a truthful README, live demo link, actual screenshot and model assumptions.

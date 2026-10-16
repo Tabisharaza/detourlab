@@ -44,3 +44,7 @@ No import executes code or becomes HTML. Text is assigned with `textContent`. Sc
 The optional tiny lesson keeps one validated experiment backup in browser memory, uses the same Worker protocol, and restores the prior workspace when the user returns. It adds no storage or alternate routing path. Reset during the lesson restores its reference fixture; ordinary edits invalidate reference instructions. Starting, resetting or returning supersedes pending imports and worker results. Reloading still clears unsaved work. Small-graph node labels are cached with scene geometry; the dense city renderer remains unchanged.
 
 Add a pure routing policy only behind a stable engine interface and deterministic fixtures. Add real geometry as separately licensed city packs with recorded provenance. Add capacity/time-window optimization through an explicit solver adapter, not an unannounced change to the default model. Rendering, server storage and private integrations should remain optional.
+
+## Optional per-job CLI gates
+
+`scripts/job-gates.js` compares already computed baseline/variant job ledgers by ID. It has no simulation or browser dependency. Both threshold runners add its summary only when an opt-in per-job gate is requested; old deltas and input fingerprints remain unchanged. [The gate contract](JOB_GATES.md) defines comparable arrivals, newly late status transitions and fail-closed missing evidence.

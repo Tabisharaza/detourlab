@@ -27,6 +27,8 @@ This optional package is isolated from the app and core checks. Its [lockfile](t
 
 For the headless job-impact workflow, run `node --test tests/job-impact.test.js tests/job-impact-cli.test.js`. Preserve original job order, engine status/tolerance semantics and explicit nulls for unreachable timings. [JOB_IMPACT.md](docs/JOB_IMPACT.md) defines the report contract and its limits.
 
+For opt-in per-job acceptance gates, run `node --test tests/job-gates.test.js tests/job-gates-cli.test.js`. Preserve default output bytes, ID-based ledger matching, status tolerance, and the null/fail-closed no-comparable-arrivals contract. [JOB_GATES.md](docs/JOB_GATES.md) includes the hand-checkable masked-regression example.
+
 ## Choose a scope
 
 Start with [open contribution issues](https://github.com/Tabisharaza/detourlab/issues). [Additional issue scopes](docs/ISSUE_DRAFTS.md) include reproducible problems, acceptance criteria and explicit non-goals, and distinguish published issues from proposals. Before adding a solver, city dataset, dependency or storage service, propose the interface and its effect on licensing, privacy and reproducibility.

@@ -54,6 +54,8 @@ Timing units are seconds. Per-job numeric differences are **variant minus baseli
 
 `changed` means that status, arrival or service completion differs. It does not mean that the route changed. Identical outcomes do not prove identical paths. Status and lateness preserve the engine's floating-point boundary tolerance; a numerically tiny positive deadline difference already classified on time stays on time with zero lateness.
 
+For CI policies that reject individual regressions, the [opt-in job gates](JOB_GATES.md) limit newly late deliveries and worst comparable arrival slip. The impact report itself remains diagnostic and keeps its existing output contract.
+
 ## Scope and limits
 
 - The command validates and simulates the **whole experiment**, then selects a report. An invalid or over-budget unselected variant can therefore reject the run, just as in the existing experiment runner.

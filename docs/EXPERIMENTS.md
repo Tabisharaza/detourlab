@@ -107,3 +107,7 @@ node scripts/explain-experiment.js examples/meridian-experiment.json --variant m
 ```
 
 It reports all per-job status and timing differences, including changed arrivals that remain on time and unreachable work with null timing comparisons. Its successful exit means a report was produced, not that thresholds passed. The existing runner above retains its original flags and output.
+
+## Per-job acceptance gates
+
+[Job gates](JOB_GATES.md) complement signed aggregate thresholds with opt-in `--max-newly-late` and `--max-arrival-slip-s`. They reuse completed ledgers, evaluate every variant, and expose incomparable work explicitly. The linked five-node example shows how net late counts can remain unchanged while a different delivery becomes late.

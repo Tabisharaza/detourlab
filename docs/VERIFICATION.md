@@ -262,3 +262,12 @@ No browser was used for this deployment. Native file-picker/download roundtrips,
 An unauthenticated HTTP request to the public root returned **403** from this checking environment. No alternate credentials, headers or asset retries were used. Downloading the saved deployment archive for independent post-save inspection was also unavailable. Therefore, this record establishes native deployment success, saved-version provenance and the submitted package's source-byte mapping; it does **not** establish a successful direct HTTP smoke test or CDN-served byte hashes. The saved archive's reported storage hash is not represented as the local gzip hash.
 
 The next acceptance step is a permitted browser check of v8's main workflow and newly deployed import/keyboard fixes, retaining the synthetic-only QA checklist in [issue #2](https://github.com/Tabisharaza/detourlab/issues/2) and [KEYBOARD.md](KEYBOARD.md). The existing file-picker/DevTools restrictions were not retried or bypassed.
+
+## Per-job acceptance-gate source milestone
+
+Local checks on **October 16, 2026**, using **Node 24.19.0 / npm 11.9.0 / Linux**, passed **475 core tests** and **120 optional authoring tests**, with zero failures or skips. The **43 new tests** comprise 21 helper/contract cases and 22 actual CLI subprocess cases. CI separately repeats **79 CLI cases** already included in the core count. Syntax checks cover **51 core JavaScript files** and the optional tool's two files.
+
+The [new opt-in gates](JOB_GATES.md) catch newly late deliveries and worst comparable arrival slip, including a documented fixture where net late counts conceal a different delivery becoming late. A requested timing gate fails closed when no comparable arrivals exist. Existing aggregate thresholds, input fingerprints and the job-impact report contract remain unchanged. Fourteen prior CLI invocations preserve byte-identical stdout/stderr and exit codes; 20 of the 22 new subprocess cases fail against the previous source, with two old-contract controls passing.
+
+The repeated builds and all **20 browser payloads plus manifest** remain byte-identical to v8. Only headless scripts, tests, documentation and the existing CLI test step change. Node/action pins, workflow permissions, schemas, dependencies and licenses are unchanged. Hosted verification for this source is pending publication; local Node checks do not close browser or terminal-emulator QA gaps.
+

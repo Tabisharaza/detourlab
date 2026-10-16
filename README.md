@@ -14,6 +14,8 @@ Use the native controls by keyboard, including the road and direction selectors.
 
 *An actual capture of the public v5 workbench on October 10, 2026 UTC. The ten-minute closure variant was created in the interface. [Screenshot provenance](docs/VERIFICATION.md#screenshot).*
 
+Compare individual delivery regressions in CI with the [opt-in job gates](docs/JOB_GATES.md): newly late deliveries and worst comparable arrival slip, including explicit missing-evidence failures.
+
 ## Try one experiment
 
 **New here? Start with four junctions.** Use **Try a tiny example** in the app for a one-van lesson you can trace by hand. Three plans share the same job: clear roads, a closure at 10 seconds, and the same closure at 11 seconds. The optional lesson keeps your current experiment in memory so you can return to it; reload still clears unsaved work.
@@ -79,7 +81,7 @@ npm run experiment -- examples/meridian-experiment.json \
   --max-extra-distance-pct 30 --max-extra-late 150 --max-unreachable 60
 ```
 
-Thresholds apply independently to every variant. The report includes a deterministic experiment fingerprint and names any failing variant. Exit codes: `0` for a completed run within the supplied thresholds, `1` for a threshold failure, `2` for invalid input or a failed simulation. No threshold flags means no numeric acceptance limits were requested.
+Thresholds apply independently to every variant. The report includes a deterministic experiment fingerprint and names any failing variant. Exit codes: `0` for a completed run within the supplied thresholds, `1` for a threshold failure (including a requested arrival-slip gate with no comparable jobs), `2` for invalid input or a failed simulation. No threshold flags means no numeric acceptance limits were requested.
 
 For an exported file, use the direct runner when capturing machine-readable output (npm itself prints an additional script header):
 

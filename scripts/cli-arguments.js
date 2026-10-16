@@ -3,6 +3,8 @@ const thresholdOptions = Object.freeze({
   '--max-extra-distance-pct': 'extraDistancePct',
   '--max-extra-late': 'extraLateJobs',
   '--max-unreachable': 'unreachableJobs',
+  '--max-newly-late': 'newlyLateJobs',
+  '--max-arrival-slip-s': 'maxArrivalSlipS',
 });
 
 export function parseArguments(args, { requireFile = false } = {}) {

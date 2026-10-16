@@ -19,7 +19,7 @@ An invalid import leaves the previous experiment intact. Reset, a newer import, 
 
 Displayed file error bodies are limited to 512 UTF-16 code units (plus a fixed UI/CLI prefix) and escape control characters that could manipulate a terminal or obscure the message. Ordinary schema paths and version details remain useful. Imported labels continue to use text rendering, not HTML. The browser error appears in the existing polite status toast; it is not a persistent error panel, and no screen-reader announcement timing is claimed here.
 
-All three CLI entry points report invalid input on stderr and exit **2**, without emitting a successful result to stdout. The two threshold runners retain success (`0`) and threshold-failure (`1`) behavior. The [job-impact explainer](JOB_IMPACT.md) exits `0` when its report is produced; it does not apply threshold policy. For portable files and the multi-variant schema, see [SCENARIOS.md](SCENARIOS.md) and [EXPERIMENTS.md](EXPERIMENTS.md).
+All three CLI entry points report invalid input on stderr and exit **2**, without emitting a successful result to stdout. The two threshold runners retain success (`0`) and threshold-failure (`1`) behavior. The [opt-in arrival-slip gate](JOB_GATES.md) also returns `1` when no comparable job arrivals exist; it does not present missing evidence as a measured pass. The [job-impact explainer](JOB_IMPACT.md) exits `0` when its report is produced; it does not apply threshold policy. For portable files and the multi-variant schema, see [SCENARIOS.md](SCENARIOS.md) and [EXPERIMENTS.md](EXPERIMENTS.md).
 
 ## Human CLI label display
 
