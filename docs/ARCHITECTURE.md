@@ -48,3 +48,9 @@ Add a pure routing policy only behind a stable engine interface and deterministi
 ## Optional per-job CLI gates
 
 `scripts/job-gates.js` compares already computed baseline/variant job ledgers by ID. It has no simulation or browser dependency. Both threshold runners add its summary only when an opt-in per-job gate is requested; old deltas and input fingerprints remain unchanged. [The gate contract](JOB_GATES.md) defines comparable arrivals, newly late status transitions and fail-closed missing evidence.
+
+## Portable experiment reviews
+
+The headless [review packet](REVIEW_PACKETS.md) combines input, policy, all-variant outcomes and readable exceptions. `scripts/experiment-report.js` runs one whole-experiment simulation and projects each completed ledger using the same pure job-outcome projection as the compatibility impact wrapper. Existing job gates evaluate those ledgers; report generation never reroutes or resimulates per variant.
+
+Serialization and safe readable presentation share one model. Source-file fingerprinting and staged, no-overwrite filesystem publication remain Node-only boundaries. The report does not add a browser surface or change the 20-file static payload. See the report contract for byte bounds, integrity limitations and non-atomic directory visibility.

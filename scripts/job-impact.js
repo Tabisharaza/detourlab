@@ -24,20 +24,13 @@ function outcome(job) {
 const difference = (baseline, variant) => baseline === null || variant === null ? null : variant - baseline;
 
 /**
- * Compare one existing variant's job outcomes with the clear-road baseline.
- * Validate first and run the unchanged, fully budgeted experiment runner; an
- * unselected variant can still reject the experiment. No partial report escapes.
- * Rows retain original input job order. Changed outcomes do not imply changed
- * routes, equal paths, closure causality, or an equal-service improvement.
+ * Pure projection of two completed ledgers from the same validated experiment.
+ * No validation, simulation, mutation or rounding: callers own those boundaries.
+ * Preserve the legacy report's property order as well as its job semantics.
  */
-export function createJobImpactReport(input, variantId) {
-  const experiment = validateExperiment(input);
-  if (typeof variantId !== 'string') throw new Error('Experiment variant ID must be a string.');
-  if (!experiment.variants.some(variant => variant.id === variantId)) throw new Error(`Unknown experiment variant "${variantId}".`);
-  const simulation = simulateExperiment(experiment);
-  const selected = simulation.variants.find(variant => variant.id === variantId);
-  const baselineJobs = outcomesById(simulation.baseline);
-  const variantJobs = outcomesById(selected.result);
+export function projectJobOutcomes(experiment, baselineResult, variantResult) {
+  const baselineJobs = outcomesById(baselineResult);
+  const variantJobs = outcomesById(variantResult);
   const summary = {
     totalJobs: experiment.baseScenario.jobs.length,
     changedJobs: 0,
@@ -71,6 +64,23 @@ export function createJobImpactReport(input, variantId) {
       delayDeltaS: difference(baseline.delayS, variant.delayS),
     };
   });
+  return { summary, jobs };
+}
+
+/**
+ * Compare one existing variant's job outcomes with the clear-road baseline.
+ * Validate first and run the unchanged, fully budgeted experiment runner; an
+ * unselected variant can still reject the experiment. No partial report escapes.
+ * Rows retain original input job order. Changed outcomes do not imply changed
+ * routes, equal paths, closure causality, or an equal-service improvement.
+ */
+export function createJobImpactReport(input, variantId) {
+  const experiment = validateExperiment(input);
+  if (typeof variantId !== 'string') throw new Error('Experiment variant ID must be a string.');
+  if (!experiment.variants.some(variant => variant.id === variantId)) throw new Error(`Unknown experiment variant "${variantId}".`);
+  const simulation = simulateExperiment(experiment);
+  const selected = simulation.variants.find(variant => variant.id === variantId);
+  const { summary, jobs } = projectJobOutcomes(experiment, simulation.baseline, selected.result);
   const report = {
     format: 'detourlab-job-impact',
     version: 1,

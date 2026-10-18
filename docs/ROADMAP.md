@@ -18,6 +18,10 @@ The [job-impact explainer](JOB_IMPACT.md) shows which jobs change status, arriva
 
 [Opt-in headless gates](JOB_GATES.md) reject newly late deliveries and excessive worst-case comparable arrival slip. They retain existing aggregate semantics and explicitly fail a requested timing gate when no comparable evidence exists. They do not change the model or browser app.
 
+## Implemented: portable experiment reviews
+
+[Review packets](REVIEW_PACKETS.md) consolidate the validated input, existing acceptance policy, all variant metrics and complete delivery outcomes into deterministic machine data plus a readable offline review. The headless path reuses one simulation and preserves the browser and existing CLI contracts. Browser export controls and native download validation remain separate future work.
+
 ## Release-readiness gates
 
 1. Publish a truthful README, live demo link, actual screenshot and model assumptions.

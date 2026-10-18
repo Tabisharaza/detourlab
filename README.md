@@ -95,6 +95,17 @@ The original single-scenario runner remains available:
 npm run scenario -- examples/meridian-default.json --json
 ```
 
+## Share a complete review
+
+```sh
+node scripts/report-experiment.js examples/minimal-experiment.json \
+  --out tiny-review --max-arrival-slip-s 6 --max-unreachable 0
+```
+
+[Read the generated tiny review](docs/examples/tiny-review/REVIEW.md) or inspect its [complete machine bundle](docs/examples/tiny-review/bundle.json). Both are reproduced byte-for-byte by a source test.
+
+The [review packet](docs/REVIEW_PACKETS.md) puts the validated experiment, supplied acceptance limits, every variant’s results and complete delivery outcomes in `bundle.json`, alongside a readable `REVIEW.md`. It runs the simulation once. Use a fresh output directory; a failing policy still produces the packet and exits 1. With no limits, acceptance is explicitly not evaluated.
+
 ## Author a portable input
 
 Use a filename ending in `.scenario.json` or `.experiment.json` inside this checkout to get scoped JSON Schema diagnostics, completion and unit-rich hover help in VS Code. The [authoring guide](docs/JSON_SCHEMAS.md) includes small valid examples and explains the checks that still require the runtime. Do not add `$schema` to your data files: the import format remains strict.
@@ -122,6 +133,7 @@ The human view shows the first 20 changed jobs and says how many are omitted; ve
 - Cancel/rerun, terminated superseded workers and stale-result/import guards
 - Bounded experiment JSON, backward-compatible scenario imports and deterministic CLI thresholds
 - Headless per-job impact reports with complete status transitions and comparable timing differences
+- Portable all-variant review packets with embedded input, policy and readable exceptions
 - Original procedural geometry, a buildless UI, a module Worker and Node-native tests
 
 ## Model assumptions

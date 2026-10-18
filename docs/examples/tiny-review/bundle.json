@@ -1,0 +1,459 @@
+{
+  "format": "detourlab-experiment-report",
+  "version": 1,
+  "engineVersion": "0.1.0",
+  "generator": {
+    "name": "detourlab",
+    "packageVersion": "0.1.0",
+    "reportVersion": 1,
+    "sourceRevision": null,
+    "implementation": {
+      "algorithm": "sha256",
+      "files": [
+        "package.json",
+        "src/engine.js",
+        "src/scenario.js",
+        "src/experiment.js",
+        "src/file-input.js",
+        "scripts/experiment-report.js",
+        "scripts/job-impact.js",
+        "scripts/job-gates.js",
+        "scripts/report-experiment.js",
+        "scripts/write-review-packet.js",
+        "scripts/report-identity.js",
+        "scripts/cli-arguments.js",
+        "scripts/cli-display.js",
+        "scripts/read-input.js"
+      ],
+      "sha256": "580b47a61b1f5d0ccbf2d50abc8a07e4a1a940ee666debc6aa3ecedff4097ec5"
+    }
+  },
+  "experiment": {
+    "format": "detourlab-experiment",
+    "version": 1,
+    "id": "minimal-cutoff-experiment",
+    "name": "One second changes the route",
+    "baseScenario": {
+      "version": 1,
+      "id": "minimal-directed",
+      "name": "Four-node directed example",
+      "seed": 1,
+      "description": "A small reproducible network: close B to C at 10 seconds and route B to D to C instead.",
+      "nodes": [
+        {
+          "id": "A",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "id": "B",
+          "x": 1,
+          "y": 0
+        },
+        {
+          "id": "C",
+          "x": 2,
+          "y": 0
+        },
+        {
+          "id": "D",
+          "x": 1,
+          "y": 1
+        }
+      ],
+      "edges": [
+        {
+          "id": "ab",
+          "from": "A",
+          "to": "B",
+          "distanceM": 100,
+          "travelTimeS": 10,
+          "roadName": "First Street"
+        },
+        {
+          "id": "bc",
+          "from": "B",
+          "to": "C",
+          "distanceM": 100,
+          "travelTimeS": 10,
+          "roadName": "Second Street"
+        },
+        {
+          "id": "bd",
+          "from": "B",
+          "to": "D",
+          "distanceM": 80,
+          "travelTimeS": 8,
+          "roadName": "Detour Avenue"
+        },
+        {
+          "id": "dc",
+          "from": "D",
+          "to": "C",
+          "distanceM": 80,
+          "travelTimeS": 8,
+          "roadName": "Canal Street"
+        }
+      ],
+      "vehicles": [
+        {
+          "id": "van-1",
+          "startNode": "A",
+          "startTimeS": 0
+        }
+      ],
+      "jobs": [
+        {
+          "id": "job-1",
+          "nodeId": "C",
+          "vehicleId": "van-1",
+          "dueTimeS": 22,
+          "serviceTimeS": 3
+        }
+      ],
+      "closures": [],
+      "durationS": 60
+    },
+    "variants": [
+      {
+        "id": "clear",
+        "name": "Clear roads",
+        "closures": []
+      },
+      {
+        "id": "close-at-10",
+        "name": "Close at 10 s",
+        "closures": [
+          {
+            "id": "bc-closure",
+            "edgeIds": [
+              "bc"
+            ],
+            "atS": 10
+          }
+        ]
+      },
+      {
+        "id": "close-at-11",
+        "name": "Close at 11 s",
+        "closures": [
+          {
+            "id": "bc-closure",
+            "edgeIds": [
+              "bc"
+            ],
+            "atS": 11
+          }
+        ]
+      }
+    ]
+  },
+  "experimentSha256": "7a757f1b53531826e98f44a706d3c6d235986682e6517c3c542f116fa8bf7395",
+  "policy": {
+    "unreachableJobs": 0,
+    "maxArrivalSlipS": 6
+  },
+  "policySha256": "5b1d040cbd8516b8637db5141e0c73748c9090a081cf12200b70dd4d40b87a67",
+  "assumptions": [
+    "Synthetic scenario with fixed travel times; not a forecast, operational safety certification or route optimization.",
+    "Vehicle assignments and supplied per-vehicle job order remain fixed.",
+    "Deadlines apply to arrival, not service completion; engine boundary tolerance and literal timing precision are preserved.",
+    "Unreachable jobs are skipped; lower distance or fewer late jobs may reflect lost service rather than an equal-service improvement.",
+    "Timing differences are null when either outcome is unreachable; a requested arrival-slip gate fails closed with no comparable arrivals.",
+    "No automatic best variant is selected; changed outcomes do not establish route changes, closure causality or superiority.",
+    "Hashes identify content and are not signatures; generator metadata and sourceRevision are supplied claims, not authenticated by the model helper."
+  ],
+  "warnings": [],
+  "baseline": {
+    "metrics": {
+      "distanceM": 200,
+      "lateJobs": 0,
+      "unreachableJobs": 0,
+      "completedJobs": 1,
+      "totalJobs": 1,
+      "totalDelayS": 0,
+      "onTimeJobs": 1,
+      "reroutes": 0,
+      "affectedVehicles": 0,
+      "totalTravelTimeS": 20
+    },
+    "jobs": [
+      {
+        "id": "job-1",
+        "vehicleId": "van-1",
+        "nodeId": "C",
+        "dueTimeS": 22,
+        "status": "on-time",
+        "arrivalS": 20,
+        "completedS": 23,
+        "delayS": 0
+      }
+    ]
+  },
+  "variants": [
+    {
+      "id": "clear",
+      "name": "Clear roads",
+      "metrics": {
+        "distanceM": 200,
+        "lateJobs": 0,
+        "unreachableJobs": 0,
+        "completedJobs": 1,
+        "totalJobs": 1,
+        "totalDelayS": 0,
+        "onTimeJobs": 1,
+        "reroutes": 0,
+        "affectedVehicles": 0,
+        "totalTravelTimeS": 20
+      },
+      "delta": {
+        "distanceM": 0,
+        "extraDistancePct": 0,
+        "extraLateJobs": 0,
+        "unreachableJobs": 0
+      },
+      "summary": {
+        "totalJobs": 1,
+        "changedJobs": 0,
+        "unchangedJobs": 1,
+        "statusChangedJobs": 0,
+        "arrivalChangedJobs": 0,
+        "transitions": {
+          "on-time": {
+            "on-time": 1,
+            "late": 0,
+            "unreachable": 0
+          },
+          "late": {
+            "on-time": 0,
+            "late": 0,
+            "unreachable": 0
+          },
+          "unreachable": {
+            "on-time": 0,
+            "late": 0,
+            "unreachable": 0
+          }
+        }
+      },
+      "jobComparison": {
+        "totalJobs": 1,
+        "comparableJobs": 1,
+        "uncomparableJobs": 0,
+        "newlyLateJobs": 0,
+        "maxArrivalSlipS": 0
+      },
+      "jobs": [
+        {
+          "id": "job-1",
+          "vehicleId": "van-1",
+          "nodeId": "C",
+          "dueTimeS": 22,
+          "status": "on-time",
+          "arrivalS": 20,
+          "completedS": 23,
+          "delayS": 0,
+          "changed": false,
+          "statusChanged": false,
+          "arrivalDeltaS": 0,
+          "completedDeltaS": 0,
+          "delayDeltaS": 0
+        }
+      ],
+      "verdict": "passed",
+      "violations": [],
+      "gateEvaluations": [
+        {
+          "metric": "unreachableJobs",
+          "actual": 0,
+          "limit": 0,
+          "verdict": "passed"
+        },
+        {
+          "metric": "maxArrivalSlipS",
+          "actual": 0,
+          "limit": 6,
+          "verdict": "passed"
+        }
+      ]
+    },
+    {
+      "id": "close-at-10",
+      "name": "Close at 10 s",
+      "metrics": {
+        "distanceM": 260,
+        "lateJobs": 1,
+        "unreachableJobs": 0,
+        "completedJobs": 1,
+        "totalJobs": 1,
+        "totalDelayS": 4,
+        "onTimeJobs": 0,
+        "reroutes": 1,
+        "affectedVehicles": 1,
+        "totalTravelTimeS": 26
+      },
+      "delta": {
+        "distanceM": 60,
+        "extraDistancePct": 30,
+        "extraLateJobs": 1,
+        "unreachableJobs": 0
+      },
+      "summary": {
+        "totalJobs": 1,
+        "changedJobs": 1,
+        "unchangedJobs": 0,
+        "statusChangedJobs": 1,
+        "arrivalChangedJobs": 1,
+        "transitions": {
+          "on-time": {
+            "on-time": 0,
+            "late": 1,
+            "unreachable": 0
+          },
+          "late": {
+            "on-time": 0,
+            "late": 0,
+            "unreachable": 0
+          },
+          "unreachable": {
+            "on-time": 0,
+            "late": 0,
+            "unreachable": 0
+          }
+        }
+      },
+      "jobComparison": {
+        "totalJobs": 1,
+        "comparableJobs": 1,
+        "uncomparableJobs": 0,
+        "newlyLateJobs": 1,
+        "maxArrivalSlipS": 6
+      },
+      "jobs": [
+        {
+          "id": "job-1",
+          "vehicleId": "van-1",
+          "nodeId": "C",
+          "dueTimeS": 22,
+          "status": "late",
+          "arrivalS": 26,
+          "completedS": 29,
+          "delayS": 4,
+          "changed": true,
+          "statusChanged": true,
+          "arrivalDeltaS": 6,
+          "completedDeltaS": 6,
+          "delayDeltaS": 4
+        }
+      ],
+      "verdict": "passed",
+      "violations": [],
+      "gateEvaluations": [
+        {
+          "metric": "unreachableJobs",
+          "actual": 0,
+          "limit": 0,
+          "verdict": "passed"
+        },
+        {
+          "metric": "maxArrivalSlipS",
+          "actual": 6,
+          "limit": 6,
+          "verdict": "passed"
+        }
+      ]
+    },
+    {
+      "id": "close-at-11",
+      "name": "Close at 11 s",
+      "metrics": {
+        "distanceM": 200,
+        "lateJobs": 0,
+        "unreachableJobs": 0,
+        "completedJobs": 1,
+        "totalJobs": 1,
+        "totalDelayS": 0,
+        "onTimeJobs": 1,
+        "reroutes": 0,
+        "affectedVehicles": 0,
+        "totalTravelTimeS": 20
+      },
+      "delta": {
+        "distanceM": 0,
+        "extraDistancePct": 0,
+        "extraLateJobs": 0,
+        "unreachableJobs": 0
+      },
+      "summary": {
+        "totalJobs": 1,
+        "changedJobs": 0,
+        "unchangedJobs": 1,
+        "statusChangedJobs": 0,
+        "arrivalChangedJobs": 0,
+        "transitions": {
+          "on-time": {
+            "on-time": 1,
+            "late": 0,
+            "unreachable": 0
+          },
+          "late": {
+            "on-time": 0,
+            "late": 0,
+            "unreachable": 0
+          },
+          "unreachable": {
+            "on-time": 0,
+            "late": 0,
+            "unreachable": 0
+          }
+        }
+      },
+      "jobComparison": {
+        "totalJobs": 1,
+        "comparableJobs": 1,
+        "uncomparableJobs": 0,
+        "newlyLateJobs": 0,
+        "maxArrivalSlipS": 0
+      },
+      "jobs": [
+        {
+          "id": "job-1",
+          "vehicleId": "van-1",
+          "nodeId": "C",
+          "dueTimeS": 22,
+          "status": "on-time",
+          "arrivalS": 20,
+          "completedS": 23,
+          "delayS": 0,
+          "changed": false,
+          "statusChanged": false,
+          "arrivalDeltaS": 0,
+          "completedDeltaS": 0,
+          "delayDeltaS": 0
+        }
+      ],
+      "verdict": "passed",
+      "violations": [],
+      "gateEvaluations": [
+        {
+          "metric": "unreachableJobs",
+          "actual": 0,
+          "limit": 0,
+          "verdict": "passed"
+        },
+        {
+          "metric": "maxArrivalSlipS",
+          "actual": 0,
+          "limit": 6,
+          "verdict": "passed"
+        }
+      ]
+    }
+  ],
+  "verdict": "passed",
+  "integrity": {
+    "algorithm": "sha256",
+    "sha256": "d6271cf09a6fe00768d44651241a44f47987860d8e5131375f418ba1cf48851c",
+    "reviewSha256": "773d523cf361627d39b52e9af3926da602577e3845d74e8732db6add4dd9efd6"
+  }
+}

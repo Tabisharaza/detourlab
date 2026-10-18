@@ -69,7 +69,7 @@ The `verify` job runs on pushes, pull requests, and manual dispatch with an expl
 
 1. `npm ci --ignore-scripts --no-audit --no-fund` checks the committed lockfile without running installation lifecycle scripts or contacting the npm audit service. The root lockfile contains only this project; no app dependencies are installed in this step.
 2. `npm run check` syntax-checks JavaScript, runs the complete Node test suite, and builds `dist/`.
-3. `node --test tests/cli.test.js tests/experiment-cli.test.js tests/cli-arguments.test.js tests/job-impact-cli.test.js tests/job-gates-cli.test.js` explicitly repeats the CLI regression gates. Both runners must report success with exit `0`, threshold violations with exit `1` and usable result output, and invalid input with exit `2`. Experiment coverage also exercises every variant, exact threshold boundaries, canonical hashes, malformed/oversized inputs, and deterministic budget failures. The job-impact CLI repeats its diagnostic-output, selection, byte/label and budget checks; exit 0 there means a report was produced, not that thresholds passed.
+3. `node --test tests/cli.test.js tests/experiment-cli.test.js tests/cli-arguments.test.js tests/job-impact-cli.test.js tests/job-gates-cli.test.js tests/experiment-report-cli.test.js` explicitly repeats the CLI regression gates. Both runners must report success with exit `0`, threshold violations with exit `1` and usable result output, and invalid input with exit `2`. Experiment coverage also exercises every variant, exact threshold boundaries, canonical hashes, malformed/oversized inputs, and deterministic budget failures. The job-impact CLI repeats its diagnostic-output, selection, byte/label and budget checks; exit 0 there means a report was produced, not that thresholds passed.
 4. `npm ci --prefix tools/schema-check --ignore-scripts --no-audit --no-fund` installs the separately locked optional validator/editor packages. `npm run verify --prefix tools/schema-check` syntax-checks its two files and runs the offline schema/language-service corpus. Installation needs the npm registry; the tests allow only local schema loading.
 5. `node scripts/verify-dist.js` validates the built distribution. The job copies that first build to a temporary directory, rebuilds, and verifies the new tree against the copy.
 6. `git diff --exit-code && git diff --cached --exit-code` checks that verification did not change tracked source in the clean checkout. Ignored build output is expected; this is not a general check for arbitrary untracked files.
@@ -85,7 +85,7 @@ node --version
 npm --version
 npm ci --ignore-scripts --no-audit --no-fund
 npm run check
-node --test tests/cli.test.js tests/experiment-cli.test.js tests/cli-arguments.test.js tests/job-impact-cli.test.js tests/job-gates-cli.test.js
+node --test tests/cli.test.js tests/experiment-cli.test.js tests/cli-arguments.test.js tests/job-impact-cli.test.js tests/job-gates-cli.test.js tests/experiment-report-cli.test.js
 # Optional authoring-tool checks, required for schema/editor changes and hosted CI:
 npm ci --prefix tools/schema-check --ignore-scripts --no-audit --no-fund
 npm run verify --prefix tools/schema-check
