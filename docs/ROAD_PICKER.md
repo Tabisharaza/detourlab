@@ -7,8 +7,7 @@ demo **v10**. The [dated v9 desktop Chromium observations](VERIFICATION.md#v9-ro
 cover specific search, keyboard, lesson and 200% desktop-zoom flows. That review
 exposed a pre-existing run-lifecycle focus defect. The correction passes source tests and independent review and is
 [deployed in v10](VERIFICATION.md#v10-run-lifecycle-focus-deployment). Its native
-cancellation/completion focus retest and served-manifest check passed. Public
-GitHub source identity and exact-commit CI remain pending.
+cancellation/completion focus retest and served-manifest check passed. The [published source `addd5f6`](https://github.com/Tabisharaza/detourlab/commit/addd5f62bba1225c23b779c8c9ab684db2be1326) and [CI run 39227618544](https://github.com/Tabisharaza/detourlab/actions/runs/39227618544) are verified; both pinned Node jobs passed.
 The implementation is based on public source
 `25c7fb636c6151d5a9e1b7ddcd5cf8c7e8ab349d`.
 

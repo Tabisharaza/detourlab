@@ -9,9 +9,7 @@ already included in the core total. Local toolchains remain **Node 24.19.0 /
 npm 11.9.0 / Linux**; syntax coverage is **60 core JavaScript files** and the
 optional tool's **two `.mjs` files**. The aggregate check builds 20 static
 payloads; distribution verification confirms source parity and a byte-identical
-second build, including the manifest. **Hosted CI for the exact public
-road-picker commit is pending**. A baseline or earlier milestone's green run
-does not verify these new bytes.
+second build, including the manifest. Hosted CI for [published source `addd5f6`](https://github.com/Tabisharaza/detourlab/commit/addd5f62bba1225c23b779c8c9ab684db2be1326) and [CI run 39227618544](https://github.com/Tabisharaza/detourlab/actions/runs/39227618544) passed on both Node 24.19.0 and 24.21.0. Every job step succeeded, including the complete tests, CLI gates, optional tooling and repeat-build verification. This verifies that feature commit, not subsequent documentation edits.
 
 The existing workflow discovers the new tests without changing permissions,
 Node/action pins or dependencies. [The verification record](VERIFICATION.md#road-picker-and-run-lifecycle-focus-milestone)

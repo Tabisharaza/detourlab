@@ -1,6 +1,6 @@
 # Verification record
 
-**Current public demo: v10**, deployed October 19, 2026 UTC. [The v9 record](#v9-road-picker-deployment-and-bounded-desktop-checks) describes bounded desktop Chromium checks and the run-lifecycle focus finding. [The corrected v10 deployment](#v10-run-lifecycle-focus-deployment) is recorded separately. Native cancellation/completion retests and served-manifest parity passed; public GitHub source mapping and exact-commit CI remain pending. Earlier version records remain historical evidence.
+**Current public demo: v10**, deployed October 19, 2026 UTC. [The v9 record](#v9-road-picker-deployment-and-bounded-desktop-checks) describes bounded desktop Chromium checks and the run-lifecycle focus finding. [The corrected v10 deployment](#v10-run-lifecycle-focus-deployment) is recorded separately. Native cancellation/completion retests and served-manifest parity passed; The [published source `addd5f6`](https://github.com/Tabisharaza/detourlab/commit/addd5f62bba1225c23b779c8c9ab684db2be1326) and [CI run 39227618544](https://github.com/Tabisharaza/detourlab/actions/runs/39227618544) are verified; both pinned Node jobs passed. Earlier version records remain historical evidence.
 
 ## Headless job-impact milestone
 
@@ -319,8 +319,7 @@ Runtime/test changes are confined to `src/app.js`, `index.html`, `src/style.css`
 formats/schemas, Worker, package metadata, lockfile, workflow, licenses and shared
 harness retain the baseline bytes.
 The corrected runtime is deployed in v10; native cancellation/completion retests
-and served-manifest parity passed as recorded below. Public GitHub source
-identity and exact-commit hosted CI remain pending. The v9 observations below are intermediate
+and served-manifest parity passed as recorded below. The [published source `addd5f6`](https://github.com/Tabisharaza/detourlab/commit/addd5f62bba1225c23b779c8c9ab684db2be1326) and [CI run 39227618544](https://github.com/Tabisharaza/detourlab/actions/runs/39227618544) are verified; both pinned Node jobs passed. The v9 observations below are intermediate
 evidence, not verification of the corrected runtime. Historical v4–v8 results
 retain their original dates, mappings and limits.
 
@@ -445,8 +444,7 @@ It includes the corrected Cancel-run focus handoff described above.
   above. These package checks are separate from served-manifest inspection.
 
 The corrected source's 601 core tests and independent review are distinct from
-the actual native-browser checks below. Public GitHub source identity and hosted
-CI for the exact final commit remain pending. Neither deployment provenance nor
+the actual native-browser checks below. The [published source `addd5f6`](https://github.com/Tabisharaza/detourlab/commit/addd5f62bba1225c23b779c8c9ab684db2be1326) and [CI run 39227618544](https://github.com/Tabisharaza/detourlab/actions/runs/39227618544) are verified; both pinned Node jobs passed. Neither deployment provenance nor
 the bounded desktop observations establish screen-reader behavior, mobile
 coverage, a complete accessibility audit or operational readiness.
 
