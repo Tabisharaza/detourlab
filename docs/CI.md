@@ -1,5 +1,24 @@
 # CI and release verification
 
+## Road-picker and lifecycle-focus local verification
+
+The corrected October 19, 2026 source passes **601 core tests + 120 optional
+schema/editor tests = 721 distinct tests**, including 29 road-picker and nine
+run-lifecycle focus regressions. The **113 separately repeated CLI tests** are
+already included in the core total. Local toolchains remain **Node 24.19.0 /
+npm 11.9.0 / Linux**; syntax coverage is **60 core JavaScript files** and the
+optional tool's **two `.mjs` files**. The aggregate check builds 20 static
+payloads; distribution verification confirms source parity and a byte-identical
+second build, including the manifest. **Hosted CI for the exact public
+road-picker commit is pending**. A baseline or earlier milestone's green run
+does not verify these new bytes.
+
+The existing workflow discovers the new tests without changing permissions,
+Node/action pins or dependencies. [The verification record](VERIFICATION.md#road-picker-and-run-lifecycle-focus-milestone)
+separates local source evidence, v9 browser observations and the corrected
+v10 deployment with its passed native cancellation/completion retests and
+served-manifest check. Hosted Node CI does not launch a browser.
+
 ## Portable experiment review-packet milestone
 
 The [review-packet source `92a6cac`](https://github.com/Tabisharaza/detourlab/commit/92a6cacd138155569cd3913f8affa04077382b68) passed [hosted run 39086496176](https://github.com/Tabisharaza/detourlab/actions/runs/39086496176) on **October 18, 2026 UTC**. Both matrix jobs completed every step successfully: Node **24.19.0 / npm 11.17.0** (job **117554070842**) and Node **24.21.0 / npm 11.19.0** (job **117554070650**), on Ubuntu 24.04 image **20261012.334.1**.

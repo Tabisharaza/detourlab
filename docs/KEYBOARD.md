@@ -1,6 +1,6 @@
 # Keyboard controls and focus
 
-DetourLab uses native buttons, selects and sliders for the experiment controls. The road dropdown and direction selector offer an alternative to clicking roads on Canvas; the route inspector exposes computed outcomes as text.
+DetourLab uses native buttons, selects and sliders for the experiment controls. The road dropdown and direction selector offer an alternative to clicking roads on Canvas; the route inspector exposes computed outcomes as text. The [road picker](ROAD_PICKER.md) adds a labeled search field, concise result count and saved-schedule context while retaining the native road selector.
 
 ## Dialogs
 
@@ -22,13 +22,31 @@ Comparison cards and closure-editor controls update when their data or calculati
 
 - A comparison card remains focused by variant identity when selected or refreshed by a result.
 - Editing a closure's start time retains its input and adjacent Remove control. This avoids removing the next native Tab/click target during the input's change event. Invalid edits return to the latest committed value.
-- Removing an event moves to the next available Remove action, the previous one if last, or the road selector if empty. The same source handler supports reopen chips, but the existing stylesheet hides that chip list; this is not an assertion that those chips are currently keyboard-reachable.
+- Removing an event moves to the next available Remove action, the previous one if last, or an available road-editing control if empty. With searchable road editing, that final fallback is the road selector when it has choices or the enabled search field when it does not. The same source handler supports reopen chips, but the existing stylesheet hides that chip list; this is not an assertion that those chips are currently keyboard-reachable.
 - Activating a preset keeps a corresponding available preset in place through the refresh.
 - If focused Duplicate reaches the six-variant limit, or focused Remove reaches the two-variant minimum, focus goes to the variant selector instead of staying on a newly disabled button.
 
 Fallback focus is tied to the control being removed or disabled, not an earlier click or worker request. A later result must not move focus away from another input, playback control or open dialog. Surviving controls do not need a focus call. No delayed focus timer, positive `tabindex` or custom Tab order is added.
 
-This tested source improvement is deployed in v8; see the [deployment record](VERIFICATION.md#v8-source-parity-deployment) for the exact mapping and verification limits. Native blur/Tab ordering, visible focus after scrolling and assistive-technology behavior require a separate browser review.
+The original dynamic-focus improvement was deployed in v8; its [historical record](VERIFICATION.md#v8-source-parity-deployment) retains that scope. The [v9 desktop review](VERIFICATION.md#v9-road-picker-deployment-and-bounded-desktop-checks) checked specific native picker transitions and the no-choice search fallback. It does not establish every dynamic-editor transition or assistive-technology behavior.
+
+## Run completion and cancellation
+
+The v9 native review exposed lost focus when **Cancel run** disappeared during
+cancellation or completion. The corrected source deployed in v10 moves focus to **Run all
+variants** before hiding Cancel, but only if Cancel still owns focus. It does
+not reclaim focus from a newer control or modal. Current-run completion,
+returned errors, Worker failure, timeout and construction failure use the same
+handoff; stale callbacks remain guarded.
+
+Nine new source regressions cover these lifecycle cases. Independent review
+passed 25 dynamic-focus tests and five terminal-path probes. These are source
+checks. The [v10 native retest](VERIFICATION.md#v10-native-focus-checks-and-screenshot)
+separately passed two flows: Run → Shift+Tab → Space canceled and focused Run all
+variants; Run → Shift+Tab visibly focused Cancel before normal completion, then
+completion focused Run all variants. The `bridge` query and Foundry Bridge
+selection survived both. Error/timeout paths, stale callbacks and newer-modal
+cases remain source-only checks.
 
 ## Implementation and regression checks
 
@@ -44,7 +62,7 @@ The Node UI harness exercises the real event handlers with DOM and Worker stand-
 
 For a real-browser review, open each dialog by keyboard and check initial focus, forward and backward boundary wrapping, Escape, explicit close, guide-to-lesson transition, confirmation, repeated open/close, lesson reset and return. Also open the guide while a lesson is active, when its lesson-entry button is disabled. Check the visible focus indicator and that the underlying experiment is unchanged after cancellation.
 
-For the dynamic editor, repeatedly select a comparison card with the keyboard, update a closure time with Enter and then with Tab, remove the first/middle/last/only event and activate presets. Only check reopen chips if that UI is made visible; the current stylesheet hides the chip list. Let a result arrive while a card is focused, then repeat with focus on a different control and in an open guide. Confirm that focus stays visible and useful without interrupting native navigation. These additional browser checks have not yet been performed.
+For the dynamic editor, repeatedly select a comparison card with the keyboard, update a closure time with Enter and then with Tab, remove the first/middle/last/only event and activate presets. Only check reopen chips if that UI is made visible; the current stylesheet hides the chip list. Let a result arrive while a card is focused, then repeat with focus on a different control and in an open guide. Confirm that focus stays visible and useful without interrupting native navigation. The v9 record covers only the particular transitions observed there; all other cases in this broader checklist remain unverified.
 
 The dated browser observations and remaining gaps are in [VERIFICATION.md](VERIFICATION.md). No complete accessibility audit or WCAG conformance claim is made.
 

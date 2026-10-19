@@ -6,7 +6,7 @@ These scopes were prepared before publication. Selected work is now public:
 - [#2: Real desktop-browser import/export roundtrips](https://github.com/Tabisharaza/detourlab/issues/2), a bounded subset of scope 1 below
 - [#3: Profile and avoid redraws of unchanged paused scenes](https://github.com/Tabisharaza/detourlab/issues/3), based on scope 4 below
 
-The numbered headings below are draft scope numbers, not GitHub issue numbers. Scope 3 is implemented as documented below; other unimplemented scopes remain proposals. None implies an assignment or delivery commitment. Use each public issue's own acceptance criteria when contributing.
+The numbered headings below are draft scope numbers, not GitHub issue numbers. Scope 3 is implemented as documented below; scope 2 has a deployed implementation with accessibility acceptance still open. Other unimplemented scopes remain proposals. None implies an assignment or delivery commitment. Use each public issue's own acceptance criteria when contributing.
 
 ## 1. Exercise file roundtrips and interruptions in a real browser
 
@@ -26,6 +26,14 @@ The numbered headings below are draft scope numbers, not GitHub issue numbers. S
 **Non-goals:** Adding accounts, uploads, production datasets or remote data services.
 
 ## 2. Make the road picker searchable and accessible
+
+**Status:** Search/filter and saved-schedule context are implemented in the
+[v9 road picker](ROAD_PICKER.md), with bounded desktop Chromium observations.
+A run-lifecycle focus issue found during review is corrected and deployed in
+v10. Native cancellation/completion retests passed; public GitHub source mapping
+and exact-commit CI remain pending. Screen-reader and
+broader accessibility evidence remain open, so the original acceptance scope
+below is not fully complete.
 
 **Problem:** The default scene has 807 undirected road pairs in one native select. Searching by road/junction is cumbersome, and the map is not a complete assistive-technology interface.
 

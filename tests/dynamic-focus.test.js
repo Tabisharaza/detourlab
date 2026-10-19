@@ -16,6 +16,14 @@ const focus = (app, target) => {
   assert.equal(target.disabled, false, 'focus must remain usable');
   assert.ok(target.getClientRects().length, 'focus must remain visible');
 };
+function modelNativeHiding(app, target) {
+  // The shared stand-in only drops focus on removal; native hiding can do so too.
+  let hidden = target.hidden;
+  Object.defineProperty(target, 'hidden', {
+    get: () => hidden,
+    set(value) { hidden = value; if (value && app.document.activeElement === target) app.document.activeElement = app.document.body; },
+  });
+}
 function experiment(count = 3, events = 3) {
   const value = experimentFromScenario(minimalScenario());
   value.variants = Array.from({ length: count }, (_, index) => ({
@@ -173,8 +181,87 @@ test('worker completion, failure, error, timeout and cancellation preserve curre
   }
 });
 
+test('focused Cancel hands off to Run before hiding, preserves edits, and supports repeated cancellation', async () => {
+  const app = await loaded(), cancel = app.element('cancel-run'), run = app.element('run-experiment');
+  modelNativeHiding(app, cancel);
+  await app.change('road-search', 'ab', 'input');
+  const selectedRoad = app.element('road-select').value, original = structuredClone(app.state.experiment);
+  app.element('variant-name').value = 'Unsaved variant draft';
+  app.latestWorker().respond();
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    run.focus(); await run.click(); const canceled = app.latestWorker();
+    assert.equal(cancel.hidden, false); cancel.focus();
+    assert.equal(app.windowEvent('keydown', { key: ' ', code: 'Space' }).defaultPrevented, false, 'Space remains a native button action');
+    await cancel.click(); focus(app, run);
+    assert.equal(cancel.hidden, true); assert.equal(canceled.terminated, true); assert.equal(app.state.pending, false);
+    assert.equal(app.state.allResults, null); assert.deepEqual(app.state.experiment, original);
+    assert.equal(app.element('variant-name').value, 'Unsaved variant draft');
+    assert.equal(app.element('road-search').value, 'ab'); assert.equal(app.element('road-select').value, selectedRoad);
+    canceled.respond(); canceled.fail(); focus(app, run);
+  }
+});
+
+for (const [name, finish] of [
+  ['Worker success', app => app.latestWorker().respond()],
+  ['returned Worker error', app => app.latestWorker().respond({ error: 'Budget exceeded' })],
+  ['Worker failure', app => app.latestWorker().fail()],
+  ['safety timeout', app => [...app.timers.values()].find(timer => timer.delay === 30000).callback()],
+]) test(`${name} hands focus from the disappearing Cancel button to Run`, async () => {
+  const app = await loaded(), cancel = app.element('cancel-run'), run = app.element('run-experiment');
+  modelNativeHiding(app, cancel); cancel.focus(); await finish(app);
+  assert.equal(cancel.hidden, true); assert.equal(app.state.pending, false); focus(app, run);
+  await run.click(); assert.equal(app.state.pending, true); assert.equal(cancel.hidden, false); focus(app, run);
+});
+
+test('Worker construction failure hands off focus if Cancel still owns it', async () => {
+  let fail = false;
+  const app = application({ workerConstructionError: () => fail ? 'Worker unavailable' : null });
+  const cancel = app.element('cancel-run'); modelNativeHiding(app, cancel);
+  cancel.focus(); fail = true; await app.element('run-experiment').click();
+  assert.equal(cancel.hidden, true); assert.equal(app.state.pending, false); focus(app, app.element('run-experiment'));
+});
+
+test('stale terminal callbacks cannot hide or take focus from the current Cancel button', async () => {
+  const app = await loaded(), old = app.latestWorker(), timeout = [...app.timers.values()].find(timer => timer.delay === 30000).callback;
+  const cancel = app.element('cancel-run'); modelNativeHiding(app, cancel);
+  await app.element('run-experiment').click(); cancel.focus();
+  for (const stale of [() => old.respond(), () => old.respond({ error: 'Stale error' }), () => old.fail(), timeout]) {
+    stale(); assert.equal(cancel.hidden, false); assert.equal(app.state.pending, true); focus(app, cancel);
+  }
+  app.latestWorker().respond(); focus(app, app.element('run-experiment'));
+});
+
+test('Cancel focus handoff never overrides a newer synchronous control or modal interaction', async () => {
+  for (const finish of [app => app.latestWorker().respond(), app => app.latestWorker().respond({ error: 'Budget exceeded' }), app => app.latestWorker().fail(), app => [...app.timers.values()].find(timer => timer.delay === 30000).callback(), app => app.element('cancel-run').click()]) {
+    for (const destination of ['timeline', 'guide-dialog-title', 'lesson-cancel']) {
+      const app = await loaded(), worker = app.latestWorker(), terminate = worker.terminate.bind(worker);
+      worker.terminate = () => {
+        terminate();
+        if (destination === 'guide-dialog-title') app.element('guide-button').click();
+        else if (destination === 'lesson-cancel') app.element('try-example-button').click();
+        else app.element(destination).focus();
+      };
+      app.element('cancel-run').focus(); await finish(app);
+      focus(app, app.element(destination)); assert.equal(app.element('cancel-run').hidden, true);
+    }
+  }
+});
+
+test('Cancel does not request a focus handoff when another control or modal already owns focus', async () => {
+  for (const destination of ['timeline', 'variant-name', 'guide-dialog-title', 'lesson-cancel']) {
+    const app = await loaded();
+    if (destination === 'guide-dialog-title') await app.element('guide-button').click();
+    else if (destination === 'lesson-cancel') await app.element('try-example-button').click();
+    else app.element(destination).focus();
+    let focusCalls = 0;
+    app.element('run-experiment').focus = () => { focusCalls += 1; };
+    await app.element('cancel-run').click();
+    assert.equal(focusCalls, 0); focus(app, app.element(destination));
+  }
+});
+
 test('async terminal updates never reclaim focus from another control or a newer modal', async () => {
-  for (const finish of [app => app.latestWorker().respond(), app => app.latestWorker().respond({ error: 'Budget exceeded' }), app => app.latestWorker().fail(), app => app.element('cancel-run').click()]) {
+  for (const finish of [app => app.latestWorker().respond(), app => app.latestWorker().respond({ error: 'Budget exceeded' }), app => app.latestWorker().fail(), app => [...app.timers.values()].find(timer => timer.delay === 30000).callback(), app => app.element('cancel-run').click()]) {
     for (const destination of ['timeline', 'variant-name', 'guide-dialog-title', 'lesson-cancel']) {
       const app = await loaded(); card(app, 'plan-1').focus();
       if (destination === 'guide-dialog-title') await app.element('guide-button').click();

@@ -8,7 +8,7 @@ DetourLab is a browser-based logistics disruption lab. Create named closure vari
 
 The bundled city, fleet and demand are entirely synthetic. The app needs no API key, account, map service or npm dependency.
 
-Use the native controls by keyboard, including the road and direction selectors. [Keyboard controls and modal focus](docs/KEYBOARD.md) describes the guide, lesson confirmation, focus return and verification limits.
+Use the native controls by keyboard, including the road and direction selectors. The [searchable road picker](docs/ROAD_PICKER.md) adds a text filter and selected-road context without replacing the native select. [Keyboard controls and modal focus](docs/KEYBOARD.md) describes the guide, lesson confirmation, focus return and verification limits.
 
 ![Actual DetourLab workbench showing three variants, a tilted fictional district, route replay and delivery outcomes.](docs/images/workbench-v5-desktop.jpg)
 
@@ -39,6 +39,18 @@ For the larger fictional district:
 5. Export the experiment and run it in Node.
 
 In the bundled seed-42 experiment, the five-minute bridge closure produces **118 late arrivals**; moving its start to ten minutes produces **106**. Those are model results from the same 192 orders, not measured delivery performance.
+
+## Find a road before editing
+
+The demo adds **Find a road** above the existing **Road segment** selector. Search by road name, full junction ID or representative edge ID, then choose the road, direction and cutoff for the selected variant. The context text describes that variant's saved closure schedule; it does not describe closure state at the current replay time.
+
+Search only filters the choices. It does not edit the experiment or launch a calculation. A still-matching selection is retained; otherwise the first match is selected. No matches disables the road edit action, and **Clear search** restores all choices. Ordinary edits and variant changes keep the search; entering the tiny lesson starts fresh, and returning restores the previous search and selection.
+
+The default district has **807 road-pair choices**. [Road-picker behavior and verification limits](docs/ROAD_PICKER.md) explain exact matching, direction semantics and the separate browser-review status. The v9 browser review found a run-lifecycle focus issue; its v10 correction passed native cancellation and completion retests.
+
+![Actual public v10 road editor showing the bridge filter, three matching roads, Market Bridge selected and the native selector's visible lime focus outline.](docs/images/road-picker-v10-desktop.jpg)
+
+*Actual public v10 capture, October 19, 2026 at approximately 08:47 UTC, in desktop Chromium on Linux at 100% zoom. [Screenshot provenance and bounded browser evidence](docs/VERIFICATION.md#v10-native-focus-checks-and-screenshot).*
 
 ## Run locally
 
@@ -128,6 +140,7 @@ The human view shows the first 20 changed jobs and says how many are omitted; ve
 - 432 junctions, 1,614 directed edges, 24 vehicles and 192 seeded jobs in the default district
 - Two to six named variants sharing identical geometry, fleet, demand and job order
 - Independent closure events with explicit cutoffs and direction-aware road edits
+- Road filtering by name or ID, with saved-schedule context and native controls
 - Actual simulation ledgers driving the map, route inspector and final-run KPIs
 - A selected vehicle's baseline/disrupted overlay, shared replay time, pause, speed and zoom
 - Cancel/rerun, terminated superseded workers and stale-result/import guards
@@ -162,16 +175,16 @@ Start with a small reproducible scenario or an improvement that makes results ea
 
 [A/B Street](https://github.com/a-b-street/abstreet), [Eclipse SUMO](https://github.com/eclipse-sumo/sumo), [VROOM](https://github.com/VROOM-Project/vroom), and [kepler.gl](https://github.com/keplergl/kepler.gl) address adjacent planning, simulation, optimization and visualization problems. DetourLab focuses on a small, inspectable disruption experiment and a portable regression fixture. Their code and datasets are not included here.
 
-**Status:** early synthetic workbench. Historical v4–v7 desktop flows and the current automated suite have been checked; v8 native browser QA is pending; browser file-picker roundtrips, mobile, reduced-motion emulation and screen-reader auditing remain open. The [initial public release](docs/PUBLICATION.md) passed GitHub-hosted CI on both pinned Node versions, with 173 tests per job and the 20 CLI gates repeated separately. This does not close the browser QA gaps. No adoption, production-readiness or Trending claim is made.
+**Status:** early synthetic workbench. The public demo is **v10**, with searchable road editing and a run-lifecycle focus correction. [The v9 desktop Chromium review](docs/VERIFICATION.md#v9-road-picker-deployment-and-bounded-desktop-checks) exposed lost focus when Cancel run disappeared; the corrected source passes **601 core + 120 optional tests = 721 distinct tests**, including 29 road-picker and nine lifecycle-focus regressions. The 113 CLI repeats are already included. The [v10 cancellation/completion retest and served-manifest check passed](docs/VERIFICATION.md#v10-native-focus-checks-and-screenshot). Public GitHub source identity and exact-commit CI remain pending. Native file-picker/download roundtrips, mobile, reduced motion, screen readers and broader browser/performance checks remain open. See [the source evidence](docs/VERIFICATION.md#road-picker-and-run-lifecycle-focus-milestone). No adoption, production-readiness or Trending claim is made.
 
 ### Renderer update and live demo
 
-The current source skips unchanged paused Canvas paints while preserving playback redraws. [Reproducible operation counts and limitations](docs/RENDERING.md) document the change. The guard first shipped in v5. The v7 demo included the v6 reversible tiny lesson and added [modal keyboard focus fixes from source `fb08b57`](https://github.com/Tabisharaza/detourlab/commit/fb08b57457eb70abe107eca0cab41f6f3d30261f). Its [CI run](https://github.com/Tabisharaza/detourlab/actions/runs/38042346894) passed **231 tests per Node job**. Both dialogs were exercised with real desktop keyboard input, including boundary navigation and focus return. [Deployment and browser evidence](docs/VERIFICATION.md#v7-modal-keyboard-deployment-and-desktop-checks) retains the exact source mapping and remaining QA gaps. Browser rendering time remains unmeasured. The current public demo is **v8**, with [the tested import and dynamic-focus source deployed on October 11](docs/VERIFICATION.md#v8-source-parity-deployment). New native UI QA and direct HTTP byte verification remain pending.
+The current source skips unchanged paused Canvas paints while preserving playback redraws. [Reproducible operation counts and limitations](docs/RENDERING.md) document the change. The guard first shipped in v5. The v7 demo included the v6 reversible tiny lesson and added [modal keyboard focus fixes from source `fb08b57`](https://github.com/Tabisharaza/detourlab/commit/fb08b57457eb70abe107eca0cab41f6f3d30261f). Its [CI run](https://github.com/Tabisharaza/detourlab/actions/runs/38042346894) passed **231 tests per Node job**. Both dialogs were exercised with real desktop keyboard input, including boundary navigation and focus return. [Deployment and browser evidence](docs/VERIFICATION.md#v7-modal-keyboard-deployment-and-desktop-checks) retains the exact source mapping and remaining QA gaps. Browser rendering time remains unmeasured. The October 11 [v8 deployment](docs/VERIFICATION.md#v8-source-parity-deployment) included the tested import and dynamic-focus source. The [v9 road-picker deployment and bounded desktop checks](docs/VERIFICATION.md#v9-road-picker-deployment-and-bounded-desktop-checks) are separate from that historical record. The public demo is now **v10**, with [the run-lifecycle focus correction deployed](docs/VERIFICATION.md#v10-run-lifecycle-focus-deployment); its native cancellation/completion retest passed. The served manifest matches the verified local build; individual remote assets were not independently downloaded and hashed.
 
 ### File-input source update
 
-The current source rejects malformed UTF-8 consistently, bounds all three CLI reads and makes hostile file errors short and safe to display. The [deterministic regression corpus](docs/FILE_INPUT.md) covers 48 experiments and 189 variants. [Hosted CI for `e9285ee`](https://github.com/Tabisharaza/detourlab/actions/runs/38055582446) passed 341 tests on both pinned Node versions; [the verification record](docs/VERIFICATION.md#file-input-source-milestone) records the exact scope. These fixes are deployed in v8. The native file-picker QA gap remains open.
+The current source rejects malformed UTF-8 consistently, bounds all three CLI reads and makes hostile file errors short and safe to display. The [deterministic regression corpus](docs/FILE_INPUT.md) covers 48 experiments and 189 variants. [Hosted CI for `e9285ee`](https://github.com/Tabisharaza/detourlab/actions/runs/38055582446) passed 341 tests on both pinned Node versions; [the verification record](docs/VERIFICATION.md#file-input-source-milestone) records the exact scope. These fixes first deployed in v8. The native file-picker QA gap remains open.
 
 ### Dynamic editor keyboard update
 
-The current source keeps comparison cards and closure-editor controls in place while their data changes, so repeated keyboard edits do not discard the active control. Deleted controls and variant-limit buttons get a nearby usable focus target. [Hosted CI for `0559eec`](https://github.com/Tabisharaza/detourlab/actions/runs/38069928417) passed **357 tests on both pinned Node versions**, including 16 new regressions; [keyboard behavior and remaining checks](docs/KEYBOARD.md) are documented separately. This source change is deployed in v8; native browser Tab/blur verification remains pending.
+The current source keeps comparison cards and closure-editor controls in place while their data changes, so repeated keyboard edits do not discard the active control. Deleted controls and variant-limit buttons get a nearby usable focus target. [Hosted CI for `0559eec`](https://github.com/Tabisharaza/detourlab/actions/runs/38069928417) passed **357 tests on both pinned Node versions**, including 16 new regressions; [keyboard behavior and remaining checks](docs/KEYBOARD.md) are documented separately. This source change first deployed in v8; wider native Tab/blur coverage remains separate from the specific v9 observations.

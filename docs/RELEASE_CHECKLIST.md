@@ -111,3 +111,34 @@ This scoped milestone does not complete the broader accessibility or native-file
 - Submitted package verified locally against that build; saved version/commit, public audience and v4–v7 rollback history read back.
 - Direct HTTP root check returned 403; saved-artifact download was unavailable. Neither failure was bypassed. CDN byte verification and all new native browser checks remain pending.
 - No new runtime edits were made beyond the already-tested source. Audience, integrations, account permissions and runtime settings were unchanged. [Full deployment evidence](VERIFICATION.md#v8-source-parity-deployment).
+
+## October 19 road picker and run-lifecycle focus
+
+- [x] Pass 601 core and 120 optional tests (721 distinct), including 29 road-picker
+  and nine lifecycle-focus regressions; repeat 113 already-counted CLI tests.
+- [x] Check 60 core JavaScript files and two optional `.mjs` files.
+- [x] Complete independent picker review and final lifecycle review; the latter
+  passes 25 dynamic-focus tests and five terminal-path probes with no findings.
+- [x] Deploy the intermediate road picker as public v9 and record its hosting
+  source, saved-version identity, deployment receipt and package digest.
+- [x] Record the specific [v9 desktop Chromium search, keyboard, lesson and 200%
+  zoom observations](VERIFICATION.md#v9-road-picker-deployment-and-bounded-desktop-checks),
+  including the Cancel/completion focus failure rather than marking it passed.
+- [x] Correct the disappearing-Cancel focus path in source without reclaiming
+  newer control or modal focus.
+- [x] Verify corrected-package source parity and byte-identical repeated builds,
+  including all 20 payloads and the manifest.
+- [ ] Verify final public source commit/tree and both exact-commit hosted CI jobs.
+- [x] Record the corrected v10 Site version, deployment and retained v8 rollback.
+- [x] Retest native cancellation/completion focus on v10; both return focus to
+  Run all variants and preserve the road query/selection.
+- [x] Include the unaltered 1173×751 v10 road-picker screenshot with its SHA-256
+  and dated provenance; retain the older screenshots' historical captions.
+- [x] Compare the browser-served manifest byte-for-byte with the verified local
+  manifest and confirm all 20 listed hashes match local payloads.
+- [ ] Independently download and hash every served remote payload.
+
+Native file import/export, console/profiling, screen-reader,
+reduced-motion, native mobile and broader browser/platform checks remain open.
+The v9 desktop pass does not complete these independent gates or the historical
+checklists above.

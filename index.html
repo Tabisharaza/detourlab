@@ -32,8 +32,16 @@
       <div class="section-label"><h2>03 / Make it yours</h2></div>
       <button id="edit-roads" class="button road-edit"><span>⌁</span> Edit road closures <span id="closure-count" class="counter">2</span></button>
       <p class="help-text">Click a road on the map, or choose one below. Choose the direction below. Other variants stay unchanged.</p>
-      <label class="sr-only" for="road-select">Choose a road segment to toggle its closure</label><div class="road-picker"><select id="road-select"></select><button id="toggle-road" class="button" aria-label="Toggle closure for selected road segment">±</button></div>
-      <label class="sr-only" for="road-direction">Direction for road edits</label><select id="road-direction" class="direction-select"><option value="both">Both directions</option><option value="forward">Listed direction only</option><option value="reverse">Reverse direction only</option></select><div id="event-list" class="event-list" aria-label="Independent closure events"></div>
+      <div class="road-search-controls">
+        <label for="road-search">Find a road</label>
+        <div class="road-search-row"><input id="road-search" type="search" autocomplete="off" aria-describedby="road-search-help road-results-count"><button id="clear-road-search" class="button" type="button">Clear search</button></div>
+        <p id="road-search-help" class="help-text">Filter by road name, full junction ID or representative edge ID. Search only changes the list.</p>
+        <label for="road-select">Road segment</label>
+        <div class="road-picker"><select id="road-select" aria-describedby="road-selection-detail"></select><button id="toggle-road" class="button" aria-describedby="road-selection-detail">Toggle</button></div>
+        <label for="road-direction">Direction for road edits</label><select id="road-direction" class="direction-select" aria-describedby="road-selection-detail"><option value="both">Both directions</option><option value="forward">Listed direction only</option><option value="reverse">Reverse direction only</option></select>
+        <div class="road-picker-status"><p id="road-results-count" role="status" aria-live="polite" aria-atomic="true"></p><p id="road-selection-detail"></p></div>
+      </div>
+      <div id="event-list" class="event-list" aria-label="Independent closure events"></div>
       <div id="closed-roads" class="closed-roads" aria-label="Closed road segments"></div>
       <div class="panel-bottom"><button id="import-button" class="text-button" aria-describedby="lesson-import-help">↑ Import experiment / scenario</button><span id="lesson-import-help" class="help-text" hidden>Return to your experiment before importing a file.</span><input id="import-input" type="file" accept=".json,application/json" hidden><button id="reset-button" class="text-button muted">↺ Reset experiment</button><div class="privacy-note"><span>◇</span> Your scenarios stay in this browser.<br>No tracking. No real fleet data.</div></div>
     </aside>

@@ -22,6 +22,10 @@ The [job-impact explainer](JOB_IMPACT.md) shows which jobs change status, arriva
 
 [Review packets](REVIEW_PACKETS.md) consolidate the validated input, existing acceptance policy, all variant metrics and complete delivery outcomes into deterministic machine data plus a readable offline review. The headless path reuses one simulation and preserves the browser and existing CLI contracts. Browser export controls and native download validation remain separate future work.
 
+## Implemented: searchable road editing
+
+The [road picker](ROAD_PICKER.md) filters the native selector by road name, full endpoint ID or representative edge ID, with result counts and saved-schedule context. It preserves existing grouping, direction semantics and variant independence. The v9 demo has bounded desktop Chromium evidence. A run-lifecycle focus finding was corrected with regression tests and independent review, then deployed in v10. Native cancellation/completion retests and served-manifest parity passed; public GitHub source mapping and exact-commit CI remain pending.
+
 ## Release-readiness gates
 
 1. Publish a truthful README, live demo link, actual screenshot and model assumptions.
@@ -34,7 +38,7 @@ The [job-impact explainer](JOB_IMPACT.md) shows which jobs change status, arriva
 
 ## Next useful contributions
 
-- Searchable, keyboard-friendly road selection and stronger non-map explanations
+- Complete the exact-commit source release checks and retain separate assistive-technology gaps
 - Actual browser interruption/import/export coverage
 - Paused-render and large-fixture profiling, with repeatable measurements
 - Additional independent routing oracles and cross-browser deterministic fixtures

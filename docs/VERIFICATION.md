@@ -1,6 +1,6 @@
 # Verification record
 
-**Current public demo: v8**, deployed October 11, 2026 UTC from tested public source `ffe3d15`. [Jump to the v8 source/deployment record and verification limits](#v8-source-parity-deployment). The earlier v4/v5/v6/v7 records remain historical evidence; v8 has not yet received native browser QA.
+**Current public demo: v10**, deployed October 19, 2026 UTC. [The v9 record](#v9-road-picker-deployment-and-bounded-desktop-checks) describes bounded desktop Chromium checks and the run-lifecycle focus finding. [The corrected v10 deployment](#v10-run-lifecycle-focus-deployment) is recorded separately. Native cancellation/completion retests and served-manifest parity passed; public GitHub source mapping and exact-commit CI remain pending. Earlier version records remain historical evidence.
 
 ## Headless job-impact milestone
 
@@ -284,3 +284,215 @@ Independent review passed **32 supplemental checks**, separately reran all **88 
 
 All **117 public source files** matched Git blob IDs, sizes and modes in tree `e6ac41111faabf87243169db733de400bbcd0559`. The browser payloads and manifest remain byte-identical to the v8 source/build; no Site deployment, UI, engine, input schema, dependency, license or workflow-permission change is part of this milestone. Existing screenshot and native-browser evidence retains its historical scope. Hard-link output publication is not atomic directory visibility or crash-durable storage; adversarial co-writer races, unusual filesystems, native Windows/macOS and browser behavior remain outside this verification. This record names the exact runtime source commit; a later documentation-only commit requires its own CI check.
 
+## Road-picker and run-lifecycle focus milestone
+
+The October 19, 2026 implementation is based on public source
+[`25c7fb6`](https://github.com/Tabisharaza/detourlab/commit/25c7fb636c6151d5a9e1b7ddcd5cf8c7e8ab349d).
+The [road picker](ROAD_PICKER.md) adds native-selector name/ID filtering, count
+feedback and saved-schedule context without changing graph grouping, direction
+semantics or the routing engine. The subsequent lifecycle correction hands
+focus from a disappearing **Cancel run** button to **Run all variants** only
+while Cancel still owns it; newer control/modal focus and stale-run guards are
+preserved.
+
+Local checks on **Node 24.19.0 / npm 11.9.0 / Linux** passed **601 core + 120
+optional tests = 721 distinct tests**, with no failures or skips. The total
+includes **29 road-picker regressions** and **nine lifecycle-focus regressions**.
+**113 CLI tests** are repeated separately and are not additional distinct tests.
+Syntax checks cover **60 core JavaScript files** and **two optional `.mjs`
+files**. The corrected distribution passed manifest/source verification for
+**20 static payloads plus manifest**; a second build matched every byte, including
+the manifest. These checks name the corrected source, rather than relying on
+the earlier 592-core-test candidate's build receipt.
+
+Initial independent picker review passed **95 focused tests**, **11 supplemental
+probes** and **72 baseline pair-toggle assertions**. It resolved retained options
+after a zero-edge import and redundant unchanged live-count assignments. Final
+lifecycle review passed **25 dynamic-focus tests** and **five terminal-path
+probes**, with no findings. These overlapping checks are not added to 721.
+The lifecycle tests cover cancellation/completion, returned errors, Worker
+failure, timeout, construction failure, repeated runs, stale callbacks and newer
+control/modal focus. They use source-handler DOM/Worker stand-ins, not a browser.
+
+Runtime/test changes are confined to `src/app.js`, `index.html`, `src/style.css`,
+`tests/road-picker.test.js` and `tests/dynamic-focus.test.js`. The engine, map,
+formats/schemas, Worker, package metadata, lockfile, workflow, licenses and shared
+harness retain the baseline bytes.
+The corrected runtime is deployed in v10; native cancellation/completion retests
+and served-manifest parity passed as recorded below. Public GitHub source
+identity and exact-commit hosted CI remain pending. The v9 observations below are intermediate
+evidence, not verification of the corrected runtime. Historical v4–v8 results
+retain their original dates, mappings and limits.
+
+## v9 road-picker deployment and bounded desktop checks
+
+On **October 19, 2026 at 08:22:07.554212 UTC**, Sites reported a successful
+**v9** deployment at the existing [public demo](https://detourlab-tabish.tabisharaza.chatgpt.site/).
+This is an intermediate deployment record. The desktop review found a Cancel-run
+focus defect, so it is not the final release acceptance record.
+
+### Deployment mapping
+
+- Hosting source commit: `4a44a3fb595d938e44b7fe6a907d2fe73cafdf3b`.
+- Saved version: **9**, ID
+  `appgprj_6ac90e32f4c0819188f610bb51276139~appgver_c47de415029c8191830cbbeb07f9bc72`.
+- Deployment: `appgdep_6ad5d326574c81919a7b72d12bd1fb19`, reported successful at
+  the timestamp above.
+- Recorded deployment archive SHA-256:
+  `da323172831eb164bb0ffe00b85c8e212cd4dcf2ae542d9b51a9d53ca2bd1464`.
+- The candidate was based on public source
+  [`25c7fb6`](https://github.com/Tabisharaza/detourlab/commit/25c7fb636c6151d5a9e1b7ddcd5cf8c7e8ab349d).
+  This baseline commit and its CI are not the final road-picker source or CI.
+
+The recorded archive digest identifies the deployment package. It is not a
+claim about independently retrieved CDN asset bytes. The corrective v10 deployment is recorded separately below. Its own
+source/package mapping and browser retest must not be inferred from v9.
+
+### Browser scope
+
+These observations used **desktop Chromium on Linux**, with native keyboard
+input and the application's built-in synthetic district and tiny lesson. The
+exact Chromium version was not captured. No screen reader
+or other assistive technology was run.
+
+### Road search, native controls and focus
+
+- The default selector contained **807 road-pair choices**. Searching for
+  `bridge` reduced the list to **3**; full endpoint ID `node-11-9` produced **4**;
+  an uppercase, outer-whitespace-padded representative edge-ID query produced
+  **1** matching choice.
+- **Alt+Down**, arrow keys and **Enter** operated the native road selector.
+  Native `m` type-ahead, **Tab**, **Shift+Tab** and visible focus were exercised.
+- A one-direction Harbor-road closure and its removal were exercised. The
+  selected-road context reflected the chosen direction and saved schedule.
+- A zero-match search disabled the road selector and **Toggle** action.
+  Removing the last closure event in this state moved focus to the enabled
+  search field.
+- **Clear search** restored **807** choices and retained focus on the Clear
+  search button.
+- Native **Escape** in the search field cleared its query and retained focus.
+  This was observed browser search-input behavior, not an application modal
+  dismissal or a guarantee about every browser.
+- Variant changes, duplication and renaming were exercised while retaining the
+  road-search state. **Reset** cleared the search.
+
+### Lesson and dialog transitions
+
+Lesson **Cancel**, **Escape** dismissal and **Shift+Tab** containment were
+exercised. Starting and resetting the lesson began with an unfiltered picker;
+returning restored the earlier experiment's search. The lesson's one-way road
+explained the unavailable reverse direction, and the reverse toggle was a no-op.
+These observations cover those particular transitions; they do not replace the
+complete modal, worker-interruption or assistive-technology test matrix.
+
+### Desktop zoom
+
+**200% zoom** was set and verified through ordinary Chromium controls. The
+rendered page was inspected and a screenshot captured to review reflow. The
+initial page-directed shortcut did not change zoom; it is not counted as the
+successful zoom check. The later native browser-control interaction is the
+basis for the 200% observation.
+
+This was desktop-browser zoom, not native mobile testing or mobile-device
+emulation. No new screenshot is embedded in this record until its retained original
+identity, exact pixel dimensions, timestamp and SHA-256 have been verified. Earlier v5/v6 screenshots remain evidence for those versions.
+
+### Finding corrected in v10
+
+A real **Cancel run** action stopped the calculation, but keyboard focus was
+then reported on the page's **AXWebArea** rather than a useful enabled control.
+The native review also exposed focus loss when the run completed while Cancel
+held focus. The finding was identified as pre-existing. The corrected local
+source now hands focus to **Run all variants** before hiding Cancel, only while
+Cancel still owns it. Nine new regressions and independent source review pass;
+the subsequent v10 native cancellation/completion retest passed as recorded
+below. The v9 calculations themselves completed, but their focus behavior failed.
+
+### Checks not established
+
+- Native file selection, chooser cancellation and import/export roundtrips remain
+  unverified.
+- No console audit or browser performance profile was performed.
+- Imported hostile/long/duplicate-label or no-edge fixtures were not exercised
+  in the browser. Their source-test coverage remains a separate kind of evidence.
+- Screen-reader announcements, reduced-motion behavior, native mobile devices
+  and a wider browser/platform matrix were not tested.
+- This pass does not establish exported-file/CLI parity, independent CDN asset
+  hashes, a complete accessibility audit, WCAG conformance or production readiness.
+
+The [road-picker contract](ROAD_PICKER.md) and [keyboard guide](KEYBOARD.md)
+describe the intended behavior. Final release status must distinguish the
+observed v9 flows above from any later corrective build, retests and CI results.
+
+## v10 run-lifecycle focus deployment
+
+On **October 19, 2026 at 08:38:08.674906 UTC**, Sites reported a successful
+**v10** deployment at the unchanged [public demo](https://detourlab-tabish.tabisharaza.chatgpt.site/).
+It includes the corrected Cancel-run focus handoff described above.
+
+- Hosting source commit: `93b8ba0674799fe93e56c4b9eaff41e46b613780`.
+- Saved version: **10**, ID
+  `appgprj_6ac90e32f4c0819188f610bb51276139~appgver_81e48a8ae6fc8191b49b57354632ff5d`.
+- Deployment: `appgdep_6ad5d6e8b098819192bc29318d7fd722`, reported successful
+  at the timestamp above.
+- Recorded deployment archive SHA-256:
+  `61cf727ee95536352faf426dc17d5957911b1a548bcf3577651e52497c879b31`.
+- The original **v8** remains saved for rollback.
+- Saved-version readback confirms that v10's deployment ID matches the successful
+  deployment receipt. The hosting checkout built matching source; `src/app.js`
+  SHA-256 is `6ca77692bbff3a4b0578662f1c61786f434022a4d20d146784182cc21c72924d`.
+  Local corrected-package verification and the repeated build passed as recorded
+  above. These package checks are separate from served-manifest inspection.
+
+The corrected source's 601 core tests and independent review are distinct from
+the actual native-browser checks below. Public GitHub source identity and hosted
+CI for the exact final commit remain pending. Neither deployment provenance nor
+the bounded desktop observations establish screen-reader behavior, mobile
+coverage, a complete accessibility audit or operational readiness.
+
+### v10 native focus checks and screenshot
+
+On **October 19, 2026 at approximately 08:47 UTC**, the public v10 page was checked
+in cloud-hosted **desktop Chromium on Linux**, at **100% zoom** with a
+**1173×751 content viewport**. The exact browser version was unavailable. The
+checks used native keyboard input and the built-in synthetic district:
+
+- **Run all variants → Shift+Tab → Space** activated Cancel run, stopped the
+  calculation and returned focus to **Run all variants**.
+- **Run all variants → Shift+Tab** visibly focused Cancel before normal Worker
+  completion; completion then returned focus to **Run all variants**.
+- The `bridge` query and **Foundry Bridge** selection were preserved through
+  both flows. Completed outcomes displayed baseline **311.8 km / 0 late /
+  0 unreachable**, versus closure **377.1 km / 118 late / 0 unreachable**.
+  These are rounded interface values for the synthetic model.
+- Native selector type-ahead **m**, then **Return**, selected **Market Bridge**.
+  Its lime focus outline was visibly present.
+
+Worker errors, timeout, construction failure, stale callbacks and newer-modal
+races were covered by source tests, not induced in this native pass. The earlier
+v9 200% zoom observations retain their v9 scope; this v10 check used 100% zoom.
+
+The [unaltered screenshot](images/road-picker-v10-desktop.jpg) was captured at
+approximately **08:47 UTC**, visually inspected and copied without re-encoding.
+It is **1173×751 pixels**, contains only synthetic application content, and has
+no EXIF metadata. It shows the `bridge` filter, **3 of 807** choices, selected
+Market Bridge, saved-schedule context and the native selector's visible focus.
+It does not depict the transient cancellation/completion handoff.
+Screenshot SHA-256:
+`bf2740028fd84e2cb29fc946820abc800d8adbffaa3ca547716e3238b7048632`.
+
+### Served manifest verification
+
+The public [distribution manifest](https://detourlab-tabish.tabisharaza.chatgpt.site/manifest.json)
+was read through the real browser and saved. Its bytes match the locally verified
+`dist/manifest.json` exactly, with SHA-256
+`8c3a5a1a4f540056f529daf3f651d95ce213fad2a6de4cb9df293c616cb1c016`.
+All **20 listed payload hashes** match the corresponding verified local payloads,
+including `src/app.js` hash
+`6ca77692bbff3a4b0578662f1c61786f434022a4d20d146784182cc21c72924d`.
+
+This verifies the served manifest and its agreement with the tested local build.
+It does **not** independently download or hash each remote payload, and the
+manifest is not a signed provenance guarantee. Native file-picker/download
+roundtrips, screen readers, reduced motion, native mobile, additional browsers
+and browser performance profiling remain unverified.

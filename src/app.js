@@ -28,6 +28,7 @@ const lessonSteps = [
   { id: 'close-at-11', time: 11, story: 'At 11 s the van is already on B → C: it entered at 10 s. It finishes that edge even though it closes. A → B → C stays 200 m, with arrival at 20 s and no late delivery. The run finishes at 23 s, including 3 s of service.' },
 ];
 let roads = [];
+let visibleRoads = [];
 let edgesById = new Map();
 let roadPairs = new Map();
 const map = new NetworkMap($('network-map'), state, {
@@ -44,6 +45,11 @@ function setEditing(value) { state.editing = value; $('edit-roads').setAttribute
 function closedIds() { return new Set(state.scenario.closures.flatMap(closure => closure.edgeIds)); }
 function closureAt() { return Number($('closure-time').value); }
 function pairsFor(id) { const edge = edgesById.get(id); return edge ? roadPairs.get([edge.from, edge.to].sort().join('|')) || [] : []; }
+function roadEditIds(id, forceReopen = false) {
+  const edge = edgesById.get(id); if (!edge) return [];
+  const direction = $('road-direction').value || 'both';
+  return forceReopen || direction === 'both' ? pairsFor(id) : direction === 'forward' ? [id] : pairsFor(id).filter(edgeId => { const item = edgesById.get(edgeId); return item.from === edge.to && item.to === edge.from; });
+}
 function activeVariant() { return state.experiment.variants.find(variant => variant.id === state.selectedVariantId); }
 function changedExperiment(experiment, selectedId = state.selectedVariantId) {
   const validated = validateExperiment(experiment);
@@ -64,9 +70,7 @@ function setClosures(ids, atS = closureAt()) {
 function toggleRoad(id, forceReopen = false) {
   if (!id) return;
   const closed = closedIds();
-  const edge = edgesById.get(id);
-  const direction = $('road-direction').value || 'both';
-  const pairs = forceReopen || direction === 'both' ? pairsFor(id) : direction === 'forward' ? [id] : pairsFor(id).filter(edgeId => { const item = edgesById.get(edgeId); return item.from === edge.to && item.to === edge.from; });
+  const pairs = roadEditIds(id, forceReopen);
   if (!pairs.length) { toast('This segment has no reverse edge. Choose its listed direction.'); return; }
   const removing = forceReopen || pairs.every(value => closed.has(value));
   const closures = state.scenario.closures.map(closure => ({ ...closure, edgeIds: closure.edgeIds.filter(edgeId => !pairs.includes(edgeId)) })).filter(closure => closure.edgeIds.length);
@@ -154,7 +158,7 @@ function updateEvents() {
     title.textContent = roads.join(', '); detail.textContent = `${closure.edgeIds.length} directed edges · ${closure.id}`;
     input.value = String(closure.atS); input.setAttribute('aria-label', `Start time in seconds for ${closure.id}`);
     remove.setAttribute('aria-label', `Remove closure event ${closure.id}`); return row;
-  }, $('road-select'), closure => JSON.stringify([state.selectedVariantId, closure.id]));
+  }, roadPickerFocusTarget(), closure => JSON.stringify([state.selectedVariantId, closure.id]));
 }
 
 function makeRoads() {
@@ -162,7 +166,59 @@ function makeRoads() {
   for (const edge of state.scenario.edges) { const key = [edge.from, edge.to].sort().join('|'); if (!roadPairs.has(key)) roadPairs.set(key, []); roadPairs.get(key).push(edge.id); }
   for (const edge of state.scenario.edges) { const key = [edge.from, edge.to].sort().join('|'); if (seen.has(key)) continue; seen.add(key); roads.push(edge); }
   roads.sort((a, b) => Number(b.id.startsWith('bridge')) - Number(a.id.startsWith('bridge')) || a.roadName.localeCompare(b.roadName) || a.id.localeCompare(b.id));
-  $('road-select').replaceChildren(...roads.map(edge => { const option = node('option', `${edge.roadName} · ${edge.from.replace('node-', '')} → ${edge.to.replace('node-', '')}`); option.value = edge.id; return option; }));
+  $('road-select').replaceChildren(); visibleRoads = [];
+  filterRoads();
+}
+
+function roadPickerFocusTarget() { return $('road-select').disabled ? $('road-search') : $('road-select'); }
+function selectedRoad() { return visibleRoads.find(edge => edge.id === $('road-select').value); }
+function filterRoads(preferredId = $('road-select').value) {
+  const query = $('road-search').value.trim().toLowerCase();
+  const matches = roads.filter(edge => [edge.roadName, edge.from, edge.to, edge.id].some(value => value.toLowerCase().includes(query)));
+  // Preserve the native select and its options when the visible list is unchanged.
+  if (matches.length !== visibleRoads.length || matches.some((edge, index) => edge !== visibleRoads[index])) {
+    $('road-select').replaceChildren(...matches.map(edge => { const option = node('option', `${edge.roadName} · ${edge.from} → ${edge.to} · ${edge.id}`); option.value = edge.id; return option; }));
+  }
+  visibleRoads = matches;
+  $('road-select').value = matches.some(edge => edge.id === preferredId) ? preferredId : matches[0]?.id ?? '';
+  $('road-select').disabled = !matches.length;
+  const countText = !roads.length ? 'No road segments in this graph.' : matches.length ? `${matches.length} of ${roads.length} road segments shown.` : `No matching roads. 0 of ${roads.length} road segments shown. Clear search to show all roads.`;
+  if ($('road-results-count').textContent !== countText) $('road-results-count').textContent = countText;
+  updateRoadDetails();
+}
+function updateRoadDetails() {
+  const edge = selectedRoad(), variant = activeVariant();
+  $('toggle-road').disabled = !edge;
+  if (!edge) {
+    $('road-selection-detail').textContent = `No road selected. Variant: ${variant.name} (${variant.id}). Road toggle is unavailable.`;
+    return;
+  }
+  // Each edge is governed by its earliest scheduled closure. Keep this summary
+  // bounded even when imported events repeat an edge or the pair has parallels.
+  const cutoffs = new Map();
+  for (const closure of state.scenario.closures) for (const id of closure.edgeIds) cutoffs.set(id, Math.min(cutoffs.get(id) ?? Infinity, closure.atS));
+  const time = seconds => `${seconds} s`;
+  const status = ids => {
+    const times = ids.filter(id => cutoffs.has(id)).map(id => cutoffs.get(id));
+    const count = `${ids.length} ${ids.length === 1 ? 'edge' : 'edges'}`;
+    if (!times.length) return `${count}, no scheduled closures`;
+    const first = Math.min(...times), last = Math.max(...times);
+    return `${count}, ${times.length} scheduled; ${first === last ? 'cutoff ' + time(first) : 'earliest cutoff ' + time(first) + ', latest ' + time(last)}`;
+  };
+  const pair = pairsFor(edge.id), reverse = pair.filter(id => { const other = edgesById.get(id); return other.from === edge.to && other.to === edge.from; });
+  const reverseIds = new Set(reverse), parallel = pair.filter(id => id !== edge.id && !reverseIds.has(id));
+  const targets = roadEditIds(edge.id), closed = closedIds(), direction = $('road-direction').value || 'both';
+  const directionName = direction === 'both' ? 'Both directions' : direction === 'forward' ? 'Listed direction only (representative edge)' : 'Reverse direction only';
+  const targetCount = `${targets.length} directed ${targets.length === 1 ? 'edge' : 'edges'}`;
+  const action = !targets.length ? 'No reverse edge; toggle changes nothing.' : targets.every(id => closed.has(id)) ? `Next toggle removes scheduled closures from ${targetCount}.` : `Next toggle closes all ${targetCount} at ${time(closureAt())}, replacing their cutoffs.`;
+  $('road-selection-detail').textContent = [
+    `Selected: ${edge.roadName}. Variant: ${variant.name} (${variant.id}).`,
+    `Listed ${edge.from} → ${edge.to} (${edge.id}): ${cutoffs.has(edge.id) ? 'scheduled cutoff ' + time(cutoffs.get(edge.id)) : 'no scheduled closure'}.`,
+    ...(parallel.length ? [`Other listed-direction edges: ${status(parallel)}.`] : []),
+    `Reverse ${edge.to} → ${edge.from}: ${reverse.length ? status(reverse) : 'no reverse edge (one-way)'}.`,
+    `${directionName}. ${action} New-closure cutoff: ${time(closureAt())}.`,
+    'Schedule status is independent of replay time.',
+  ].join(' ');
 }
 function updateControls() {
   const scenario = state.scenario;
@@ -187,13 +243,13 @@ function updateControls() {
     const names = { central: ['Bridge works', 'A busy crossing goes offline'], 'all-bridges': ['River cut', 'Three crossings. One hard limit.'], clear: ['Clear roads', 'The unchanged control run'] };
     const [name, detail] = names[preset.id] ?? [preset.name, preset.description];
     const text = node('div'); text.append(node('strong', name), node('small', detail)); button.replaceChildren(node('span', ['⌁','⊘','↗'][index] ?? '◇', 'preset-icon'), text); button.title = preset.description; return button;
-  }, $('road-select'));
+  }, roadPickerFocusTarget());
   const closedRoads = roads.filter(edge => pairsFor(edge.id).some(id => closed.has(id)));
   updateControlList($('closed-roads'), closedRoads, (edge, button) => {
     if (!button) { button = node('button', undefined, 'closure-chip'); button.addEventListener('click', () => toggleRoad(edge.id, true)); }
     button.textContent = `${edge.roadName} ×`; button.title = `Reopen ${edge.roadName}, ${edge.from} to ${edge.to}`; button.setAttribute('aria-label', button.title); return button;
-  }, $('road-select'));
-  updateVariants(); updateEvents(); updateLesson(); map.invalidate();
+  }, roadPickerFocusTarget());
+  updateVariants(); updateEvents(); updateLesson(); updateRoadDetails(); map.invalidate();
 }
 function clearResults() {
   for (const id of ['distance', 'late', 'unreachable']) { $(id + '-value').textContent = '—'; $(id + '-delta').textContent = 'Calculating…'; $(id + '-baseline').textContent = ''; }
@@ -207,10 +263,16 @@ function computationFailed(message) {
   for (const id of ['distance', 'late', 'unreachable']) $(id + '-delta').textContent = 'Unavailable';
   $('route-reason').textContent = message; $('status-line').parentElement.setAttribute('aria-busy', 'false');
 }
+function hideCancelRun() {
+  const cancel = $('cancel-run');
+  // Hand off before hiding the focused button, without reclaiming newer focus.
+  if (document.activeElement === cancel) focusFirst([$('run-experiment')]);
+  cancel.hidden = true;
+}
 function cancelComputation(message = 'Run canceled. Your variants are preserved.') {
   revision += 1; clearTimeout(workerTimeout); worker?.terminate(); worker = null; state.pending = false; setPlaying(false);
   state.allResults = null; state.baseline = null; state.disrupted = null; clearResults(); computationFailed(message);
-  $('status-line').textContent = message; $('comparison-status').textContent = message; $('cancel-run').hidden = true; updateVariants(true); map.invalidateFrame();
+  $('status-line').textContent = message; $('comparison-status').textContent = message; hideCancelRun(); updateVariants(true); map.invalidateFrame();
 }
 function showSelectedResult() {
   const selected = state.allResults?.variants.find(variant => variant.id === state.selectedVariantId);
@@ -236,7 +298,7 @@ function compute() {
   worker = currentWorker;
   currentWorker.onmessage = ({ data }) => {
     if (id !== revision || data.id !== revision || worker !== currentWorker) return;
-    clearTimeout(workerTimeout); state.pending = false; $('status-line').parentElement.setAttribute('aria-busy', 'false'); $('cancel-run').hidden = true;
+    clearTimeout(workerTimeout); state.pending = false; $('status-line').parentElement.setAttribute('aria-busy', 'false'); hideCancelRun();
     currentWorker.terminate(); if (worker === currentWorker) worker = null;
     if (data.error) { computationFailed(data.error); toast(`The experiment could not run: ${data.error}`, true); $('status-line').textContent = 'Experiment failed. Edit or import a smaller experiment.'; $('comparison-status').textContent = 'No partial results shown. ' + data.error; updateVariants(true); return; }
     state.allResults = { baseline: data.baseline, variants: data.variants }; showSelectedResult();
@@ -318,8 +380,12 @@ function loadExperiment(experiment, workspace = {}) {
   // Establish the new timeline before setting time; a previous tiny run must not
   // clamp the restored experiment's replay position while its worker is pending.
   $('timeline').max = String(workspace.timelineMax ?? Math.max(state.scenario.durationS ?? 1, state.time, 1));
-  setTime(state.time); map.invalidate(); makeRoads(); updateControls();
-  if (roads.some(road => road.id === workspace.roadId)) $('road-select').value = workspace.roadId;
+  // A successful import or reset starts an unfiltered picker; lesson return
+  // explicitly restores its prior query and visible selection.
+  $('road-search').value = workspace.roadSearch ?? '';
+  $('road-select').value = '';
+  setTime(state.time); map.invalidate(); makeRoads();
+  filterRoads(workspace.roadId); updateControls();
   if (workspace.variantName !== undefined) $('variant-name').value = workspace.variantName;
   compute();
 }
@@ -409,7 +475,7 @@ function startLesson() {
   lessonBackup = {
     focus: dialogFocus?.source,
     experiment: validateExperiment(state.experiment),
-    workspace: { selectedVariantId: state.selectedVariantId, time: state.time, speed: state.speed, view: state.view, zoom: state.zoom, selectedVehicle: state.selectedVehicle, editing: state.editing, closureTime: $('closure-time').value, roadDirection: $('road-direction').value, roadId: $('road-select').value, variantName: $('variant-name').value, timelineMax: $('timeline').max },
+    workspace: { selectedVariantId: state.selectedVariantId, time: state.time, speed: state.speed, view: state.view, zoom: state.zoom, selectedVehicle: state.selectedVehicle, editing: state.editing, closureTime: $('closure-time').value, roadDirection: $('road-direction').value, roadId: $('road-select').value, roadSearch: $('road-search').value, variantName: $('variant-name').value, timelineMax: $('timeline').max },
   };
   state.lessonActive = true;
   resetLesson();
@@ -426,9 +492,12 @@ function returnToExperiment() {
   toast('Your experiment and view are restored. Playback is paused; results are being recomputed.');
 }
 
-$('closure-time').addEventListener('input', (event) => { $('closure-time-label').textContent = clock(event.target.value); });
-$('closure-time').addEventListener('change', (event) => { $('closure-time-label').textContent = clock(event.target.value); });
-$('toggle-road').addEventListener('click', () => toggleRoad($('road-select').value));
+for (const name of ['input', 'change']) $('closure-time').addEventListener(name, (event) => { $('closure-time-label').textContent = clock(event.target.value); updateRoadDetails(); });
+$('road-search').addEventListener('input', () => filterRoads());
+$('clear-road-search').addEventListener('click', () => { $('road-search').value = ''; filterRoads(); });
+$('road-select').addEventListener('change', updateRoadDetails);
+$('road-direction').addEventListener('change', updateRoadDetails);
+$('toggle-road').addEventListener('click', () => { const edge = selectedRoad(); if (edge) toggleRoad(edge.id); });
 $('edit-roads').setAttribute('aria-pressed', 'false');
 $('edit-roads').addEventListener('click', () => setEditing(!state.editing));
 for (const view of ['disruption', 'baseline', 'compare']) $('view-' + view).addEventListener('click', () => setView(view));
