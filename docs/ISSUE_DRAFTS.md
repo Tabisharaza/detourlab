@@ -31,7 +31,7 @@ The numbered headings below are draft scope numbers, not GitHub issue numbers. S
 [v9 road picker](ROAD_PICKER.md), with bounded desktop Chromium observations.
 A run-lifecycle focus issue found during review is corrected and deployed in
 v10. Native cancellation/completion retests passed; public GitHub source mapping
-and exact-commit CI remain pending. Screen-reader and
+and exact-commit CI passed (see VERIFICATION.md). Screen-reader and
 broader accessibility evidence remain open, so the original acceptance scope
 below is not fully complete.
 

@@ -109,6 +109,8 @@ npm run scenario -- examples/meridian-default.json --json
 
 ## Share a complete review
 
+In the source workbench, choose **Review results** after a run, then download the readable review and JSON evidence separately. This browser feature is not yet on the public v10 demo. It uses the completed results without rerunning, reports acceptance as **not evaluated**, and explicitly leaves browser implementation identity unverified. [Browser export boundaries](docs/REVIEW_PACKETS.md#download-from-the-browser-workbench).
+
 ```sh
 node scripts/report-experiment.js examples/minimal-experiment.json \
   --out tiny-review --max-arrival-slip-s 6 --max-unreachable 0

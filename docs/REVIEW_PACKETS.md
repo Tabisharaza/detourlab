@@ -25,6 +25,16 @@ node scripts/report-experiment.js examples/minimal-experiment.json \
 
 Exit **1** still produces the complete packet. It records the newly late job rather than hiding a failed experiment. No thresholds means **not evaluated**, not an acceptance pass.
 
+## Download from the browser workbench
+
+The source workbench now offers **Review results** after a complete run. Download `REVIEW.md` and `bundle.json` separately and keep them together. Preparation consumes the completed Worker results; it does not rerun the simulation. Both files cover the baseline and every variant, not only the selected card or replay time.
+
+Browser packets use the same projection, readable renderer and output budgets as the CLI. They contain no thresholds, so acceptance is **not evaluated**. Their generator is `detourlab-browser`, with null source revision and implementation fingerprint: browser content hashes are not proof of a particular deployed build. The report explains how to extract the input and rerun it with the source CLI, without promising an identical browser/CLI provenance fingerprint.
+
+Editing, importing, resetting, canceling or starting another run invalidates prepared files. Closing the dialog discards preparation; reopening takes a fresh snapshot. Failed preparation never enables downloads. Browser downloads are explicit individual actions, not an automatic batch.
+
+**Release boundary:** this source feature is not yet deployed to the public v10 demo. Automated DOM/Worker tests are not native browser download, file-picker, accessibility or mobile verification. Those checks and the hosted release remain open.
+
 ## Questions the review answers
 
 1. Which input and closure schedules were compared?

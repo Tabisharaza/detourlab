@@ -29,8 +29,9 @@ const bytes = value => Buffer.byteLength(value, 'utf8');
 // Keep the public API free of testing switches. As with job-impact tests, load the
 // checked-in pure module with narrow runner/limit substitutions, no ESM mocking.
 function instrument({ runner = simulateExperiment, maxBundleBytes = REPORT_LIMITS.maxBundleBytes, maxReviewBytes = REPORT_LIMITS.maxReviewBytes } = {}) {
-  const source = readFileSync(new URL('../scripts/experiment-report.js', import.meta.url), 'utf8')
-    .replace(/^import .*;\n/gm, '').replace(/^export /gm, '')
+  const source = ['../src/experiment-report.js', '../scripts/experiment-report.js']
+    .map(file => readFileSync(new URL(file, import.meta.url), 'utf8')).join('\n')
+    .replace(/^import .*;\n/gm, '').replace(/^export \{.*\};\n/gm, '').replace(/^export /gm, '')
     .replace('maxBundleBytes: 8 * 1024 * 1024', `maxBundleBytes: ${maxBundleBytes}`)
     .replace('maxReviewBytes: 1024 * 1024', `maxReviewBytes: ${maxReviewBytes}`);
   return new Function('createHash', 'canonicalExperiment', 'simulateExperiment', 'validateExperiment', 'projectJobOutcomes', 'compareJobOutcomes', 'thresholdViolations', `${source}\nreturn { createExperimentReport, serializeExperimentReport };`)(createHash, canonicalExperiment, runner, validateExperiment, projectJobOutcomes, compareJobOutcomes, thresholdViolations);

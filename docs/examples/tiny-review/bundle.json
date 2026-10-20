@@ -15,6 +15,9 @@
         "src/scenario.js",
         "src/experiment.js",
         "src/file-input.js",
+        "src/experiment-report.js",
+        "src/job-impact.js",
+        "src/job-gates.js",
         "scripts/experiment-report.js",
         "scripts/job-impact.js",
         "scripts/job-gates.js",
@@ -25,7 +28,7 @@
         "scripts/cli-display.js",
         "scripts/read-input.js"
       ],
-      "sha256": "580b47a61b1f5d0ccbf2d50abc8a07e4a1a940ee666debc6aa3ecedff4097ec5"
+      "sha256": "0b67481f4bd071dbda5b64127d8e9798f2c625c388c0ffb1397acdb0e6b1bc9b"
     }
   },
   "experiment": {
@@ -453,7 +456,7 @@
   "verdict": "passed",
   "integrity": {
     "algorithm": "sha256",
-    "sha256": "d6271cf09a6fe00768d44651241a44f47987860d8e5131375f418ba1cf48851c",
-    "reviewSha256": "773d523cf361627d39b52e9af3926da602577e3845d74e8732db6add4dd9efd6"
+    "sha256": "5b5ac565bae2dabb0d62331d1e5a80ade6a443c2643b6ba1ec09aeae65ba4a1c",
+    "reviewSha256": "5265e566e7dfe358c26a466c4216bb5ca1b940932bb081fe5bd4769981f1b226"
   }
 }

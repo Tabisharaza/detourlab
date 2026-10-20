@@ -20,11 +20,11 @@ The [job-impact explainer](JOB_IMPACT.md) shows which jobs change status, arriva
 
 ## Implemented: portable experiment reviews
 
-[Review packets](REVIEW_PACKETS.md) consolidate the validated input, existing acceptance policy, all variant metrics and complete delivery outcomes into deterministic machine data plus a readable offline review. The headless path reuses one simulation and preserves the browser and existing CLI contracts. Browser export controls and native download validation remain separate future work.
+[Review packets](REVIEW_PACKETS.md) consolidate the validated input, existing acceptance policy, all variant metrics and complete delivery outcomes into deterministic machine data plus a readable offline review. The headless path reuses one simulation. Browser source now exports the exact completed Worker results through the same projection and renderer, with explicit unverified build identity and no acceptance policy. Hosted rollout and native download validation remain separate release gates.
 
 ## Implemented: searchable road editing
 
-The [road picker](ROAD_PICKER.md) filters the native selector by road name, full endpoint ID or representative edge ID, with result counts and saved-schedule context. It preserves existing grouping, direction semantics and variant independence. The v9 demo has bounded desktop Chromium evidence. A run-lifecycle focus finding was corrected with regression tests and independent review, then deployed in v10. Native cancellation/completion retests and served-manifest parity passed; public GitHub source mapping and exact-commit CI remain pending.
+The [road picker](ROAD_PICKER.md) filters the native selector by road name, full endpoint ID or representative edge ID, with result counts and saved-schedule context. It preserves existing grouping, direction semantics and variant independence. The v9 demo has bounded desktop Chromium evidence. A run-lifecycle focus finding was corrected with regression tests and independent review, then deployed in v10. Native cancellation/completion retests and served-manifest parity passed; [public GitHub source mapping and exact-commit CI passed](VERIFICATION.md#v10-native-focus-checks-and-screenshot).
 
 ## Release-readiness gates
 
@@ -38,7 +38,7 @@ The [road picker](ROAD_PICKER.md) filters the native selector by road name, full
 
 ## Next useful contributions
 
-- Complete the exact-commit source release checks and retain separate assistive-technology gaps
+- Release and natively verify browser review downloads; retain separate assistive-technology gaps
 - Actual browser interruption/import/export coverage
 - Paused-render and large-fixture profiling, with repeatable measurements
 - Additional independent routing oracles and cross-browser deterministic fixtures

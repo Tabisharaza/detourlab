@@ -1,5 +1,6 @@
 import { createDemoScenario, createPresets, validateScenario, LIMITS } from './scenario.js';
 import { experimentFromScenario, validateExperiment, parseExperiment, scenarioForVariant, exportExperiment, EXPERIMENT_LIMITS } from './experiment.js';
+import { createBrowserReview } from './browser-review.js';
 import { NetworkMap } from './map.js';
 import { createTutorialExperiment } from './tutorial.js';
 import { decodeFileInput, FILE_INPUT_MAX_BYTES, formatInputError } from './file-input.js';
@@ -22,6 +23,8 @@ let toastTimeout;
 let initial = true;
 let lessonBackup = null;
 let dialogFocus = null;
+let reviewRevision = 0;
+let preparedReview = null;
 const lessonSteps = [
   { id: 'clear', time: 0, story: 'With clear roads, the van takes A → B → C: 200 m and arrival at 20 s, before the 22 s deadline. Its run finishes at 23 s because delivery service takes 3 more seconds.' },
   { id: 'close-at-10', time: 10, story: 'At 10 s the van reaches B. B → C closes at that exact instant, so entry is blocked. It takes A → B → D → C instead: 260 m, arrival at 26 s, and 4 s late. The run finishes at 29 s, including 3 s of service.' },
@@ -252,6 +255,7 @@ function updateControls() {
   updateVariants(); updateEvents(); updateLesson(); updateRoadDetails(); map.invalidate();
 }
 function clearResults() {
+  invalidateReview();
   for (const id of ['distance', 'late', 'unreachable']) { $(id + '-value').textContent = '—'; $(id + '-delta').textContent = 'Calculating…'; $(id + '-baseline').textContent = ''; }
   for (const id of ['route-baseline-distance', 'route-scenario-distance', 'route-baseline-time', 'route-scenario-time']) $(id).textContent = '—';
   $('route-reason').textContent = 'Calculating this experiment. No previous results are shown.';
@@ -301,7 +305,7 @@ function compute() {
     clearTimeout(workerTimeout); state.pending = false; $('status-line').parentElement.setAttribute('aria-busy', 'false'); hideCancelRun();
     currentWorker.terminate(); if (worker === currentWorker) worker = null;
     if (data.error) { computationFailed(data.error); toast(`The experiment could not run: ${data.error}`, true); $('status-line').textContent = 'Experiment failed. Edit or import a smaller experiment.'; $('comparison-status').textContent = 'No partial results shown. ' + data.error; updateVariants(true); return; }
-    state.allResults = { baseline: data.baseline, variants: data.variants }; showSelectedResult();
+    state.allResults = { baseline: data.baseline, variants: data.variants }; showSelectedResult(); updateReviewAvailability();
     $('status-line').textContent = `${state.scenario.jobs.length} shared orders · ${state.experiment.variants.length} variants · synchronized replay`;
     $('comparison-status').textContent = `Open-network baseline: ${distanceText(data.baseline.metrics.distanceM)}, ${data.baseline.metrics.lateJobs} late, ${data.baseline.metrics.unreachableJobs} unreachable. Cards show final modeled outcomes.`;
     if (initial) { initial = false; document.documentElement.dataset.ready = 'true'; }
@@ -420,6 +424,7 @@ function dialogControls(dialog) {
   return [...dialog.querySelectorAll('button, [href], input, select, textarea, [tabindex]')].filter(element => element.tabIndex >= 0 && canFocus(element));
 }
 function dialogReturnTargets(dialog, source) {
+  if (dialog === $('review-dialog')) return [source, $('review-button'), $('run-experiment')];
   return dialog === $('guide-dialog') ? [source, $('guide-button'), $('assumptions-button'), $('try-example-button')] : [source, $('try-example-button'), $('quick-example-button'), $('assumptions-button')];
 }
 function openDialog(dialog, source, initialFocus) {
@@ -492,6 +497,53 @@ function returnToExperiment() {
   toast('Your experiment and view are restored. Playback is paused; results are being recomputed.');
 }
 
+function updateReviewAvailability() {
+  $('review-button').disabled = state.pending || !state.allResults;
+}
+function invalidateReview() {
+  reviewRevision += 1; preparedReview = null;
+  for (const id of ['download-review', 'download-bundle']) $(id).disabled = true;
+  $('review-status').textContent = 'Results changed. Close this window and finish a new run before exporting.';
+  updateReviewAvailability();
+}
+async function prepareReview() {
+  if (state.pending || !state.allResults) return;
+  setPlaying(false);
+  openDialog($('review-dialog'), $('review-button'), $('review-dialog-title'));
+  const id = ++reviewRevision, experiment = state.experiment, results = state.allResults;
+  preparedReview = null;
+  for (const button of ['download-review', 'download-bundle']) $(button).disabled = true;
+  $('review-status').textContent = 'Preparing the complete results from this run…';
+  try {
+    const files = await createBrowserReview(experiment, results);
+    if (id !== reviewRevision || !reviewIsCurrent(experiment, results) || !$('review-dialog').open) return;
+    preparedReview = { ...files, experiment, results };
+    $('review-status').textContent = `${experiment.name} · ${experiment.variants.length} variants. Both files are ready. Acceptance: not evaluated (no thresholds configured).`;
+    for (const button of ['download-review', 'download-bundle']) $(button).disabled = false;
+  } catch (error) {
+    if (id !== reviewRevision || !$('review-dialog').open) return;
+    $('review-status').textContent = `Review could not be prepared. ${formatInputError(error)} Close and try again, or use the experiment export and CLI.`;
+  }
+}
+function reviewIsCurrent(experiment, results) {
+  return !state.pending && state.experiment === experiment && state.allResults === results;
+}
+function downloadReview(kind) {
+  const packet = preparedReview;
+  if (!packet || !$('review-dialog').open || !reviewIsCurrent(packet.experiment, packet.results)) { invalidateReview(); return; }
+  const markdown = kind === 'review';
+  const blob = new Blob([markdown ? packet.reviewMarkdown : packet.bundleJson], { type: markdown ? 'text/markdown;charset=utf-8' : 'application/json' });
+  const url = URL.createObjectURL(blob), link = node('a');
+  link.href = url; link.download = markdown ? 'REVIEW.md' : 'bundle.json';
+  link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+  toast(`${markdown ? 'Readable review' : 'Complete results bundle'} download requested. Save both files together.`);
+}
+$('review-button').addEventListener('click', prepareReview);
+$('download-review').addEventListener('click', () => downloadReview('review'));
+$('download-bundle').addEventListener('click', () => downloadReview('bundle'));
+$('review-close').addEventListener('click', () => { invalidateReview(); closeDialog($('review-dialog')); });
+$('review-dialog').addEventListener('cancel', invalidateReview);
+
 for (const name of ['input', 'change']) $('closure-time').addEventListener(name, (event) => { $('closure-time-label').textContent = clock(event.target.value); updateRoadDetails(); });
 $('road-search').addEventListener('input', () => filterRoads());
 $('clear-road-search').addEventListener('click', () => { $('road-search').value = ''; filterRoads(); });
@@ -547,7 +599,7 @@ $('run-experiment').addEventListener('click', () => { importRevision += 1; compu
 for (const id of ['try-example-button', 'quick-example-button', 'guide-example-button']) $(id).addEventListener('click', () => showLessonConfirmation($(id)));
 $('lesson-start').addEventListener('click', startLesson);
 $('lesson-cancel').addEventListener('click', () => closeDialog($('lesson-dialog')));
-for (const id of ['guide-dialog', 'lesson-dialog']) {
+for (const id of ['guide-dialog', 'lesson-dialog', 'review-dialog']) {
   const dialog = $(id);
   dialog.addEventListener('keydown', event => containDialogTab(event, dialog));
   dialog.addEventListener('close', () => restoreDialogFocus(dialog));
@@ -560,7 +612,7 @@ for (const step of lessonSteps) $('lesson-' + step.id).addEventListener('click',
 for (const id of ['guide-button', 'assumptions-button']) $(id).addEventListener('click', () => { setPlaying(false); openDialog($('guide-dialog'), $(id), $('guide-dialog-title')); });
 $('guide-close').addEventListener('click', () => closeDialog($('guide-dialog')));
 $('guide-dialog').addEventListener('click', (event) => { if (event.target === $('guide-dialog')) { const bounds = event.target.getBoundingClientRect(); if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) closeDialog(event.target); } });
-window.addEventListener('keydown', (event) => { if (event.code === 'Space' && !['INPUT','BUTTON','SELECT','TEXTAREA'].includes(document.activeElement.tagName) && !$('guide-dialog').open && !$('lesson-dialog').open) { event.preventDefault(); $('play-button').click(); } });
+window.addEventListener('keydown', (event) => { if (event.code === 'Space' && !['INPUT','BUTTON','SELECT','TEXTAREA'].includes(document.activeElement.tagName) && !$('guide-dialog').open && !$('lesson-dialog').open && !$('review-dialog').open) { event.preventDefault(); $('play-button').click(); } });
 document.addEventListener('visibilitychange', () => { if (document.hidden) setPlaying(false); });
 let previous = performance.now();
 function frame(now) { const delta = Math.min((now - previous) / 1000, .1); previous = now; if (state.playing && !state.pending) { setTime(state.time + delta * state.speed); if (state.time >= Number($('timeline').max)) setPlaying(false); } map.render(now); requestAnimationFrame(frame); }

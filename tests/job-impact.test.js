@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { LIMITS } from '../src/scenario.js';
 import { canonicalExperiment, simulateExperiment, validateExperiment } from '../src/experiment.js';
-import { createJobImpactReport, IMPACT_LIMITS } from '../scripts/job-impact.js';
+import { createJobImpactReport, projectJobOutcomes, IMPACT_LIMITS } from '../scripts/job-impact.js';
 
 const readJSON = name => JSON.parse(readFileSync(new URL(`../examples/${name}`, import.meta.url), 'utf8'));
 const fixture = () => readJSON('minimal-experiment.json');
@@ -26,9 +26,9 @@ const reverseKeys = value => Array.isArray(value) ? value.map(reverseKeys)
 // without adding a production injection API or relying on experimental mocks.
 function instrument({ maxBytes = IMPACT_LIMITS.maxBytes, runner = simulateExperiment } = {}) {
   const source = readFileSync(new URL('../scripts/job-impact.js', import.meta.url), 'utf8')
-    .replace(/^import .*;\n/gm, '').replace(/^export /gm, '')
+    .replace(/^import .*;\n/gm, '').replace(/^export \{.*\};\n/gm, '').replace(/^export /gm, '')
     .replace('maxBytes: 4 * 1024 * 1024', `maxBytes: ${maxBytes}`);
-  return new Function('createHash', 'canonicalExperiment', 'simulateExperiment', 'validateExperiment', `${source}\nreturn createJobImpactReport;`)(createHash, canonicalExperiment, runner, validateExperiment);
+  return new Function('createHash', 'canonicalExperiment', 'simulateExperiment', 'validateExperiment', 'projectJobOutcomes', `${source}\nreturn createJobImpactReport;`)(createHash, canonicalExperiment, runner, validateExperiment, projectJobOutcomes);
 }
 
 test('impact report has a frozen, bounded format limit', () => {

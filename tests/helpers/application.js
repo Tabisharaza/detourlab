@@ -2,11 +2,12 @@ import { readFileSync } from 'node:fs';
 import * as scenarioSchema from '../../src/scenario.js';
 import * as experimentSchema from '../../src/experiment.js';
 import * as fileInput from '../../src/file-input.js';
+import { createBrowserReview } from '../../src/browser-review.js';
 import { createTutorialExperiment } from '../../src/tutorial.js';
 
 // Execute only checked-in app source with DOM/Worker stand-ins. This covers
 // handler state and result rendering, never browser layout, file pickers or QA.
-export function application({ workerConstructionError = () => null, mapClass = null, now = () => performance.now(), deferDialogClose = false } = {}) {
+export function application({ workerConstructionError = () => null, mapClass = null, now = () => performance.now(), deferDialogClose = false, reviewBuilder = createBrowserReview } = {}) {
   const created = [];
   const markup = readFileSync(new URL('../../index.html', import.meta.url), 'utf8');
   const closeEvents = [];
@@ -161,7 +162,7 @@ export function application({ workerConstructionError = () => null, mapClass = n
   const windowListeners = new Map();
   const window = { addEventListener(name, handler) { if (!windowListeners.has(name)) windowListeners.set(name, []); windowListeners.get(name).push(handler); } };
   const environment = {
-    ...scenarioSchema, ...experimentSchema, ...fileInput, createTutorialExperiment, document, getComputedStyle: computedStyle, NetworkMap: mapClass ? class extends mapClass {
+    ...scenarioSchema, ...experimentSchema, ...fileInput, createBrowserReview: reviewBuilder, createTutorialExperiment, document, getComputedStyle: computedStyle, NetworkMap: mapClass ? class extends mapClass {
       constructor(...args) { super(...args); maps.push(this); }
     } : NetworkMap, Worker: FakeWorker,
     URL, Blob, TextEncoder, TextDecoder, performance: { now }, structuredClone,

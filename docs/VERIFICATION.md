@@ -2,6 +2,16 @@
 
 **Current public demo: v10**, deployed October 19, 2026 UTC. [The v9 record](#v9-road-picker-deployment-and-bounded-desktop-checks) describes bounded desktop Chromium checks and the run-lifecycle focus finding. [The corrected v10 deployment](#v10-run-lifecycle-focus-deployment) is recorded separately. Native cancellation/completion retests and served-manifest parity passed; The [published source `addd5f6`](https://github.com/Tabisharaza/detourlab/commit/addd5f62bba1225c23b779c8c9ab684db2be1326) and [CI run 39227618544](https://github.com/Tabisharaza/detourlab/actions/runs/39227618544) are verified; both pinned Node jobs passed. Earlier version records remain historical evidence.
 
+## Browser review source milestone
+
+On **October 20, 2026 UTC**, the source workbench gained an all-variant review export using the exact completed Worker result. The browser and CLI share a pure report projection, renderer and output budgets. Browser packets explicitly have no acceptance policy and no verified implementation fingerprint. See [design and release boundary](BROWSER_REVIEWS.md) and [usage](REVIEW_PACKETS.md#download-from-the-browser-workbench).
+
+Local checks on **Node 24.19.0 / npm 11.9.0 / Linux** passed **628 core tests + 120 optional authoring tests = 748 distinct tests**, **67 core JavaScript syntax checks**, and **113 repeated CLI tests** (already included in the core count). Twelve new UI handler tests cover exact result reuse, separate downloads, edit/import/run invalidation, old completion/rejection ordering, Escape/focus/Tab containment, failure/timeout and the modal Space shortcut. Fifteen browser-report tests exercise real demo/Meridian/tiny/floating fixtures, strict copied ledgers, complete data, byte/hash parity and budgets. Independent code review found a global Space shortcut reaching background playback from the modal title; the guard and regression test now prevent it.
+
+Eighteen old/new report comparisons (three fixtures × three policy cases × two generator identities) preserved complete CLI bundle and review bytes. The checked-in tiny review was regenerated because the implementation fingerprint now includes the extracted shared modules. Engine behavior, schemas, model assumptions and the dependency-free lockfile remain unchanged. The release allowlist explicitly includes the five new browser modules. All **25 distribution payloads plus manifest** match a second build byte-for-byte, with source hashes and license notices verified.
+
+**The public demo remains v10.** This source work does not claim native browser download/save/reopen, import roundtrip, mobile, screen-reader or hosted rollout checks. DOM/Worker stand-ins are not those checks. Exact-commit GitHub publication and CI must be verified separately; no contribution issue is closed by this milestone alone.
+
 ## Headless job-impact milestone
 
 Local checks on **October 15, 2026**, using **Node 24.19.0 / npm 11.9.0 / Linux**, passed **432 core tests**, **120 optional authoring tests**, **48 core JavaScript syntax checks** and the optional tool’s two syntax checks. The 48 new tests comprise 20 report tests and 28 actual CLI subprocess tests. CI now separately repeats the new CLI cases alongside the existing gates: **57 repeated tests**, not additional unique tests.
