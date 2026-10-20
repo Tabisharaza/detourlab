@@ -33,7 +33,7 @@ Browser packets use the same projection, readable renderer and output budgets as
 
 Editing, importing, resetting, canceling or starting another run invalidates prepared files. Closing the dialog discards preparation; reopening takes a fresh snapshot. Failed preparation never enables downloads. Browser downloads are explicit individual actions, not an automatic batch.
 
-**Release boundary:** this source feature is not yet deployed to the public v10 demo. Automated DOM/Worker tests are not native browser download, file-picker, accessibility or mobile verification. Those checks and the hosted release remain open.
+**Release boundary:** this feature is deployed in the public v11 demo. [Bounded desktop Chromium checks](VERIFICATION.md#v11-browser-review-deployment-and-native-checks) verified actual downloads, their contents, repeat export, edit/reopen and modal keyboard behavior. Native file-picker/import roundtrips, mobile and assistive-technology checks remain open. Automated race tests are not native timing-race verification.
 
 ## Questions the review answers
 

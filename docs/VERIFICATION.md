@@ -1,6 +1,22 @@
 # Verification record
 
-**Current public demo: v10**, deployed October 19, 2026 UTC. [The v9 record](#v9-road-picker-deployment-and-bounded-desktop-checks) describes bounded desktop Chromium checks and the run-lifecycle focus finding. [The corrected v10 deployment](#v10-run-lifecycle-focus-deployment) is recorded separately. Native cancellation/completion retests and served-manifest parity passed; The [published source `addd5f6`](https://github.com/Tabisharaza/detourlab/commit/addd5f62bba1225c23b779c8c9ab684db2be1326) and [CI run 39227618544](https://github.com/Tabisharaza/detourlab/actions/runs/39227618544) are verified; both pinned Node jobs passed. Earlier version records remain historical evidence.
+**Previous public demo: v10**, deployed October 19, 2026 UTC. The current v11 release is recorded below. [The v9 record](#v9-road-picker-deployment-and-bounded-desktop-checks) describes bounded desktop Chromium checks and the run-lifecycle focus finding. [The corrected v10 deployment](#v10-run-lifecycle-focus-deployment) is recorded separately. Native cancellation/completion retests and served-manifest parity passed; The [published source `addd5f6`](https://github.com/Tabisharaza/detourlab/commit/addd5f62bba1225c23b779c8c9ab684db2be1326) and [CI run 39227618544](https://github.com/Tabisharaza/detourlab/actions/runs/39227618544) are verified; both pinned Node jobs passed. Earlier version records remain historical evidence.
+
+## v11 browser review deployment and native checks
+
+**Current public demo: v11**, deployed **October 20, 2026 at 08:12:49 UTC** to <https://detourlab-tabish.tabisharaza.chatgpt.site/>. The public audience and earlier versions were preserved. Hosting commit `15b2c007e13e19da6f35b08ac716ec738884eca9` matches all 128 files from [GitHub source `959c94a`](https://github.com/Tabisharaza/detourlab/commit/959c94ae917005544e1a5426498b7064c2d46043); only the retained hosting manifest is additional. This documentation follow-up does not change the deployed application.
+
+The supported source workflow reran all **628 core tests**, **67 syntax checks**, built the **25-payload distribution**, and verified its exact allowlist, hashes, source bytes and license notices. Saved version `appgprj_6ac90e32f4c0819188f610bb51276139~appgver_c54b33b308648191b55bc0a85c56e7ad` deployed successfully as `appgdep_6ad7227a9dd88191a5699a940cc99984`.
+
+Bounded **cloud desktop Chromium** checks on the live site at **08:16–08:18 UTC** passed:
+
+- Native controls downloaded and saved `REVIEW.md` (12,582 bytes) and `bundle.json` (615,943 bytes) for the default Meridian experiment. Each of its two variants retains 192 delivery outcomes; policy is empty, verdicts are not evaluated, and browser source/build identity is null.
+- The downloaded JSON and Markdown passed shared integrity validation and matched a source CLI rerun byte-for-byte using the same browser generator identity. This is a verified content comparison, not authentication of an arbitrary browser build.
+- Closing/reopening and exporting the same results produced byte-identical JSON.
+- The tiny example exported all three variants with arrival times **20 / 26 / 20 seconds**. Renaming a variant and completing the new run produced its fresh name and a changed packet fingerprint; both downloaded packets passed exact rerun comparison.
+- Initial focus reached the dialog title. Tab/Shift+Tab wrapped within enabled dialog controls; Escape restored Review results focus. Space on the title did not start background playback. The desktop modal was visually legible.
+
+These checks do **not** establish native file-picker/import roundtrips, mobile behavior, assistive-technology support, other browser compatibility or forced native asynchronous-race behavior. Race/timeout guards retain their automated test evidence. No contribution issue is closed by this bounded smoke test.
 
 ## Browser review source milestone
 
@@ -10,7 +26,7 @@ Local checks on **Node 24.19.0 / npm 11.9.0 / Linux** passed **628 core tests + 
 
 Eighteen old/new report comparisons (three fixtures × three policy cases × two generator identities) preserved complete CLI bundle and review bytes. The checked-in tiny review was regenerated because the implementation fingerprint now includes the extracted shared modules. Engine behavior, schemas, model assumptions and the dependency-free lockfile remain unchanged. The release allowlist explicitly includes the five new browser modules. All **25 distribution payloads plus manifest** match a second build byte-for-byte, with source hashes and license notices verified.
 
-**The public demo remains v10.** This source work does not claim native browser download/save/reopen, import roundtrip, mobile, screen-reader or hosted rollout checks. DOM/Worker stand-ins are not those checks. The [published source `222a1d7`](https://github.com/Tabisharaza/detourlab/commit/222a1d77eb77bd54c2423121cd3767ed242aa223) passed [CI run 39384575574](https://github.com/Tabisharaza/detourlab/actions/runs/39384575574): both Node 24.19.0 and 24.21.0 jobs completed every step successfully. All 128 source files matched remote tree `502dc4fb12b8f704472276342653176edccc572b`. This verifies that feature commit, not later documentation edits. No contribution issue is closed by this milestone alone.
+**At source publication, the demo remained v10.** The later [v11 rollout and bounded native checks](#v11-browser-review-deployment-and-native-checks) are recorded separately. This source-only phase did not claim those checks. DOM/Worker stand-ins are not those checks. The [published source `222a1d7`](https://github.com/Tabisharaza/detourlab/commit/222a1d77eb77bd54c2423121cd3767ed242aa223) passed [CI run 39384575574](https://github.com/Tabisharaza/detourlab/actions/runs/39384575574): both Node 24.19.0 and 24.21.0 jobs completed every step successfully. All 128 source files matched remote tree `502dc4fb12b8f704472276342653176edccc572b`. This verifies that feature commit, not later documentation edits. No contribution issue is closed by this milestone alone.
 
 ## Headless job-impact milestone
 

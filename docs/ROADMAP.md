@@ -20,7 +20,7 @@ The [job-impact explainer](JOB_IMPACT.md) shows which jobs change status, arriva
 
 ## Implemented: portable experiment reviews
 
-[Review packets](REVIEW_PACKETS.md) consolidate the validated input, existing acceptance policy, all variant metrics and complete delivery outcomes into deterministic machine data plus a readable offline review. The headless path reuses one simulation. Browser source now exports the exact completed Worker results through the same projection and renderer, with explicit unverified build identity and no acceptance policy. Hosted rollout and native download validation remain separate release gates.
+[Review packets](REVIEW_PACKETS.md) consolidate the validated input, existing acceptance policy, all variant metrics and complete delivery outcomes into deterministic machine data plus a readable offline review. The headless path reuses one simulation. Browser source now exports the exact completed Worker results through the same projection and renderer, with explicit unverified build identity and no acceptance policy. The v11 hosted rollout and bounded desktop download checks passed; native import roundtrips, mobile, assistive technology and cross-browser checks remain separate gates.
 
 ## Implemented: searchable road editing
 
@@ -38,7 +38,7 @@ The [road picker](ROAD_PICKER.md) filters the native selector by road name, full
 
 ## Next useful contributions
 
-- Release and natively verify browser review downloads; retain separate assistive-technology gaps
+- Complete native import roundtrips and cross-browser review checks; retain separate assistive-technology gaps
 - Actual browser interruption/import/export coverage
 - Paused-render and large-fixture profiling, with repeatable measurements
 - Additional independent routing oracles and cross-browser deterministic fixtures

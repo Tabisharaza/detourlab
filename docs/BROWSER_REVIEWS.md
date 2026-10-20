@@ -22,8 +22,8 @@ The UI takes identity references to the current experiment and completed result 
 
 Downloads are separate explicit clicks. The JSON contains complete per-job rows; the Markdown prioritizes at most 20 exceptions per variant and states omitted counts. Both carry content fingerprints, not signatures. Browser generator identity is explicitly unverified (`implementation: null`, `sourceRevision: null`) and acceptance is not evaluated because no policy was supplied. Use the CLI for source-identified reports and explicit thresholds.
 
-## Remaining checks
+## Release and remaining checks
 
-The public demo remains v10. This source milestone does not claim a hosted rollout. Automated DOM/Worker checks are not native browser checks. Native download/save/reopen, import roundtrip, mobile, assistive technology and cross-browser checks remain open. No contribution issue is closed merely because the source exporter exists.
+The public v11 demo now serves the browser exporter. Actual desktop Chromium downloads were saved and verified against the source rerun; repeated export, tiny-example values, edited fresh data and modal keyboard behavior passed. See [the bounded deployment record](VERIFICATION.md#v11-browser-review-deployment-and-native-checks). Native import roundtrip, mobile, assistive technology and cross-browser checks remain open. No contribution issue is closed merely because the source exporter exists.
 
 Hosted release and native checks are separate from source publication. Public GitHub publication and its exact-commit CI are recorded separately in VERIFICATION.md.
