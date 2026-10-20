@@ -10,7 +10,7 @@ Local checks on **Node 24.19.0 / npm 11.9.0 / Linux** passed **628 core tests + 
 
 Eighteen old/new report comparisons (three fixtures × three policy cases × two generator identities) preserved complete CLI bundle and review bytes. The checked-in tiny review was regenerated because the implementation fingerprint now includes the extracted shared modules. Engine behavior, schemas, model assumptions and the dependency-free lockfile remain unchanged. The release allowlist explicitly includes the five new browser modules. All **25 distribution payloads plus manifest** match a second build byte-for-byte, with source hashes and license notices verified.
 
-**The public demo remains v10.** This source work does not claim native browser download/save/reopen, import roundtrip, mobile, screen-reader or hosted rollout checks. DOM/Worker stand-ins are not those checks. Exact-commit GitHub publication and CI must be verified separately; no contribution issue is closed by this milestone alone.
+**The public demo remains v10.** This source work does not claim native browser download/save/reopen, import roundtrip, mobile, screen-reader or hosted rollout checks. DOM/Worker stand-ins are not those checks. The [published source `222a1d7`](https://github.com/Tabisharaza/detourlab/commit/222a1d77eb77bd54c2423121cd3767ed242aa223) passed [CI run 39384575574](https://github.com/Tabisharaza/detourlab/actions/runs/39384575574): both Node 24.19.0 and 24.21.0 jobs completed every step successfully. All 128 source files matched remote tree `502dc4fb12b8f704472276342653176edccc572b`. This verifies that feature commit, not later documentation edits. No contribution issue is closed by this milestone alone.
 
 ## Headless job-impact milestone
 

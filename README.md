@@ -109,7 +109,9 @@ npm run scenario -- examples/meridian-default.json --json
 
 ## Share a complete review
 
-In the source workbench, choose **Review results** after a run, then download the readable review and JSON evidence separately. This browser feature is not yet on the public v10 demo. It uses the completed results without rerunning, reports acceptance as **not evaluated**, and explicitly leaves browser implementation identity unverified. [Browser export boundaries](docs/REVIEW_PACKETS.md#download-from-the-browser-workbench).
+The [source milestone passed both pinned Node CI jobs](https://github.com/Tabisharaza/detourlab/actions/runs/39384575574), with 628 core and 120 optional tests.
+
+In the [published source workbench](https://github.com/Tabisharaza/detourlab/commit/222a1d77eb77bd54c2423121cd3767ed242aa223), choose **Review results** after a run, then download the readable review and JSON evidence separately. This browser feature is not yet on the public v10 demo. It uses the completed results without rerunning, reports acceptance as **not evaluated**, and explicitly leaves browser implementation identity unverified. [Browser export boundaries](docs/REVIEW_PACKETS.md#download-from-the-browser-workbench).
 
 ```sh
 node scripts/report-experiment.js examples/minimal-experiment.json \
