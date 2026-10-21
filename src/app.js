@@ -55,16 +55,18 @@ function roadEditIds(id, forceReopen = false) {
 }
 function activeVariant() { return state.experiment.variants.find(variant => variant.id === state.selectedVariantId); }
 function changedExperiment(experiment, selectedId = state.selectedVariantId) {
-  const validated = validateExperiment(experiment);
+  let validated;
+  try { validated = validateExperiment(experiment); }
+  catch (error) { toast(`Change rejected. ${formatInputError(error)}`, true); return false; }
   importRevision += 1;
   state.experiment = validated;
   if (state.lessonActive) state.lessonModified = true;
   state.selectedVariantId = selectedId;
   state.scenario = scenarioForVariant(state.experiment, selectedId);
-  updateControls(); compute();
+  updateControls(); compute(); return true;
 }
 function replaceClosures(closures) {
-  changedExperiment({ ...state.experiment, variants: state.experiment.variants.map(variant => variant.id === state.selectedVariantId ? { ...variant, closures } : variant) });
+  return changedExperiment({ ...state.experiment, variants: state.experiment.variants.map(variant => variant.id === state.selectedVariantId ? { ...variant, closures } : variant) });
 }
 function setClosures(ids, atS = closureAt()) {
   const edgeIds = [...new Set(ids)].sort();
@@ -151,7 +153,7 @@ function updateEvents() {
         const current = state.scenario.closures.find(item => item.id === closureId); if (!current) return;
         const atS = Number(input.value);
         if (input.value.trim() === '' || !Number.isFinite(atS) || atS < 0 || atS > LIMITS.maxTimeS) { input.value = String(current.atS); toast('Enter a closure time from 0 to 604800 seconds.', true); return; }
-        replaceClosures(state.scenario.closures.map(item => item.id === closureId ? { ...item, atS } : item));
+        if (!replaceClosures(state.scenario.closures.map(item => item.id === closureId ? { ...item, atS } : item))) input.value = String(current.atS);
       });
       remove.addEventListener('click', () => { if (state.selectedVariantId === variantId) replaceClosures(state.scenario.closures.filter(item => item.id !== closureId)); });
       controls.append(label, input, remove); row.append(node('strong'), node('small'), controls);
@@ -582,7 +584,7 @@ $('variant-select').addEventListener('change', event => selectVariant(event.targ
 $('rename-variant').addEventListener('click', () => {
   const name = $('variant-name').value.trim();
   if (!name || name.length > EXPERIMENT_LIMITS.nameLength) { toast('Give the variant a short nonempty name.', true); return; }
-  try { changedExperiment({ ...state.experiment, variants: state.experiment.variants.map(variant => variant.id === state.selectedVariantId ? { ...variant, name } : variant) }); } catch (error) { toast(error.message, true); }
+  changedExperiment({ ...state.experiment, variants: state.experiment.variants.map(variant => variant.id === state.selectedVariantId ? { ...variant, name } : variant) });
 });
 $('duplicate-variant').addEventListener('click', () => {
   if (state.experiment.variants.length >= EXPERIMENT_LIMITS.maxVariants) return;

@@ -520,3 +520,30 @@ It does **not** independently download or hash each remote payload, and the
 manifest is not a signed provenance guarantee. Native file-picker/download
 roundtrips, screen readers, reduced motion, native mobile, additional browsers
 and browser performance profiling remain unverified.
+
+## Imported experiment mutation limits: source-only correction
+
+On **October 21, 2026**, the checked-in UI handlers reproduced a silent-action
+failure after importing a valid two-variant experiment with **4,001 closures**
+in the selected variant. Duplicate remained enabled, then threw the aggregate
+8,000-closure validation error without displaying it. The experiment remained
+unchanged, but the prior successful-import toast stayed visible. Valid imported
+data could similarly exhaust the reference or byte budget during later edits.
+
+The correction catches validation failures before changing experiment state or
+starting another worker, displays a bounded error, and restores a rejected
+cutoff input to its saved value without moving focus. Seven regressions cover
+duplicate closure/reference/byte rejection, valid duplication at exactly 8,000
+closures, road-add rejection, cutoff rollback and rename rejection. Against the
+original app, five rejected-action cases threw uncaught errors, the rename case
+lacked the consistent rejection prefix, and the valid-duplicate control passed
+(**six failed / one passed**). All seven pass with the correction.
+
+Local verification used **Node 24.19.0**: **68 JavaScript syntax checks**, all
+**635 core tests**, all **120 optional schema/editor tests**, the static build,
+and exact allowlist/source/hash verification of **25 release files** passed. A
+second build matched every release byte and `manifest.json`. The new regressions
+use DOM/Worker stand-ins and real application handlers, not a native browser.
+This is source-only evidence: **this correction was not deployed or tested with
+a native file chooser or browser in this pass**. Existing deployment and native
+QA records above are not extended by these results.
