@@ -12,7 +12,11 @@ Original [Draft-07 scenario and experiment schemas](JSON_SCHEMAS.md) provide sco
 
 ## Implemented: headless delivery-impact inspection
 
-The [job-impact explainer](JOB_IMPACT.md) shows which jobs change status, arrival or service completion for a chosen variant, with an explicit transition matrix, null unreachable comparisons and bounded complete JSON. It exposes same-status arrival shifts hidden by aggregate lateness without inferring per-job paths or complete causal attribution. Browser inspection and accessibility gates remain separate.
+The [job-impact explainer](JOB_IMPACT.md) shows which jobs change status, arrival or service completion for a chosen variant, with an explicit transition matrix, null unreachable comparisons and bounded complete JSON. It exposes same-status arrival shifts hidden by aggregate lateness without inferring per-job paths or complete causal attribution. The browser inspector below reuses the same projection; native-browser and accessibility gates remain separate.
+
+## Implemented in source: browser delivery-impact inspection
+
+The [delivery inspector](BROWSER_IMPACT.md) reuses completed results and the shared job projection to compare the selected variant with its baseline. It exposes same-status arrival shifts, original-order 20-row pages, explicit missing timing comparisons, full/filtered counts and keyboard-safe invalidation. No simulation, model or acceptance policy changes. Source tests are separate from native-browser, assistive-technology, mobile and deployment gates, which remain pending for this inspector.
 
 ## Implemented: per-job regression gates
 

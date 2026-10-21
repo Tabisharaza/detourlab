@@ -547,3 +547,35 @@ use DOM/Worker stand-ins and real application handlers, not a native browser.
 This is source-only evidence: **this correction was not deployed or tested with
 a native file chooser or browser in this pass**. Existing deployment and native
 QA records above are not extended by these results.
+
+## Browser delivery-impact inspector: source-only milestone
+
+On **October 21, 2026**, the source added **Inspect deliveries**, reusing the
+completed Worker results and the existing job-impact projection. A selected
+variant can be compared against the clear-road baseline using changed-outcome,
+status-change, same-status-arrival-change and all-delivery filters. Original
+input order is retained; 20-row pages expose every matching job and state the
+filtered, total and excluded counts. Unreachable timings remain explicit
+missing evidence rather than zero. No routing, import/export or threshold
+semantics changed, and no credentials, dependencies or network calls were added.
+
+Local verification on **Node 24.19.0** passed **71 JavaScript syntax checks**,
+**665 core tests** and **120 optional schema/editor tests**, for **785 distinct
+tests** with zero failures/skips. The **113 CLI tests** were repeated separately
+and are already included in the core count. The static build, exact release
+allowlist, source-byte and hash verification passed for **26 payload files**;
+a second build matched every file byte and `manifest.json`.
+
+The 30 new inspector tests cover exact tiny/Meridian CLI metrics and job-row
+parity, all 2,000 supported jobs through bounded pages, fractional timing,
+unreachable nulls, empty views, safe imported labels, committed and rejected
+edits, delayed imports, cancellation, failures, stale and repeated Worker
+results, modal reopening, Escape, Tab containment and focus handoff. The seven
+imported-mutation-limit regressions above remain included unchanged. Browser UI
+tests execute checked-in handlers with DOM/Worker stand-ins, not a browser.
+
+**This inspector has not been deployed, reviewed in a native browser or verified
+in hosted CI by this source pass.** Native scrolling/focus, mobile, 200% zoom,
+reduced motion, screen readers and cross-browser review remain separate gates.
+The existing v11 browser/export observations are not evidence for this new
+interface. [Behavior, bounds and native review checklist](BROWSER_IMPACT.md).

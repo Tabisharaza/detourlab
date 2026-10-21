@@ -31,6 +31,8 @@ For opt-in per-job acceptance gates, run `node --test tests/job-gates.test.js te
 
 For review packets, see [REVIEW_PACKETS.md](docs/REVIEW_PACKETS.md). Preserve one whole-experiment simulation, complete machine rows, existing CLI contracts, deterministic source/policy identity, separate safe display escaping and no-overwrite output. Test a failed acceptance policy producing a complete packet as well as invalid-input and write failures. Never weaken bounds or overwrite an existing destination to make a test pass.
 
+For browser delivery inspection, run `node --test tests/browser-impact.test.js tests/browser-impact-ui.test.js`. Preserve completed-result reuse, exact shared job semantics, 20-row bounds with full/filtered counts, explicit null comparisons and invalidation/focus behavior. [BROWSER_IMPACT.md](docs/BROWSER_IMPACT.md) separates source tests from pending native-browser checks.
+
 ## Choose a scope
 
 Start with [open contribution issues](https://github.com/Tabisharaza/detourlab/issues). [Additional issue scopes](docs/ISSUE_DRAFTS.md) include reproducible problems, acceptance criteria and explicit non-goals, and distinguish published issues from proposals. Before adding a solver, city dataset, dependency or storage service, propose the interface and its effect on licensing, privacy and reproducibility.

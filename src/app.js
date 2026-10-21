@@ -1,6 +1,7 @@
 import { createDemoScenario, createPresets, validateScenario, LIMITS } from './scenario.js';
 import { experimentFromScenario, validateExperiment, parseExperiment, scenarioForVariant, exportExperiment, EXPERIMENT_LIMITS } from './experiment.js';
 import { createBrowserReview } from './browser-review.js';
+import { createBrowserImpact, pageDeliveryImpact } from './browser-impact.js';
 import { NetworkMap } from './map.js';
 import { createTutorialExperiment } from './tutorial.js';
 import { decodeFileInput, FILE_INPUT_MAX_BYTES, formatInputError } from './file-input.js';
@@ -25,6 +26,8 @@ let lessonBackup = null;
 let dialogFocus = null;
 let reviewRevision = 0;
 let preparedReview = null;
+let inspectedImpact = null;
+let impactPage = 0;
 const lessonSteps = [
   { id: 'clear', time: 0, story: 'With clear roads, the van takes A → B → C: 200 m and arrival at 20 s, before the 22 s deadline. Its run finishes at 23 s because delivery service takes 3 more seconds.' },
   { id: 'close-at-10', time: 10, story: 'At 10 s the van reaches B. B → C closes at that exact instant, so entry is blocked. It takes A → B → D → C instead: 260 m, arrival at 26 s, and 4 s late. The run finishes at 29 s, including 3 s of service.' },
@@ -258,6 +261,7 @@ function updateControls() {
 }
 function clearResults() {
   invalidateReview();
+  invalidateImpact();
   for (const id of ['distance', 'late', 'unreachable']) { $(id + '-value').textContent = '—'; $(id + '-delta').textContent = 'Calculating…'; $(id + '-baseline').textContent = ''; }
   for (const id of ['route-baseline-distance', 'route-scenario-distance', 'route-baseline-time', 'route-scenario-time']) $(id).textContent = '—';
   $('route-reason').textContent = 'Calculating this experiment. No previous results are shown.';
@@ -289,7 +293,7 @@ function showSelectedResult() {
   $('vehicle-select').value = state.selectedVehicle;
   const duration = Math.max(state.baseline.durationS, ...state.allResults.variants.map(variant => variant.result.durationS), 1);
   $('timeline').max = String(duration); $('duration-label').textContent = clock(duration); setTime(Math.min(state.time, duration));
-  updateMetrics(); updateInspector(); updateVariants(true); map.invalidateFrame();
+  updateMetrics(); updateInspector(); updateVariants(true); updateImpactSelection(); map.invalidateFrame();
 }
 function compute() {
   const id = ++revision;
@@ -307,7 +311,7 @@ function compute() {
     clearTimeout(workerTimeout); state.pending = false; $('status-line').parentElement.setAttribute('aria-busy', 'false'); hideCancelRun();
     currentWorker.terminate(); if (worker === currentWorker) worker = null;
     if (data.error) { computationFailed(data.error); toast(`The experiment could not run: ${data.error}`, true); $('status-line').textContent = 'Experiment failed. Edit or import a smaller experiment.'; $('comparison-status').textContent = 'No partial results shown. ' + data.error; updateVariants(true); return; }
-    state.allResults = { baseline: data.baseline, variants: data.variants }; showSelectedResult(); updateReviewAvailability();
+    state.allResults = { baseline: data.baseline, variants: data.variants }; showSelectedResult(); updateReviewAvailability(); updateImpactAvailability();
     $('status-line').textContent = `${state.scenario.jobs.length} shared orders · ${state.experiment.variants.length} variants · synchronized replay`;
     $('comparison-status').textContent = `Open-network baseline: ${distanceText(data.baseline.metrics.distanceM)}, ${data.baseline.metrics.lateJobs} late, ${data.baseline.metrics.unreachableJobs} unreachable. Cards show final modeled outcomes.`;
     if (initial) { initial = false; document.documentElement.dataset.ready = 'true'; }
@@ -426,6 +430,7 @@ function dialogControls(dialog) {
   return [...dialog.querySelectorAll('button, [href], input, select, textarea, [tabindex]')].filter(element => element.tabIndex >= 0 && canFocus(element));
 }
 function dialogReturnTargets(dialog, source) {
+  if (dialog === $('impact-dialog')) return [source, $('impact-button'), $('run-experiment')];
   if (dialog === $('review-dialog')) return [source, $('review-button'), $('run-experiment')];
   return dialog === $('guide-dialog') ? [source, $('guide-button'), $('assumptions-button'), $('try-example-button')] : [source, $('try-example-button'), $('quick-example-button'), $('assumptions-button')];
 }
@@ -546,6 +551,81 @@ $('download-bundle').addEventListener('click', () => downloadReview('bundle'));
 $('review-close').addEventListener('click', () => { invalidateReview(); closeDialog($('review-dialog')); });
 $('review-dialog').addEventListener('cancel', invalidateReview);
 
+function updateImpactAvailability() {
+  const button = $('impact-button'), disabled = state.pending || !state.allResults;
+  if (disabled && document.activeElement === button) focusFirst([$('run-experiment')]);
+  button.disabled = disabled;
+}
+function impactIsCurrent() {
+  return inspectedImpact && !state.pending && inspectedImpact.experiment === state.experiment && inspectedImpact.results === state.allResults;
+}
+function invalidateImpact() {
+  inspectedImpact = null; impactPage = 0;
+  // Move focus before disabling a control or hiding its scroll region.
+  if ($('impact-dialog').open && $('impact-dialog').contains(document.activeElement) && document.activeElement !== $('impact-close')) focusFirst([$('impact-close')]);
+  for (const id of ['impact-variant', 'impact-filter', 'impact-previous', 'impact-next']) $(id).disabled = true;
+  $('impact-rows').replaceChildren(); $('impact-table-region').hidden = true;
+  $('impact-summary').textContent = ''; $('impact-metrics').textContent = '';
+  $('impact-status').textContent = 'Results changed. Close this window and finish a new run before inspecting deliveries.';
+  updateImpactAvailability();
+}
+function updateImpactSelection() {
+  if (!$('impact-dialog').open || !impactIsCurrent()) return;
+  try {
+    inspectedImpact.report = createBrowserImpact(state.experiment, state.allResults, state.selectedVariantId);
+    $('impact-variant').value = state.selectedVariantId; impactPage = 0; renderImpact();
+  } catch (error) { invalidateImpact(); $('impact-status').textContent = `Delivery comparison unavailable. ${formatInputError(error)}`; }
+}
+function renderImpact() {
+  if (!$('impact-dialog').open || !impactIsCurrent() || inspectedImpact.report.variant.id !== state.selectedVariantId) { invalidateImpact(); return; }
+  const report = inspectedImpact.report, summary = report.summary;
+  const page = pageDeliveryImpact(report, $('impact-filter').value, impactPage);
+  impactPage = page.pageIndex;
+  $('impact-summary').textContent = `${summary.changedJobs} of ${summary.totalJobs} delivery outcomes changed; ${summary.unchangedJobs} unchanged. Status changes: ${summary.statusChangedJobs}. Arrival changes: ${summary.arrivalChangedJobs}. Same-status arrival changes: ${report.sameStatusArrivalChanges}.`;
+  $('impact-metrics').textContent = `Baseline → ${report.variant.name}: ${report.baselineMetrics.completedJobs} → ${report.variantMetrics.completedJobs} completed; ${report.baselineMetrics.unreachableJobs} → ${report.variantMetrics.unreachableJobs} unreachable. Final outcomes, independent of replay time.`;
+  const names = { changed: 'Changed outcomes', status: 'Status changes', timing: 'Same-status arrival changes', all: 'All deliveries' };
+  $('impact-table-caption').textContent = `${report.variant.name} compared with the clear-road baseline. ${names[page.filter]}.`;
+  const timing = (before, after, difference) => {
+    const cell = node('td');
+    const time = value => value === null ? 'Not reached' : `${value} s`;
+    cell.append(node('span', `${time(before)} → ${time(after)}`), node('small', difference === null ? 'Not comparable' : `Change ${difference > 0 ? '+' : ''}${difference} s`));
+    return cell;
+  };
+  const statuses = { 'on-time': 'On time', late: 'Late', unreachable: 'Unreachable' };
+  $('impact-rows').replaceChildren(...page.jobs.map(job => {
+    const row = node('tr'), identity = node('th'); identity.setAttribute('scope', 'row');
+    identity.append(node('strong', job.id), node('small', `${job.vehicleId} · ${job.nodeId}`), node('small', `Arrival deadline ${job.dueTimeS} s`));
+    row.append(identity, node('td', `${statuses[job.baseline.status]} → ${statuses[job.variant.status]}`), timing(job.baseline.arrivalS, job.variant.arrivalS, job.arrivalDeltaS), timing(job.baseline.completedS, job.variant.completedS, job.completedDeltaS), timing(job.baseline.delayS, job.variant.delayS, job.delayDeltaS));
+    return row;
+  }));
+  const active = document.activeElement;
+  $('impact-table-region').hidden = !page.jobs.length;
+  $('impact-previous').disabled = page.pageIndex === 0;
+  $('impact-next').disabled = page.pageIndex + 1 >= page.pageCount;
+  const counts = `${page.matchingJobs} matching of ${page.totalJobs} total deliveries. ${page.totalJobs - page.matchingJobs} excluded by this filter. Original input order, not severity ranking.`;
+  const empty = !page.totalJobs ? 'This experiment has no deliveries.' : `No ${names[page.filter].toLowerCase()}. Choose All deliveries to inspect unchanged outcomes too.`;
+  $('impact-status').textContent = page.jobs.length ? `Showing ${page.from}–${page.to}; page ${page.pageIndex + 1} of ${page.pageCount}. ${counts}` : `${empty} ${counts}`;
+  if ([ $('impact-previous'), $('impact-next') ].includes(active) && active.disabled || active === $('impact-table-region') && !page.jobs.length) focusFirst([$('impact-previous'), $('impact-next'), $('impact-filter'), $('impact-close')]);
+}
+function inspectDeliveries() {
+  if (state.pending || !state.allResults || $('impact-dialog').open) return;
+  try {
+    const report = createBrowserImpact(state.experiment, state.allResults, state.selectedVariantId);
+    inspectedImpact = { experiment: state.experiment, results: state.allResults, report }; impactPage = 0;
+    $('impact-variant').replaceChildren(...state.experiment.variants.map(variant => { const option = node('option', variant.name); option.value = variant.id; return option; }));
+    $('impact-variant').value = state.selectedVariantId; $('impact-filter').value = 'changed';
+    $('impact-variant').disabled = false; $('impact-filter').disabled = false;
+    setPlaying(false); openDialog($('impact-dialog'), $('impact-button'), $('impact-dialog-title')); renderImpact();
+  } catch (error) { invalidateImpact(); toast(`Delivery comparison unavailable. ${formatInputError(error)}`, true); }
+}
+$('impact-button').addEventListener('click', inspectDeliveries);
+$('impact-variant').addEventListener('change', () => { if (impactIsCurrent() && $('impact-dialog').open) selectVariant($('impact-variant').value); });
+$('impact-filter').addEventListener('change', () => { impactPage = 0; renderImpact(); });
+$('impact-previous').addEventListener('click', () => { impactPage -= 1; renderImpact(); });
+$('impact-next').addEventListener('click', () => { impactPage += 1; renderImpact(); });
+$('impact-close').addEventListener('click', () => { invalidateImpact(); closeDialog($('impact-dialog')); });
+$('impact-dialog').addEventListener('cancel', invalidateImpact);
+
 for (const name of ['input', 'change']) $('closure-time').addEventListener(name, (event) => { $('closure-time-label').textContent = clock(event.target.value); updateRoadDetails(); });
 $('road-search').addEventListener('input', () => filterRoads());
 $('clear-road-search').addEventListener('click', () => { $('road-search').value = ''; filterRoads(); });
@@ -601,7 +681,7 @@ $('run-experiment').addEventListener('click', () => { importRevision += 1; compu
 for (const id of ['try-example-button', 'quick-example-button', 'guide-example-button']) $(id).addEventListener('click', () => showLessonConfirmation($(id)));
 $('lesson-start').addEventListener('click', startLesson);
 $('lesson-cancel').addEventListener('click', () => closeDialog($('lesson-dialog')));
-for (const id of ['guide-dialog', 'lesson-dialog', 'review-dialog']) {
+for (const id of ['guide-dialog', 'lesson-dialog', 'review-dialog', 'impact-dialog']) {
   const dialog = $(id);
   dialog.addEventListener('keydown', event => containDialogTab(event, dialog));
   dialog.addEventListener('close', () => restoreDialogFocus(dialog));
@@ -614,7 +694,7 @@ for (const step of lessonSteps) $('lesson-' + step.id).addEventListener('click',
 for (const id of ['guide-button', 'assumptions-button']) $(id).addEventListener('click', () => { setPlaying(false); openDialog($('guide-dialog'), $(id), $('guide-dialog-title')); });
 $('guide-close').addEventListener('click', () => closeDialog($('guide-dialog')));
 $('guide-dialog').addEventListener('click', (event) => { if (event.target === $('guide-dialog')) { const bounds = event.target.getBoundingClientRect(); if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) closeDialog(event.target); } });
-window.addEventListener('keydown', (event) => { if (event.code === 'Space' && !['INPUT','BUTTON','SELECT','TEXTAREA'].includes(document.activeElement.tagName) && !$('guide-dialog').open && !$('lesson-dialog').open && !$('review-dialog').open) { event.preventDefault(); $('play-button').click(); } });
+window.addEventListener('keydown', (event) => { if (event.code === 'Space' && !['INPUT','BUTTON','SELECT','TEXTAREA'].includes(document.activeElement.tagName) && !$('guide-dialog').open && !$('lesson-dialog').open && !$('review-dialog').open && !$('impact-dialog').open) { event.preventDefault(); $('play-button').click(); } });
 document.addEventListener('visibilitychange', () => { if (document.hidden) setPlaying(false); });
 let previous = performance.now();
 function frame(now) { const delta = Math.min((now - previous) / 1000, .1); previous = now; if (state.playing && !state.pending) { setTime(state.time + delta * state.speed); if (state.time >= Number($('timeline').max)) setPlaying(false); } map.render(now); requestAnimationFrame(frame); }

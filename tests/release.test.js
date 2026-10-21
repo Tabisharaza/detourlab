@@ -51,6 +51,7 @@ test('release verification accepts the real build and compares every file to sou
   assert.deepEqual(await verifyDist(distribution), { files: RELEASE_FILES.length, compared: false });
   assert.ok(RELEASE_FILES.includes('LICENSE'));
   assert.ok(RELEASE_FILES.includes('THIRD_PARTY_NOTICES.md'));
+  assert.ok(RELEASE_FILES.includes('src/browser-impact.js'));
   assert.equal(new Set(RELEASE_FILES).size, RELEASE_FILES.length);
 });
 

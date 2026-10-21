@@ -20,6 +20,7 @@ export const RELEASE_FILES = Object.freeze([
   'index.html',
   'public/favicon.svg',
   'src/app.js',
+  'src/browser-impact.js',
   'src/browser-review.js',
   'src/experiment-report.js',
   'src/job-impact.js',

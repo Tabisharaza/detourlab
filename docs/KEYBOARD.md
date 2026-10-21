@@ -5,6 +5,7 @@ DetourLab uses native buttons, selects and sliders for the experiment controls. 
 ## Dialogs
 
 - **How it works** and **Model assumptions** open the same named field guide. Its heading receives initial focus so the beginning of the longer content stays in view.
+- **Inspect deliveries** opens the [bounded delivery comparison](BROWSER_IMPACT.md) with the heading focused. Native variant/filter selects, a keyboard-focusable table scroll region and 20-row page actions keep individual outcomes available without Canvas interaction. This inspector currently has source-handler coverage only.
 - **Try a tiny example** opens a named confirmation with **Cancel** focused. Opening it pauses playback but does not replace the current experiment.
 - **Tab** and **Shift+Tab** cycle through the active dialog's visible, enabled controls. Hidden and disabled controls are excluded. A dialog with one available control keeps ordinary Tab navigation on that control.
 - **Escape**, **Cancel** or **Close guide** dismiss the dialog. Focus returns to its available opener or a visible fallback. These actions do not confirm the lesson.
@@ -14,7 +15,7 @@ Browser shortcuts with Control, Alt or Meta are not captured by the ordinary Tab
 
 ## Playback and editing
 
-Use native keyboard behavior for each control: Enter or Space activates a focused button; arrow keys operate a focused range or select. Focusing an input or opening either dialog prevents the page-level Space shortcut from toggling playback underneath it. A comparison card selects the plan to inspect; final result cards and playback time describe different things.
+Use native keyboard behavior for each control: Enter or Space activates a focused button; arrow keys operate a focused range or select. Focusing an input or opening a dialog prevents the page-level Space shortcut from toggling playback underneath it. A comparison card selects the plan to inspect; final result cards and playback time describe different things.
 
 ## Dynamic experiment controls
 

@@ -35,6 +35,8 @@ The same job becomes unreachable in `all-bridges-05`. Its variant arrival, servi
 
 The Meridian experiment fingerprint is `debaaf4b86e70a869608051ee8aad856b7699e2d964c4f7455a523c242ae318c`. Variant selection does not change this fingerprint: it identifies the entire validated experiment, including every schedule.
 
+For the same completed outcome comparison in the source workbench, see the [browser delivery inspector](BROWSER_IMPACT.md). Its native-browser and deployment checks are separate from the CLI evidence below.
+
 ## Human and JSON views
 
 The human view prints all nonzero status-transition counts and the first **20 changed jobs in original input order**. It states how many changed rows were omitted. This is a view limit, not ranking by severity or arrival time. `--json` emits **every job**, including unchanged and unreachable work, up to the existing 2000-job input bound.

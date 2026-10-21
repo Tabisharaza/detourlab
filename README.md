@@ -130,6 +130,10 @@ The two original Draft-07 schemas share definitions, resolve locally and describ
 
 ## Inspect which deliveries changed
 
+The current source adds **Inspect deliveries** after a completed run. Compare the selected variant’s status, arrival, service completion and lateness, with 20-row pages and filters for changed outcomes, status changes, same-status arrival changes or all deliveries. Counts always include the complete input; unreachable differences remain non-comparable. It reuses completed results without rerunning. [Inspector behavior and source-only verification boundary](docs/BROWSER_IMPACT.md). This inspector has not yet been deployed or checked in a native browser; the public demo remains the separately recorded v11 release.
+
+For the headless equivalent:
+
 ```sh
 node scripts/explain-experiment.js examples/meridian-experiment.json --variant market-05
 node scripts/explain-experiment.js examples/minimal-experiment.json --variant close-at-10 --json
@@ -149,6 +153,7 @@ The human view shows the first 20 changed jobs and says how many are omitted; ve
 - A selected vehicle's baseline/disrupted overlay, shared replay time, pause, speed and zoom
 - Cancel/rerun, terminated superseded workers and stale-result/import guards
 - Bounded experiment JSON, backward-compatible scenario imports and deterministic CLI thresholds
+- Bounded browser delivery comparisons using completed results, with same-status timing filters and explicit missing timings
 - Headless per-job impact reports with complete status transitions and comparable timing differences
 - Portable all-variant review packets with embedded input, policy and readable exceptions
 - Original procedural geometry, a buildless UI, a module Worker and Node-native tests
