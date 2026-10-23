@@ -1,5 +1,39 @@
 # CI and release verification
 
+## Preview server read-failure recovery
+
+The October 23, 2026 source fix keeps a transient asset read failure from
+terminating the local preview server. Previously, `scripts/serve.js` committed
+HTTP 200 after `stat` but before awaiting `readFile`. If a concurrent `--dist`
+rebuild removed the asset in that interval, the error handler attempted a second
+`writeHead`, causing `ERR_HTTP_HEADERS_SENT` and an unhandled request rejection.
+The server now reads the complete GET body before committing success; a failed
+read returns the existing generic 404, and later requests can still succeed.
+HEAD continues to check the file without reading or sending its body.
+
+Nine new tests exercise real Node `IncomingMessage`/`ServerResponse` objects
+over in-memory streams, with deterministic filesystem failures. They cover
+ENOENT, EACCES and EIO recovery; no premature successful headers; HEAD behavior;
+exact successful payload bytes and existing security headers; stat/non-file
+failures; and unchanged method/path rejection. Four response-order regressions
+failed before the fix; all nine checks now pass. The handler is importable
+without starting a listener. Subprocess checks intercept `listen` to verify
+that direct source/`--dist` startup reaches the existing loopback/port wiring
+once, while import reaches it zero times, under `import.meta.main`.
+
+Final local checks on **Node 24.22.1 / npm 11.19.1 / Linux** passed **674 core +
+120 optional schema/editor tests = 794 distinct tests**, with no failures or
+skips. The **113 separately repeated CLI tests** overlap the core total. Syntax
+checks covered **72 core JavaScript files** and two optional `.mjs` files. All
+**26 distribution payloads plus manifest** remain byte-identical across repeated
+builds and to the pre-fix Node-baseline distribution. No browser application,
+engine, schema, dependency, workflow or deployed asset changes are included.
+
+These checks do not open a listening socket or a browser, and do not establish
+native-browser, Windows/macOS or hosted-CI results. A rebuild can still produce
+temporary 404s; this fix is not an atomic whole-distribution snapshot. Existing
+browser/import and deployment gates remain separate.
+
 ## Current Node security baseline
 
 As of **October 23, 2026**, use **Node 24.22.1** for local development,
