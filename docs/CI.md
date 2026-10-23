@@ -1,5 +1,38 @@
 # CI and release verification
 
+## Current Node security baseline
+
+As of **October 23, 2026**, use **Node 24.22.1** for local development,
+networked dependency installation and builds. [The official release](https://nodejs.org/en/blog/release/v24.22.1)
+is part of the [October 21 security update](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases),
+including the eMudhra CA remediation and other security fixes. `.node-version`
+and the sole CI matrix entry pin this exact patch. The former 24.19.0 and
+24.21.0 lanes are removed rather than continuing registry installation with
+unpatched runtimes. No application code, dependency/lockfile, action pin,
+workflow permission, hosting setting or deployment changes with this update.
+
+The `>=24.2.0` package/lockfile range remains an API compatibility floor, not
+an endorsement of unpatched versions or proof that the minimum was tested.
+Earlier version numbers, test totals and linked runs below are historical
+records of those exact commits; they do not verify this new toolchain change.
+The action runtime supplied by GitHub's runner is separate from the project
+Node selected by setup-node; this pin does not attest to its patch level or
+any hosted application's runtime.
+
+Local verification on **October 23, 2026**, using the official Linux x64
+**Node 24.22.1 / npm 11.19.1** distribution, passed **665 core tests + 120
+optional schema/editor tests = 785 distinct tests**, with no failures or
+skips. The **113 CLI tests repeated separately** overlap the core count.
+Syntax checks covered **71 core JavaScript files** and the optional tool's
+two `.mjs` files. The dependency-free root lockfile and the optional checker's
+unchanged lockfile both installed successfully with lifecycle scripts disabled;
+the optional install used a writable workspace-local npm cache. The documented
+Meridian experiment command passed. All **26 distribution payloads plus
+manifest** matched across two builds and the retained pre-change source build.
+No application bytes changed. New hosted CI must still be inspected for the
+exact published patch commit; local checks do not claim browser or deployment
+verification.
+
 ## Road-picker and lifecycle-focus local verification
 
 The corrected October 19, 2026 source passes **601 core tests + 120 optional
@@ -94,7 +127,7 @@ The October 10, 2026 file-input source update passed local checks on Node 24.19.
 
 ## What the workflow does
 
-The `verify` job runs on pushes, pull requests, and manual dispatch with an explicit two-version matrix: **24.19.0** (the locally tested baseline recorded in [`.node-version`](../.node-version)) and **24.21.0** (the current official Node 24 LTS release when checked on 2026-10-09). The second version is additional compatibility coverage, not a runtime minimum or a condition for creating this alpha repository. Each job has a ten-minute timeout, at most two matrix jobs run in parallel, and one matrix failure does not cancel the other. A newer run for the same workflow/ref cancels the older run. Both use `ubuntu-24.04`, assert the selected Node version, and record Node/npm versions in their logs.
+The `verify` job runs on pushes, pull requests, and manual dispatch with one exact matrix entry: **24.22.1**, matching [`.node-version`](../.node-version). Older compatibility lanes were removed for the October 2026 security baseline. The job has a ten-minute timeout. A newer run for the same workflow/ref cancels the older run. It uses `ubuntu-24.04`, asserts the selected Node version before any npm installation, and records actual Node/npm versions in its logs.
 
 1. `npm ci --ignore-scripts --no-audit --no-fund` checks the committed lockfile without running installation lifecycle scripts or contacting the npm audit service. The root lockfile contains only this project; no app dependencies are installed in this step.
 2. `npm run check` syntax-checks JavaScript, runs the complete Node test suite, and builds `dist/`.
@@ -107,7 +140,7 @@ The workflow only grants `contents: read`. Checkout does not persist credentials
 
 ## Verify a local checkout
 
-Use Node 24.19.0 to match the recorded baseline. No version-manager installation is required by the project; use an existing toolchain or your normal trusted Node installation method. From the repository root:
+Use Node 24.22.1 to match the current security and reproduction baseline. No version-manager installation is required by the project; use an existing toolchain or your normal trusted Node installation method. From the repository root:
 
 ```sh
 node --version
@@ -180,10 +213,9 @@ Before changing a pin, inspect the official release and full commit, review rele
 ### Node and runner
 
 - `package.json` and the lockfile declare **`>=24.2.0`**. The release verifier uses `import.meta.main`, added in 24.2.0 according to the [versioned Node documentation](https://nodejs.org/download/release/v24.21.0/docs/api/esm.html#importmetamain) and [24.2.0 release notes](https://nodejs.org/en/blog/release/v24.2.0). This is a source-derived API floor, not evidence of a test run on 24.2.0. It corrects the earlier overly broad `>=24` declaration. The browser application and routing engine are unchanged.
-- `.node-version` pins **24.19.0**, the locally verified baseline, rather than silently selecting the latest available patch. Its [official Node release page](https://nodejs.org/en/blog/release/v24.19.0) was checked on 2026-10-09. This is **not a claim that 24.19.0 is the newest or a permanently recommended security baseline**.
-- The second CI matrix entry pins **24.21.0**. Its [official release page](https://nodejs.org/en/blog/release/v24.21.0), the [Node 24 archive](https://nodejs.org/en/download/archive/v24) and the [release index](https://nodejs.org/dist/index.json) were rechecked on 2026-10-09 and establish that it is an existing, current Node 24 LTS release. The initial public source release subsequently passed this matrix job in [run 37995893928](https://github.com/Tabisharaza/detourlab/actions/runs/37995893928). This is verified coverage of that commit, not every later change; 24.21.0 is not required to run the project. Recheck official releases later rather than assuming it remains current.
-- Review Node 24 updates and security releases before public release and as part of routine maintenance. Update the exact matrix entry in a small reviewed change, use that version locally when available, run the entire verification sequence, and inspect the resulting remote CI run. If promoting a new reproduction baseline, update both `.node-version` and the baseline matrix entry together. Prioritize security fixes. `package.json`'s `>=24.2.0` range is compatibility intent, not evidence that every newer Node release has been tested.
-- CI uses the npm bundled with the selected official Node distribution; the workflow does not separately upgrade it. The actual local environment reported npm 11.9.0, which can differ from the stock distribution. Record the real Node and npm versions for every run rather than assuming the local and hosted toolchains are identical.
+- `.node-version` and the sole CI matrix entry pin **24.22.1**. Its [official release page](https://nodejs.org/en/blog/release/v24.22.1) and [security announcement](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases) were checked on 2026-10-23. This is a current recommended baseline, not a promise that this patch remains current forever. The prior 24.19.0/24.21.0 test records remain historical; do not use those unpatched versions for networked installs or builds.
+- Review Node 24 updates and security releases before public release and as part of routine maintenance. Update `.node-version` and the exact matrix entry together in a small reviewed change, use that version locally, run the entire verification sequence, and inspect the resulting remote CI run. Add compatibility lanes only on patched releases. `package.json`'s `>=24.2.0` range is compatibility intent, not evidence that every newer Node release has been tested.
+- CI uses the npm bundled with the selected official Node distribution; the workflow does not separately upgrade it. Historical local runs reported npm 11.9.0, which differed from the stock distribution. Record the real Node and npm versions for every run rather than assuming the local and hosted toolchains are identical.
 - `ubuntu-24.04` is an explicit OS family, **not an immutable machine image**. GitHub refreshes it. The [hosted runner documentation](https://docs.github.com/en/actions/reference/runners/github-hosted-runners) lists this supported x64 label. The [Ubuntu 24.04 image inventory](https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md), inspected on 2026-10-09, listed image `20261004.327.1` and cached Node `24.21.0`; setup-node can download the exact requested release when it is absent from that cache. The inventory also announced a future `ubuntu-latest` change, which is why this workflow does not rely on that moving OS alias.
 - Keep the runner's image version and actual Node/npm versions from the first successful remote run with the release evidence. Changing runner labels or adding more platforms should be an explicit, tested change. This workflow does not claim Windows, macOS, or self-hosted runner verification.
 
@@ -192,6 +224,6 @@ Before changing a pin, inspect the official release and full commit, review rele
 The [initial publication record](PUBLICATION.md) closes the first remote-run gate. For each later source revision:
 
 1. Confirm the intended commit, workflow file, and action pins are present in the repository.
-2. Inspect the CI run for **both matrix versions** on that exact new commit. Record its URL, commit, runner image, Node/npm versions, and all step outcomes. A previous green run is not evidence for a changed commit; report a new run as pending until both jobs succeed.
+2. Inspect the CI run for **every configured matrix version** on that exact new commit (currently Node 24.22.1 only). Record its URL, commit, runner image, Node/npm versions, and all step outcomes. A previous green run is not evidence for a changed commit; report a new run as pending until all configured jobs succeed.
 3. Investigate startup/permission failures separately from failing project checks. Do not add secrets, write permissions, or privileged triggers to make ordinary verification work.
 4. Review the browser and release evidence before publishing a changed build, and retain the existing alpha's documented QA gaps until they are actually tested. Enabling required checks or deployment is a separate maintainer decision.

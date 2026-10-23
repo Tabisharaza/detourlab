@@ -57,7 +57,7 @@ The default district has **807 road-pair choices**. [Road-picker behavior and ve
 From the downloaded source or repository checkout:
 
 ```sh
-node --version       # Node >=24.2.0; locally tested baseline is in .node-version
+node --version       # Use Node 24.22.1 from .node-version
 npm start
 # Open http://127.0.0.1:4173
 ```
@@ -71,7 +71,7 @@ npm start -- --dist  # Preview the built distribution
 npm run benchmark    # Named-machine timing of the original paired fixture
 ```
 
-The app and its core checks have zero npm dependencies. An optional, separately locked schema/editor checker lives under `tools/schema-check`; it is not needed to run the app. The root lockfile is included. CI validates it with `npm ci --ignore-scripts --no-audit --no-fund`; this is optional for local use. Node 24.2.0 is the API floor for the release verifier, not a tested-minimum claim. Local checks used Node 24.19.0. [The initial public release passed hosted CI](https://github.com/Tabisharaza/detourlab/actions/runs/37995893928) on Node 24.19.0 and 24.21.0; the latter is additional verified coverage, not a required installed version. See [CI and reproducibility](docs/CI.md).
+The app and its core checks have zero npm dependencies. An optional, separately locked schema/editor checker lives under `tools/schema-check`; it is not needed to run the app. The root lockfile is included. CI validates it with `npm ci --ignore-scripts --no-audit --no-fund`; this is optional for local use. Use **Node 24.22.1**, pinned in `.node-version` and CI, for current development and builds. It includes the [October 21, 2026 security fixes](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases), including the eMudhra CA remediation. The declared `>=24.2.0` range remains the release verifier's API compatibility floor, not a security recommendation or tested-minimum claim. [Initial CI on Node 24.19.0 and 24.21.0](https://github.com/Tabisharaza/detourlab/actions/runs/37995893928) is historical evidence only; those versions are no longer CI install lanes. See [the current baseline and reproducibility checks](docs/CI.md#current-node-security-baseline).
 
 ## Reproduce all variants
 
