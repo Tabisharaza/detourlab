@@ -1,5 +1,39 @@
 # CI and release verification
 
+## Portable distribution manifest paths
+
+The October 24, 2026 build fix separates manifest names from host filesystem
+paths. Previously, `scripts/build.js` used `path.relative` for manifest keys.
+On Windows, its backslashes conflict with the release verifier's deliberately
+slash-separated allowlist. The build now joins actual directory-entry names
+with `/` for the manifest, while retaining native `path.join` for file access.
+It does not rewrite literal backslashes in POSIX filenames, broaden the release
+allowlist, change asset bytes, or change the version-1 manifest format.
+
+Three new build tests cover the real build with Win32 relative-path return
+values, deeper nested paths with spaces and Unicode, and distinct POSIX names
+containing a literal backslash versus a directory separator. The existing build
+test now also invokes the independent release verifier. Two new regressions
+failed against the previous builder. With the fix, the ordinary and injected
+Win32-relative builds have identical manifest bytes, and the full release build
+passes hash, source-byte, license and exact-allowlist verification.
+
+Local checks on **Node 24.22.1 / npm 11.19.1 / Linux** passed **677 core + 120
+optional schema/editor tests = 797 distinct tests**, with no failures or skips.
+The **113 separately repeated CLI tests** overlap the core total. Syntax checks
+cover **72 core JavaScript files** and two optional `.mjs` files. The **26
+distribution payloads plus manifest** are byte-identical across repeated local
+builds and to the retained pre-fix distribution. Application, model, schema,
+dependency, workflow, server and deployed assets are unchanged.
+
+The Win32 tests run in isolated Node subprocesses with only `path.relative`
+supplied by `path.win32`; all filesystem operations still use the Linux host.
+This reproduces the separator defect, not a native Windows or macOS run, and
+does not establish cross-OS, cross-locale or browser reproducibility. The POSIX
+literal-backslash case is skipped on Windows, where that character is a path
+separator. New hosted CI must be checked for the exact published source commit.
+Existing browser/import and deployment gates remain separate.
+
 ## Preview server read-failure recovery
 
 The October 23, 2026 source fix keeps a transient asset read failure from
@@ -208,7 +242,7 @@ node --test tests/release.test.js
 
 ## What a passing distribution check proves
 
-[`scripts/verify-dist.js`](../scripts/verify-dist.js) uses only Node built-ins. Its reviewed `RELEASE_FILES` allowlist is independent of both the build script and the generated manifest. The current source has **20 payload files**, plus `manifest.json`: the tiny experiment and tutorial module added two files to the earlier 17-file distribution; the shared browser-safe file-input helper adds one more. Historical CI records above retain their original counts.
+[`scripts/verify-dist.js`](../scripts/verify-dist.js) uses only Node built-ins. Its reviewed `RELEASE_FILES` allowlist is independent of both the build script and the generated manifest. The current source has **26 payload files**, plus `manifest.json`, including the shared browser-impact and review modules. Historical CI records above retain their original counts.
 
 - The actual tree contains exactly the allowed files and directories. Additional files, hidden configuration, private examples, unexpected empty directories, non-regular entries, and symbolic links fail verification.
 - The manifest is version `1`, has only `version` and `files`, and lists exactly the payload files with lowercase SHA-256 hashes.
