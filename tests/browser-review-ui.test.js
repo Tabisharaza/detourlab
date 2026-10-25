@@ -137,6 +137,77 @@ test('a delayed valid import invalidates an already prepared review', async () =
   assert.equal(app.created.filter(el => el.tagName === 'A').length, 0);
 });
 
+for (const [focused, dismissal] of [['download-review', 'close'], ['download-bundle', 'escape']]) {
+  test(`a delayed valid import moves focused ${focused} to Close before disabling it`, async () => {
+    const app = ready({ reviewBuilder: async () => files });
+    const pending = deferredFile(), importing = app.importFile(pending.file);
+    app.element('review-button').focus();
+    await app.element('review-button').click();
+    app.element(focused).focus();
+    let disabledAtHandoff;
+    const close = app.element('review-close'), focusClose = close.focus.bind(close);
+    close.focus = () => { disabledAtHandoff = app.element(focused).disabled; focusClose(); };
+    pending.resolve(new TextEncoder().encode(JSON.stringify(app.latestExperiment())).buffer);
+    await importing;
+    assert.equal(app.document.activeElement.getAttribute('id'), 'review-close');
+    assert.equal(disabledAtHandoff, false);
+    assert.equal(app.element('download-review').disabled, true);
+    assert.equal(app.element('download-bundle').disabled, true);
+    assert.equal(app.element('review-button').disabled, true);
+    await app.element(focused).emit('click');
+    assert.equal(app.created.filter(el => el.tagName === 'A').length, 0);
+    assert.equal(app.document.activeElement.getAttribute('id'), 'review-close');
+    if (dismissal === 'close') await app.element('review-close').click();
+    else await app.element('review-dialog').escape();
+    assert.equal(app.document.activeElement.getAttribute('id'), 'run-experiment');
+  });
+}
+
+test('a delayed valid import moves a focused Review trigger to Run before disabling it', async () => {
+  const app = ready({ reviewBuilder: async () => files });
+  const pending = deferredFile(), importing = app.importFile(pending.file);
+  app.element('review-button').focus();
+  let disabledAtHandoff;
+  const run = app.element('run-experiment'), focusRun = run.focus.bind(run);
+  run.focus = () => { disabledAtHandoff = app.element('review-button').disabled; focusRun(); };
+  pending.resolve(new TextEncoder().encode(JSON.stringify(app.latestExperiment())).buffer);
+  await importing;
+  assert.equal(app.element('review-button').disabled, true);
+  assert.equal(app.document.activeElement.getAttribute('id'), 'run-experiment');
+  assert.equal(disabledAtHandoff, false);
+});
+
+for (const focused of ['road-search', 'review-close', 'review-dialog-title']) {
+  test(`review invalidation preserves newer focus on ${focused}`, async () => {
+    const app = ready({ reviewBuilder: async () => files });
+    const pending = deferredFile(), importing = app.importFile(pending.file);
+    app.element('review-button').focus();
+    if (focused !== 'road-search') {
+      await app.element('review-button').click();
+      app.element('download-review').focus();
+    }
+    app.element(focused).focus();
+    pending.resolve(new TextEncoder().encode(JSON.stringify(app.latestExperiment())).buffer);
+    await importing;
+    assert.equal(app.element('review-button').disabled, true);
+    assert.equal(app.document.activeElement.getAttribute('id'), focused);
+  });
+}
+
+test('a rejected delayed import preserves prepared downloads and their focus', async () => {
+  const app = ready({ reviewBuilder: async () => files });
+  const pending = deferredFile(), importing = app.importFile(pending.file);
+  await app.element('review-button').click();
+  app.element('download-bundle').focus();
+  pending.resolve(new TextEncoder().encode('not JSON').buffer);
+  await importing;
+  assert.equal(app.element('review-button').disabled, false);
+  assert.equal(app.element('download-review').disabled, false);
+  assert.equal(app.element('download-bundle').disabled, false);
+  assert.equal(app.document.activeElement.getAttribute('id'), 'download-bundle');
+  assert.match(app.element('toast').textContent, /Import rejected/);
+});
+
 test('failed and timed-out workers never enable review', async () => {
   for (const fail of ['message', 'error', 'timeout']) {
     const app = application({ reviewBuilder: async () => files });

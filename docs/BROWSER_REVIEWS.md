@@ -20,6 +20,8 @@ These references inform product requirements only. No code or assets from these 
 
 The UI takes identity references to the current experiment and completed result set. Editing, loading another experiment, canceling or rerunning clears preparation. An older asynchronous completion or failure cannot replace a newer dialog. Closing/Escape invalidates preparation. Changing only selected variant or replay time does not change the all-variant evidence.
 
+In source, when a delayed valid import invalidates results, a focused download moves to **Close** before it is disabled; a focused **Review results** trigger moves to **Run all variants**. Newer focus on another control or the dialog heading is preserved. A rejected import keeps the valid review and its focus intact. These lifecycle cases have DOM/Worker stand-in coverage, not native-browser or assistive-technology verification; the source fix is not a deployment claim.
+
 Downloads are separate explicit clicks. The JSON contains complete per-job rows; the Markdown prioritizes at most 20 exceptions per variant and states omitted counts. Both carry content fingerprints, not signatures. Browser generator identity is explicitly unverified (`implementation: null`, `sourceRevision: null`) and acceptance is not evaluated because no policy was supplied. Use the CLI for source-identified reports and explicit thresholds.
 
 ## Release and remaining checks

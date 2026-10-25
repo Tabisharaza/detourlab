@@ -505,10 +505,15 @@ function returnToExperiment() {
 }
 
 function updateReviewAvailability() {
-  $('review-button').disabled = state.pending || !state.allResults;
+  const button = $('review-button'), disabled = state.pending || !state.allResults;
+  if (disabled && document.activeElement === button) focusFirst([$('run-experiment')]);
+  button.disabled = disabled;
 }
 function invalidateReview() {
   reviewRevision += 1; preparedReview = null;
+  // A pending import can finish while a download has focus. Move it before
+  // disabling that control, without reclaiming a newer focus choice.
+  if ($('review-dialog').open && [$('download-review'), $('download-bundle')].includes(document.activeElement)) focusFirst([$('review-close')]);
   for (const id of ['download-review', 'download-bundle']) $(id).disabled = true;
   $('review-status').textContent = 'Results changed. Close this window and finish a new run before exporting.';
   updateReviewAvailability();
