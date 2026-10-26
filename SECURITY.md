@@ -30,7 +30,9 @@ A budget failure returns an explicit failure instead of partial success. Superse
 
 ## Local server and static hosting
 
-The included development server binds to `127.0.0.1`, accepts only GET/HEAD and restricts paths to application assets. It is a development preview, not a production server recommendation. Static deployments need normal host-level HTTPS and security-header configuration. No credential belongs in the frontend or hosting manifest.
+The included development server binds to `127.0.0.1`, accepts only GET/HEAD and restricts paths to application assets. It rejects symbolic links at the selected preview root and in every requested descendant, including links to otherwise allowed assets. Hidden path components, percent-encoded backslashes remaining in decoded paths and non-regular files are also rejected with a generic 404. HEAD performs the same path checks without reading a file body. Use a real checkout or distribution directory rather than a linked preview root.
+
+This is a trusted-checkout development preview, not a production server or a filesystem sandbox. Path inspection and file reading are separate operations: an untrusted concurrent writer can replace a checked component before the read. Hard links and symlinks in ancestors of the selected root are not independently rejected. Keep the checkout and its parent directories under trusted control; do not put private data in allowed asset directories. [Handler regression evidence and limits](docs/CI.md#preview-server-symbolic-link-rejection) are separate from native-browser and deployment checks. Static deployments need normal host-level HTTPS and security-header configuration. No credential belongs in the frontend or hosting manifest.
 
 ## Reporting a vulnerability
 

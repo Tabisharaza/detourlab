@@ -1,5 +1,52 @@
 # CI and release verification
 
+## Preview server symbolic-link rejection
+
+The October 26, 2026 source fix closes a gap between the preview's URL allowlist
+and the filesystem it actually reads. The previous handler checked the requested
+path lexically, then used `stat` and `readFile`, which followed symbolic links.
+An allowed asset pathname could therefore return a linked file outside the
+preview root or in a hidden directory. The independent distribution verifier
+already rejected release-tree links, but running the source preview did not use
+that verifier.
+
+The handler now uses `lstat` on the selected root and every requested descendant.
+It rejects symbolic links even when their targets are otherwise allowed assets,
+requires directories for intermediate components and a regular file at the end,
+and rejects percent-encoded backslashes remaining in decoded paths consistently
+across host path conventions. Literal backslashes are normalized to forward
+slashes by the URL parser before these checks.
+Both GET and HEAD repeat these checks on every request. A rejection returns the
+existing generic 404 without reading the target body; later valid requests still
+work. Loopback binding, method restrictions, successful bytes/security headers,
+body-free HEAD and read-before-success behavior are unchanged.
+
+Ten added tests use original synthetic temporary files and the existing real
+Node HTTP response objects over in-memory streams. Six link cases failed against
+the original handler with HTTP 200 rather than 404: outside/hidden/allowed file
+targets and root/top-level/nested directory links. Additional cases cover root
+index links, dangling/cyclic links, every path-check failure boundary, repeated
+requests after a directory becomes a link, recovery, and ordinary nested/encoded
+assets. These are filesystem/handler tests, not a listening server or native
+browser run. No private data, uploads or external services are involved.
+
+Local verification on **Node 24.22.1 / npm 11.9.0 / Linux** passed **694 core +
+120 optional schema/editor tests = 814 distinct tests**, with no failures or
+skips. The **113 separately repeated CLI tests** overlap the core total. Root
+and optional dependency lockfiles installed unchanged with lifecycle scripts
+disabled. Syntax checks cover **72 core JavaScript files** and two optional
+`.mjs` files. The documented Meridian experiment command succeeded. All **26
+distribution payloads plus manifest** are byte-identical across repeated builds
+and to the retained pre-fix distribution. No application/model, schema,
+dependency, workflow or deployed asset changes are included. Hosted CI must be
+checked for the exact published source commit separately.
+
+The checks are intentionally not a claim of race-free confinement. Inspection
+and read remain separate operations; hostile concurrent directory replacement,
+hard links and symlink ancestors of the selected root are outside this trusted-
+checkout preview's guarantee. They do not change static deployment behavior.
+Native-browser/import and hosted deployment gates remain separate.
+
 ## Portable distribution manifest paths
 
 The October 24, 2026 build fix separates manifest names from host filesystem

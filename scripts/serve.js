@@ -4,6 +4,23 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 const root = path.resolve(fileURLToPath(new URL('../', import.meta.url)), process.argv.includes('--dist') ? 'dist' : '.');
 const types = {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.svg':'image/svg+xml','.png':'image/png'};
+
+// The URL allowlist is not enough: stat/readFile follow links. Reject links at
+// the preview root and every requested descendant, including links whose target
+// is another allowed asset. This is a trusted-checkout preview, not a sandbox
+// against a co-writer replacing path components between these checks and reads.
+async function requireAssetFile(fs, sourceRoot, relative) {
+  let current = sourceRoot;
+  const parts = relative.split('/').filter(Boolean);
+  for (let index = 0; index <= parts.length; index += 1) {
+    if (index) current = path.join(current, parts[index - 1]);
+    const info = await fs.lstat(current);
+    if (info.isSymbolicLink() || !(index === parts.length ? info.isFile() : info.isDirectory())) {
+      throw new Error('Not a regular preview asset');
+    }
+  }
+}
+
 // Keep the request boundary importable for deterministic I/O-failure tests.
 // The optional filesystem adapter does not change the CLI's normal disk reads.
 export function createRequestHandler(directory = root, fs = fileSystem) {
@@ -14,8 +31,9 @@ export function createRequestHandler(directory = root, fs = fileSystem) {
       const pathname = decodeURIComponent(new URL(req.url,'http://localhost').pathname);
       const relative = pathname === '/' ? 'index.html' : pathname.replace(/^\/+/, '');
       const full = path.resolve(sourceRoot,relative);
-      if (!full.startsWith(sourceRoot + path.sep) || relative.split('/').some(s=>s.startsWith('.')) || !['index.html','src','public','examples'].includes(relative.split('/')[0])) { res.writeHead(404);res.end('Not found');return; }
-      if (!(await fs.stat(full)).isFile()) throw new Error('Not a file');
+      // URL paths use '/', never host-specific backslash separators.
+      if (relative.includes('\\') || !full.startsWith(sourceRoot + path.sep) || relative.split('/').some(s=>s.startsWith('.')) || !['index.html','src','public','examples'].includes(relative.split('/')[0])) { res.writeHead(404);res.end('Not found');return; }
+      await requireAssetFile(fs, sourceRoot, relative);
       // A rebuild can remove an asset between stat and readFile. Do not commit a
       // successful response until all GET bytes are available: a second writeHead
       // from the error path would reject this async handler and stop the server.
