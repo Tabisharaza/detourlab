@@ -90,6 +90,13 @@ The report includes explicit generator/implementation identity and a content-int
 
 Use a trusted source checkout and compare implementation identity when reproducing a packet. Embedding input makes rerunning possible; a fingerprint by itself is not evidence that someone reran it. The generated bounded reproduction command verifies the current implementation fingerprint, reruns the embedded input/policy and compares the recorded artifacts. It fails on unknown or mismatched implementation identity. Do not import a report bundle directly into the app: extract its `experiment` field first.
 
+The [read-only verifier](REVIEW_VERIFICATION.md) provides the same complete-file
+reproduction in one command: `node scripts/verify-review.js packet-directory`.
+For browser packets, explicitly add `--compare-outcomes`; this does not verify
+their original implementation. Neither mode silently treats a reproduced policy
+failure as a pass. The original generated reproduction instructions and packet
+bytes are unchanged.
+
 ## Resource and filesystem boundaries
 
 The existing strict UTF-8 **2 MiB regular-file input** and whole-experiment simulation budgets apply before reporting. The input allows 2–6 variants and at most 2,000 jobs. The complete pretty-printed machine bundle is capped at **8 MiB**, and the readable review at **1 MiB**, including their final newlines. Oversized reports fail explicitly rather than dropping machine rows.

@@ -31,6 +31,8 @@ For opt-in per-job acceptance gates, run `node --test tests/job-gates.test.js te
 
 For review packets, see [REVIEW_PACKETS.md](docs/REVIEW_PACKETS.md). Preserve one whole-experiment simulation, complete machine rows, existing CLI contracts, deterministic source/policy identity, separate safe display escaping and no-overwrite output. Test a failed acceptance policy producing a complete packet as well as invalid-input and write failures. Never weaken bounds or overwrite an existing destination to make a test pass.
 
+For received-packet verification, run `node --test tests/review-verification-cli.test.js` and follow [REVIEW_VERIFICATION.md](docs/REVIEW_VERIFICATION.md). Preserve complete-file comparison, explicit provenance mode selection, bounded read-only input and exit 1 for reproduced policy failures. Never execute packet-supplied paths or instructions, or treat unsigned hashes as authenticity.
+
 For browser delivery inspection, run `node --test tests/browser-impact.test.js tests/browser-impact-ui.test.js`. Preserve completed-result reuse, exact shared job semantics, 20-row bounds with full/filtered counts, explicit null comparisons and invalidation/focus behavior. [BROWSER_IMPACT.md](docs/BROWSER_IMPACT.md) separates source tests from pending native-browser checks.
 
 ## Choose a scope

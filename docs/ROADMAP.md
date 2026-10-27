@@ -26,6 +26,11 @@ The [delivery inspector](BROWSER_IMPACT.md) reuses completed results and the sha
 
 [Review packets](REVIEW_PACKETS.md) consolidate the validated input, existing acceptance policy, all variant metrics and complete delivery outcomes into deterministic machine data plus a readable offline review. The headless path reuses one simulation. Browser source now exports the exact completed Worker results through the same projection and renderer, with explicit unverified build identity and no acceptance policy. The v11 hosted rollout and bounded desktop download checks passed; native import roundtrips, mobile, assistive technology and cross-browser checks remain separate gates.
 
+The [read-only packet verifier](REVIEW_VERIFICATION.md) reruns received evidence
+with one command, checks both complete files, and separates exact-implementation
+reproduction from explicit outcome comparison. Reproduced policy failures remain
+failures; unsigned fingerprints never establish authorship or original provenance.
+
 ## Implemented: searchable road editing
 
 The [road picker](ROAD_PICKER.md) filters the native selector by road name, full endpoint ID or representative edge ID, with result counts and saved-schedule context. It preserves existing grouping, direction semantics and variant independence. The v9 demo has bounded desktop Chromium evidence. A run-lifecycle focus finding was corrected with regression tests and independent review, then deployed in v10. Native cancellation/completion retests and served-manifest parity passed; [public GitHub source mapping and exact-commit CI passed](VERIFICATION.md#v10-native-focus-checks-and-screenshot).

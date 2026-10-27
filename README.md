@@ -122,6 +122,16 @@ node scripts/report-experiment.js examples/minimal-experiment.json \
 
 The [review packet](docs/REVIEW_PACKETS.md) puts the validated experiment, supplied acceptance limits, every variant’s results and complete delivery outcomes in `bundle.json`, alongside a readable `REVIEW.md`. It runs the simulation once. Use a fresh output directory; a failing policy still produces the packet and exits 1. With no limits, acceptance is explicitly not evaluated.
 
+Received a packet? [Verify both complete files](docs/REVIEW_VERIFICATION.md) with one read-only command:
+
+```sh
+node scripts/verify-review.js tiny-review
+# Browser packets have no verified implementation identity:
+node scripts/verify-review.js browser-review --compare-outcomes
+```
+
+The verifier reruns the embedded input and policy, rejects inconsistent evidence, and keeps a reproduced policy failure at exit 1. Outcome comparison never authenticates the original implementation; hashes are not signatures.
+
 ## Author a portable input
 
 Use a filename ending in `.scenario.json` or `.experiment.json` inside this checkout to get scoped JSON Schema diagnostics, completion and unit-rich hover help in VS Code. The [authoring guide](docs/JSON_SCHEMAS.md) includes small valid examples and explains the checks that still require the runtime. Do not add `$schema` to your data files: the import format remains strict.
