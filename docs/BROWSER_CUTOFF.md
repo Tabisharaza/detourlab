@@ -90,6 +90,47 @@ repeated CLI parity checks are not counted as additional tests. Independent
 read-only review found no remaining blocker after the queued terminal-Cancel
 and comma-list keyboard-hint fixes.
 
-Native desktop preview QA, cross-browser, mobile, assistive technology and
-native download checks must be recorded separately. No deployment is implied
-by local implementation or a managed preview.
+## Bounded native desktop QA — October 28, 2026
+
+Source [`f1419ecc`](https://github.com/Tabisharaza/detourlab/commit/f1419ecc3e2f3d581fb6045d3c42c3f91fbb62bb)
+passed [exact-commit CI](https://github.com/Tabisharaza/detourlab/actions/runs/40647908461),
+including all 1,134 distinct tests, reproducible distribution and clean tracked
+source. A separate supported managed-preview check ran approximately
+09:37–09:46 UTC in desktop Chromium. Only the launcher-returned URL was opened,
+in a new temporary tab; no alternate host, port, tunnel or security bypass was used.
+
+Observed through the actual UI and browser Worker:
+
+- Meridian input `900, 0, 600, 300` produced sorted 0/300/600/900-second rows,
+  with 153/118/106/50 late deliveries, 192 completed and zero unreachable in
+  each. With no limits, every row said **Not evaluated**. A zero extra-late
+  limit failed all four and displayed their violations.
+- The bundled tiny lesson produced 260 m/one late delivery at 10 s versus
+  200 m/zero late at 11 s; both completed one delivery. All five zero limits
+  yielded one failed and one passed sample, with the expected distance,
+  lateness, newly-late and six-second arrival-slip violations on the first.
+- Duplicate times and seven samples were rejected with input focus and no old
+  result rows. A source with no closure disabled Run. A negative policy value
+  inside a collapsed disclosure was revealed and focused on rejection.
+- A live six-sample run was canceled: inputs remained, partial results were
+  absent, and focus returned from Cancel to Run. Editing completed sample
+  inputs immediately removed the old results and export action.
+- Initial heading focus, Tab/Shift-Tab wrapping, keyboard access to the table
+  scroll region, and Close/Escape return focus passed. Space in the modal did
+  not start background playback. Reopening started a fresh empty study.
+- The saved source label remained distinct from an unsaved name. Closing the
+  study and returning from the tiny lesson retained the original variant,
+  unsaved name, road search and original computed outcomes.
+- Settled 1165 × 747 screenshots showed readable five-column tables, policy
+  violations, service counts, limitations and a visible keyboard focus outline.
+
+Only the temporary QA tab was closed, and the managed preview was stopped.
+One read-only tool-transport interruption recovered without navigating away.
+Inspected error logs contained browser-extension metadata errors; no clean
+console or exhaustive application-error coverage is claimed.
+
+This is bounded desktop evidence, **not** native download, file-picker/import,
+mobile emulation, assistive-technology, cross-browser, real-world validation or
+live deployment evidence. No download, upload or file chooser was invoked.
+Programmatically queued stale messages, timeout/failure injection and empty-
+evidence policy cases remain source-test evidence rather than native checks.
