@@ -49,13 +49,45 @@ intercepted, plus the pure parser, environment/flag precedence and bind-error
 handling. Existing in-memory HTTP-handler tests still exercise path confinement,
 I/O failures, GET/HEAD bytes and security headers. They do not prove that a browser
 route, preview service, mobile emulation, file picker or assistive technology
-works. No browser retry or server startup was performed as part of this source
-compatibility change. An unresolved historical preview failure is not claimed
-fixed merely because these tests pass.
+works. The initial source-only validation did not start a preview or browser;
+the separately approved desktop check below was performed after publication.
 
 When using a managed preview environment, follow that environment's supported
 launcher and open only its returned URL. A failure does not authorize a different
 host, port, tunnel, network setting or security-warning bypass.
+
+### Desktop QA — 2026-10-28
+
+Source commit `23cd19d57af1718f864baca74714b4ad2f25aba2` was verified on remote
+main, including all 152 blob identities and exactly nine intended changed files.
+[CI run 40644586431](https://github.com/Tabisharaza/detourlab/actions/runs/40644586431)
+passed on Node 24.22.1: 953 core tests and 120 optional tests, distribution
+reproducibility and a clean tracked-source check.
+
+After the documented configuration repair, one supported managed-preview start
+returned a loopback URL; opening that exact URL in the desktop cloud browser
+succeeded without an access/security warning. No alternate host, port or tunnel
+was used. Actual UI checks on the built-in Meridian experiment verified:
+
+- Delivery inspector: 125 of 192 changed outcomes, including 118 status changes
+  and seven same-status arrival changes; 192 completed and zero unreachable.
+- Next/Previous pagination: pages 1–7, ending at rows 121–125; Next disabled at
+  the final boundary, with focus moved to Previous. Previous returned page 6.
+- Filters reset pagination: same-status changes showed seven rows on one page
+  with both page buttons disabled; status changes showed 118 matches on six pages.
+- Switching to Clear-road control replaced the prior results with zero changes;
+  its empty filtered state offered All deliveries, which showed all 192 outcomes.
+- Escape and Close both dismissed the inspector and restored focus to Inspect
+  deliveries. Enter reopened it with heading focus, Changed outcomes and page 1.
+- Desktop screenshot inspection showed legible comparison columns and the
+  intended scrollable dialog/table at the observed 1165 × 747 viewport.
+
+This verifies the current supported desktop route, not the cause of the original
+historical failure. File picker/import, downloads, mobile emulation, native
+assistive technology and deployment were not exercised. Browser logs contained
+extension metadata errors; those are not application failures or evidence of a
+clean browser console. No claim of exhaustive UI or accessibility coverage is
+made. The temporary tab was closed and the managed preview stopped after QA.
 
 ## Review-packet provenance
 
