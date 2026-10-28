@@ -14,6 +14,8 @@ npm run experiment -- examples/meridian-experiment.json --json
 
 No package installation is needed for the app. `npm ci --ignore-scripts --no-audit --no-fund` checks the dependency-free lockfile and matches CI setup. [CI.md](docs/CI.md) explains the exact workflow.
 
+For the local development entrypoint, run `node --test tests/serve-options.test.js tests/serve.test.js`. [Preview arguments and verification limits](docs/PREVIEW_SERVER.md) describe the strict loopback contract and why mocked listen tests are not browser evidence.
+
 ## Edit a scenario or schema
 
 See [JSON_SCHEMAS.md](docs/JSON_SCHEMAS.md) for scoped editor associations and the difference between structural diagnostics and authoritative runtime validation. If changing the schemas or their editor integration, also run:

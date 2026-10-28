@@ -2,7 +2,8 @@ import http from 'node:http';
 import * as fileSystem from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-const root = path.resolve(fileURLToPath(new URL('../', import.meta.url)), process.argv.includes('--dist') ? 'dist' : '.');
+import { parseServeArguments } from './serve-options.js';
+const root = fileURLToPath(new URL('../', import.meta.url));
 const types = {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.svg':'image/svg+xml','.png':'image/png'};
 
 // The URL allowlist is not enough: stat/readFile follow links. Reject links at
@@ -45,7 +46,18 @@ export function createRequestHandler(directory = root, fs = fileSystem) {
 }
 
 if (import.meta.main) {
-  const port = Number(process.env.PORT || 4173);
-  const server = http.createServer(createRequestHandler());
-  server.listen(port,'127.0.0.1',()=>console.log(`DetourLab → http://127.0.0.1:${port}`));
+  try {
+    const options = parseServeArguments(process.argv.slice(2), process.env.PORT);
+    const directory = path.resolve(root, options.dist ? 'dist' : '.');
+    const server = http.createServer(createRequestHandler(directory));
+    // Always strict: never try another port or widen the loopback host.
+    server.once('error', error => {
+      console.error(`DetourLab: cannot listen on ${options.host}:${options.port} (${error.code || 'listen error'}).`);
+      process.exitCode = 1;
+    });
+    server.listen(options.port, options.host, () => console.log(`DetourLab → http://${options.host}:${options.port}`));
+  } catch (error) {
+    console.error(`DetourLab: ${error.message}`);
+    process.exitCode = 2;
+  }
 }

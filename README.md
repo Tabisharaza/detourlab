@@ -68,6 +68,8 @@ There is nothing to install. Node serves the static app on loopback only. Use th
 npm run check        # Syntax checks, automated tests and static build
 npm run build        # dist/ plus a SHA-256 file manifest
 npm start -- --dist  # Preview the built distribution
+# Compatible with development tools that supply an exact loopback host/port:
+npm run dev -- --host 127.0.0.1 --port 4173 --strictPort
 npm run benchmark    # Named-machine timing of the original paired fixture
 ```
 

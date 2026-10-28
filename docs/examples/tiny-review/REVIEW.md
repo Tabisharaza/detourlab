@@ -20,10 +20,10 @@ A small reproducible network&#58; close B to C at 10 seconds and route B to D to
 
 - Experiment SHA-256: 7a757f1b53531826e98f44a706d3c6d235986682e6517c3c542f116fa8bf7395
 - Policy SHA-256: 5b1d040cbd8516b8637db5141e0c73748c9090a081cf12200b70dd4d40b87a67
-- Bundle integrity SHA-256: 5b5ac565bae2dabb0d62331d1e5a80ade6a443c2643b6ba1ec09aeae65ba4a1c
+- Bundle integrity SHA-256: 4c9611f334134ef93c488e6451e01cd52a09c60b2298c2d59ca9dc880453bb50
 - Engine version: 0&#46;1&#46;0. Generator: detourlab; package version: 0&#46;1&#46;0; report version: 1.
 - Source revision: unknown. Generator metadata is supplied, not authenticated by the model helper.
-- Implementation fingerprint: 0b67481f4bd071dbda5b64127d8e9798f2c625c388c0ffb1397acdb0e6b1bc9b.
+- Implementation fingerprint: 9c75aee3c2e981ed7e603a7171b37411c0b37b240923c11d1562fcc5c55753b4.
 - Hashes identify content; they are not signatures or proof of authorship. Bundle integrity hashes canonical JSON of all fields except integrity. Canonical JSON sorts object keys and preserves array order; the file itself is readable indented JSON.
 - The full normalized experiment, ordered policy, every outcome and every violation are embedded in bundle.json. No timestamp, local input path or user identity is inferred.
 

@@ -28,7 +28,7 @@
         "scripts/cli-display.js",
         "scripts/read-input.js"
       ],
-      "sha256": "0b67481f4bd071dbda5b64127d8e9798f2c625c388c0ffb1397acdb0e6b1bc9b"
+      "sha256": "9c75aee3c2e981ed7e603a7171b37411c0b37b240923c11d1562fcc5c55753b4"
     }
   },
   "experiment": {
@@ -456,7 +456,7 @@
   "verdict": "passed",
   "integrity": {
     "algorithm": "sha256",
-    "sha256": "5b5ac565bae2dabb0d62331d1e5a80ade6a443c2643b6ba1ec09aeae65ba4a1c",
-    "reviewSha256": "5265e566e7dfe358c26a466c4216bb5ca1b940932bb081fe5bd4769981f1b226"
+    "sha256": "4c9611f334134ef93c488e6451e01cd52a09c60b2298c2d59ca9dc880453bb50",
+    "reviewSha256": "20e641eb3b68d350e2f29ae6102e31dc03cd323438944a7e91d5e09a982d2832"
   }
 }
