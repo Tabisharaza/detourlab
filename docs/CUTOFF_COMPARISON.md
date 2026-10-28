@@ -11,6 +11,9 @@ assignments and job order stay unchanged.
 This replaces repetitive duplicate/rename/edit steps for a bounded timing study.
 It does not search for an optimal cutoff or add a new simulation model.
 
+The [browser study](BROWSER_CUTOFF.md) uses the same pure builder and completed-result
+policy projection in a separate, non-destructive modal. CLI behavior is unchanged.
+
 ## Quick start with a hand-checkable boundary
 
 ```sh

@@ -2,6 +2,9 @@ import { createDemoScenario, createPresets, validateScenario, LIMITS } from './s
 import { experimentFromScenario, validateExperiment, parseExperiment, scenarioForVariant, exportExperiment, EXPERIMENT_LIMITS } from './experiment.js';
 import { createBrowserReview } from './browser-review.js';
 import { createBrowserImpact, pageDeliveryImpact } from './browser-impact.js';
+import { createCutoffExperiment, normalizeCutoffTimes } from './cutoff-experiment.js';
+import { summarizeCutoffResults } from './cutoff-comparison.js';
+import { normalizePolicy } from './experiment-report.js';
 import { NetworkMap } from './map.js';
 import { createTutorialExperiment } from './tutorial.js';
 import { decodeFileInput, FILE_INPUT_MAX_BYTES, formatInputError } from './file-input.js';
@@ -28,6 +31,11 @@ let reviewRevision = 0;
 let preparedReview = null;
 let inspectedImpact = null;
 let impactPage = 0;
+let cutoffSource = null;
+let cutoffWorker = null;
+let cutoffRevision = 0;
+let cutoffTimeout;
+let completedCutoff = null;
 const lessonSteps = [
   { id: 'clear', time: 0, story: 'With clear roads, the van takes A → B → C: 200 m and arrival at 20 s, before the 22 s deadline. Its run finishes at 23 s because delivery service takes 3 more seconds.' },
   { id: 'close-at-10', time: 10, story: 'At 10 s the van reaches B. B → C closes at that exact instant, so entry is blocked. It takes A → B → D → C instead: 260 m, arrival at 26 s, and 4 s late. The run finishes at 29 s, including 3 s of service.' },
@@ -118,6 +126,7 @@ function updateControlList(region, records, render, fallback, keyFor = record =>
   focusFirst([candidates.find(control => sameRecord?.contains(control)), ...candidates.slice(index), ...candidates.slice(0, index).reverse(), fallback]);
 }
 function updateVariants(preserveName = false) {
+  updateCutoffAvailability();
   $('experiment-name').textContent = state.experiment.name;
   $('variant-select').replaceChildren(...state.experiment.variants.map(variant => { const option = node('option', variant.name); option.value = variant.id; return option; }));
   $('variant-select').value = state.selectedVariantId;
@@ -296,6 +305,7 @@ function showSelectedResult() {
   updateMetrics(); updateInspector(); updateVariants(true); updateImpactSelection(); map.invalidateFrame();
 }
 function compute() {
+  invalidateCutoff();
   const id = ++revision;
   clearTimeout(workerTimeout); worker?.terminate();
   state.pending = true; state.allResults = null; state.baseline = null; state.disrupted = null; clearResults(); updateVariants(true);
@@ -427,9 +437,10 @@ function focusFirst(elements) {
   }
 }
 function dialogControls(dialog) {
-  return [...dialog.querySelectorAll('button, [href], input, select, textarea, [tabindex]')].filter(element => element.tabIndex >= 0 && canFocus(element));
+  return [...dialog.querySelectorAll('button, [href], input, select, textarea, summary, [tabindex]')].filter(element => element.tabIndex >= 0 && canFocus(element));
 }
 function dialogReturnTargets(dialog, source) {
+  if (dialog === $('cutoff-dialog')) return [source, $('cutoff-button'), $('run-experiment')];
   if (dialog === $('impact-dialog')) return [source, $('impact-button'), $('run-experiment')];
   if (dialog === $('review-dialog')) return [source, $('review-button'), $('run-experiment')];
   return dialog === $('guide-dialog') ? [source, $('guide-button'), $('assumptions-button'), $('try-example-button')] : [source, $('try-example-button'), $('quick-example-button'), $('assumptions-button')];
@@ -632,6 +643,168 @@ $('impact-close').addEventListener('click', () => { invalidateImpact(); closeDia
 $('impact-dialog').addEventListener('cancel', invalidateImpact);
 
 for (const name of ['input', 'change']) $('closure-time').addEventListener(name, (event) => { $('closure-time-label').textContent = clock(event.target.value); updateRoadDetails(); });
+// A temporary study owns its own Worker and never adopts generated variants.
+const cutoffPolicyLabels = {
+  extraDistancePct: 'extra distance (%)', extraLateJobs: 'extra late deliveries',
+  unreachableJobs: 'unreachable deliveries', newlyLateJobs: 'newly late deliveries', maxArrivalSlipS: 'arrival slip (seconds)',
+};
+function updateCutoffAvailability() {
+  const button = $('cutoff-button');
+  const disabled = state.pending || !state.experiment.variants.some(variant => variant.closures.length);
+  if (disabled && document.activeElement === button) focusFirst([$('run-experiment')]);
+  button.disabled = disabled;
+}
+function cutoffIsCurrent() { return cutoffSource === state.experiment && Boolean(cutoffSource) && !$('cutoff-fields').disabled && $('cutoff-dialog').open && !state.pending; }
+function stopCutoff(message = '', stale = false) {
+  cutoffRevision += 1; clearTimeout(cutoffTimeout); cutoffWorker?.terminate(); cutoffWorker = null; completedCutoff = null;
+  const active = document.activeElement;
+  if ($('cutoff-dialog').open && (active === $('cutoff-cancel') || $('cutoff-results').contains(active) || stale && $('cutoff-fields').contains(active))) {
+    focusFirst(stale ? [$('cutoff-close')] : [$('cutoff-run'), $('cutoff-close')]);
+  }
+  $('cutoff-fields').disabled = stale;
+  $('cutoff-cancel').hidden = true; $('cutoff-export').disabled = true;
+  $('cutoff-results').hidden = true; $('cutoff-rows').replaceChildren();
+  $('cutoff-status').textContent = message; $('cutoff-status').classList.remove('error');
+  $('cutoff-results').setAttribute('aria-busy', 'false');
+  if (stale) cutoffSource = null;
+}
+function invalidateCutoff() {
+  if (cutoffSource || cutoffWorker || completedCutoff) stopCutoff('Workspace changed. Close and reopen this study to use the current schedules. No old results are shown.', true);
+  updateCutoffAvailability();
+}
+function cutoffRoadSummary(closure, edgeNames = new Map(cutoffSource.baseScenario.edges.map(edge => [edge.id, edge.roadName]))) {
+  const names = [...new Set(closure.edgeIds.map(id => edgeNames.get(id)))];
+  return names.slice(0, 2).map(name => name.length > 60 ? `${name.slice(0, 60)}…` : name).join(', ') + (names.length > 2 ? ` + ${names.length - 2} more roads` : '');
+}
+function updateCutoffClosures() {
+  const selected = cutoffSource?.variants.find(variant => variant.id === $('cutoff-variant').value);
+  const edgeNames = new Map(cutoffSource.baseScenario.edges.map(edge => [edge.id, edge.roadName]));
+  $('cutoff-closure').replaceChildren(...(selected?.closures ?? []).map(closure => {
+    const option = node('option', `${cutoffRoadSummary(closure, edgeNames)} · ${closure.id} · currently ${closure.atS} s`); option.value = closure.id; return option;
+  }));
+  $('cutoff-closure').disabled = !selected?.closures.length;
+  updateCutoffSourceDetail();
+}
+function updateCutoffSourceDetail() {
+  const selected = cutoffSource?.variants.find(variant => variant.id === $('cutoff-variant').value);
+  const closure = selected?.closures.find(item => item.id === $('cutoff-closure').value);
+  $('cutoff-run').disabled = !closure;
+  $('cutoff-source-detail').textContent = closure
+    ? `${selected.name}: ${cutoffRoadSummary(closure)} · “${closure.id}” currently starts at ${closure.atS} s and covers ${closure.edgeIds.length} directed edges. ${selected.closures.length - 1} other closure events stay unchanged. All candidates compare against clear roads, not this original schedule.`
+    : 'This variant has no closure to vary. Choose a source variant with an existing closure, or close this study and add one in the workspace.';
+}
+function openCutoffStudy() {
+  if ($('cutoff-dialog').open || state.pending || !state.experiment.variants.some(variant => variant.closures.length)) return;
+  setPlaying(false); stopCutoff(); cutoffSource = state.experiment;
+  $('cutoff-fields').disabled = false;
+  $('cutoff-variant').replaceChildren(...cutoffSource.variants.map(variant => { const option = node('option', variant.name); option.value = variant.id; return option; }));
+  $('cutoff-variant').value = state.selectedVariantId;
+  $('cutoff-times').value = '';
+  for (const metric of Object.keys(cutoffPolicyLabels)) $(`cutoff-${metric}`).value = '';
+  for (const control of [$('cutoff-times'), ...Object.keys(cutoffPolicyLabels).map(metric => $(`cutoff-${metric}`))]) control.setAttribute('aria-invalid', 'false');
+  $('cutoff-policy').open = false;
+  updateCutoffClosures();
+  $('cutoff-status').textContent = 'Choose your sample times, then run. No workspace variants will be replaced.';
+  openDialog($('cutoff-dialog'), $('cutoff-button'), $('cutoff-dialog-title'));
+}
+function cutoffInputError(control, message) { if (control.closest('details')) $('cutoff-policy').open = true; control.setAttribute('aria-invalid', 'true'); focusFirst([control]); throw new Error(message); }
+function readCutoffInputs() {
+  const control = $('cutoff-times'), text = control.value.trim();
+  const decimal = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/iu;
+  const values = text.split(',').map(value => value.trim());
+  control.setAttribute('aria-invalid', 'false');
+  if (text.length > 200 || values.length < 2 || values.length > EXPERIMENT_LIMITS.maxVariants || values.some(value => !decimal.test(value))) {
+    cutoffInputError(control, 'Enter 2–6 comma-separated closure start times, for example 10, 11.');
+  }
+  let times;
+  try { times = normalizeCutoffTimes(values.map(Number)); }
+  catch (error) { cutoffInputError(control, formatInputError(error)); }
+  const policy = {};
+  for (const [metric, label] of Object.entries(cutoffPolicyLabels)) {
+    const input = $(`cutoff-${metric}`), value = input.value.trim(); input.setAttribute('aria-invalid', 'false');
+    if (input.validity?.badInput || value && (!decimal.test(value) || !Number.isFinite(Number(value)) || Number(value) < 0)) cutoffInputError(input, `Enter a finite nonnegative maximum for ${label}, or leave it blank.`);
+    if (value) policy[metric] = Number(value);
+  }
+  return { times, policy: normalizePolicy(policy) };
+}
+function finishCutoffRun() {
+  clearTimeout(cutoffTimeout); cutoffWorker?.terminate(); cutoffWorker = null;
+  if (document.activeElement === $('cutoff-cancel')) focusFirst([$('cutoff-run'), $('cutoff-close')]);
+  $('cutoff-cancel').hidden = true; $('cutoff-results').setAttribute('aria-busy', 'false');
+}
+function renderCutoffResults(study, report, sourceName, closureId) {
+  const metrics = report.baseline;
+  $('cutoff-baseline').textContent = `Clear-road baseline: ${distanceText(metrics.distanceM)} · ${metrics.lateJobs} late · ${metrics.completedJobs}/${metrics.totalJobs} completed · ${metrics.unreachableJobs} unreachable.`;
+  const policies = Object.entries(report.thresholds);
+  $('cutoff-policy-summary').textContent = policies.length
+    ? `Supplied limits: ${policies.map(([metric, limit]) => `${cutoffPolicyLabels[metric]} ≤ ${limit}`).join('; ')}. Unlisted limits are not evaluated.`
+    : 'Acceptance not evaluated: no policy limits were supplied. Not evaluated does not mean passed.';
+  $('cutoff-caption').textContent = `Source: ${sourceName} · varied closure: ${closureId}. ${report.candidates.length} sampled start times; all other closure events preserved.`;
+  $('cutoff-rows').replaceChildren(...report.candidates.map(candidate => {
+    const row = node('tr'), time = node('th', `${candidate.cutoffS} s`); time.setAttribute('scope', 'row');
+    const distance = node('td', distanceText(candidate.metrics.distanceM)); distance.append(node('small', `${candidate.delta.extraDistancePct > 0 ? '+' : ''}${candidate.delta.extraDistancePct}% vs clear roads`));
+    const late = node('td', String(candidate.metrics.lateJobs)); late.append(node('small', `${candidate.delta.extraLateJobs > 0 ? '+' : ''}${candidate.delta.extraLateJobs} vs clear roads`));
+    const coverage = node('td', `${candidate.metrics.completedJobs}/${candidate.metrics.totalJobs} completed`); coverage.append(node('small', `${candidate.metrics.unreachableJobs} unreachable`));
+    const verdict = node('td', candidate.verdict === 'not-evaluated' ? 'Not evaluated' : candidate.verdict === 'passed' ? 'Passed supplied limits' : 'Failed supplied limits', `cutoff-${candidate.verdict}`);
+    for (const violation of candidate.violations) verdict.append(node('small', violation.reason === 'no-comparable-jobs' ? `${cutoffPolicyLabels[violation.metric]}: no comparable arrivals; requested limit cannot pass.` : `${cutoffPolicyLabels[violation.metric]}: ${violation.actual} > ${violation.limit}`));
+    if (candidate.jobComparison) verdict.append(node('small', `${candidate.jobComparison.comparableJobs} comparable arrivals; ${candidate.jobComparison.uncomparableJobs} not comparable.`));
+    row.append(time, distance, late, coverage, verdict); return row;
+  }));
+  $('cutoff-warning').textContent = report.warnings.length ? 'Some sampled schedules leave deliveries unreachable. Skipped work can reduce distance or lateness; these are not equal-service improvements. Compare completed and unreachable counts.' : 'All sampled schedules have zero unreachable deliveries. This does not establish unchanged routes, overall superiority or operational safety.';
+  completedCutoff = { experiment: study, source: cutoffSource };
+  $('cutoff-results').hidden = false; $('cutoff-export').disabled = false;
+  $('cutoff-status').textContent = `${report.candidates.length} sampled times completed. ${policies.length ? `${report.candidates.filter(candidate => candidate.verdict === 'passed').length} passed the supplied limits; ${report.candidates.filter(candidate => candidate.verdict === 'failed').length} failed.` : 'Acceptance not evaluated.'} Workspace unchanged.`;
+}
+function runCutoffStudy() {
+  if (!cutoffIsCurrent() || $('cutoff-run').disabled) return;
+  stopCutoff();
+  let study, policy;
+  const variantId = $('cutoff-variant').value, closureId = $('cutoff-closure').value;
+  try { const inputs = readCutoffInputs(); policy = inputs.policy; study = createCutoffExperiment(cutoffSource, variantId, closureId, inputs.times); }
+  catch (error) { $('cutoff-status').textContent = `Study not run. ${formatInputError(error)}`; $('cutoff-status').classList.add('error'); return; }
+  const id = ++cutoffRevision, source = cutoffSource;
+  let currentWorker;
+  const fail = error => { stopCutoff(`Study failed. No partial results shown. ${formatInputError(error)}`); $('cutoff-status').classList.add('error'); };
+  try { currentWorker = new Worker(new URL('./simulation-worker.js', import.meta.url), { type: 'module' }); }
+  catch (error) { fail(error); return; }
+  cutoffWorker = currentWorker;
+  const current = () => id === cutoffRevision && cutoffWorker === currentWorker && source === cutoffSource && cutoffIsCurrent();
+  $('cutoff-status').textContent = `Running one clear-road baseline and ${study.variants.length} sampled schedules… Edit any study input or Cancel to stop this run.`;
+  $('cutoff-cancel').hidden = false; $('cutoff-results').setAttribute('aria-busy', 'true');
+  currentWorker.onmessage = ({ data }) => {
+    if (!current() || data.id !== id) return;
+    if (data.error) { fail(new Error(data.error)); return; }
+    try {
+      const report = summarizeCutoffResults(study, closureId, { baseline: data.baseline, variants: data.variants }, policy);
+      finishCutoffRun(); renderCutoffResults(study, report, source.variants.find(variant => variant.id === variantId).name, closureId);
+    } catch (error) { fail(error); }
+  };
+  currentWorker.onerror = event => { if (current()) fail(new Error(event.message || 'Simulation worker failed. Try again.')); };
+  try { currentWorker.postMessage({ id, experiment: study }); }
+  catch (error) { fail(error); return; }
+  cutoffTimeout = setTimeout(() => { if (current()) fail(new Error('Calculation stopped after the 30-second safety limit. Use fewer samples or a smaller source experiment.')); }, 30000);
+}
+$('cutoff-button').addEventListener('click', openCutoffStudy);
+$('cutoff-run').addEventListener('click', runCutoffStudy);
+$('cutoff-cancel').addEventListener('click', () => { if (cutoffWorker && cutoffIsCurrent()) stopCutoff('Study run canceled. Inputs and workspace preserved; no partial results shown.'); });
+$('cutoff-close').addEventListener('click', () => { stopCutoff(); cutoffSource = null; closeDialog($('cutoff-dialog')); });
+$('cutoff-dialog').addEventListener('cancel', () => { stopCutoff(); cutoffSource = null; });
+$('cutoff-variant').addEventListener('change', () => { if (cutoffIsCurrent()) { stopCutoff('Source changed. Run again to compare these schedules.'); updateCutoffClosures(); } });
+$('cutoff-closure').addEventListener('change', () => { if (cutoffIsCurrent()) { stopCutoff('Closure changed. Run again to compare these schedules.'); updateCutoffSourceDetail(); } });
+for (const id of ['cutoff-times', ...Object.keys(cutoffPolicyLabels).map(metric => `cutoff-${metric}`)]) {
+  $(id).addEventListener('input', () => { if (cutoffIsCurrent()) { $(id).setAttribute('aria-invalid', 'false'); stopCutoff('Inputs changed. Run again for current results.'); } });
+}
+$('cutoff-export').addEventListener('click', () => {
+  if (!completedCutoff || !cutoffIsCurrent() || completedCutoff.source !== state.experiment) return;
+  try {
+    const serialized = exportExperiment(completedCutoff.experiment);
+    const url = URL.createObjectURL(new Blob([serialized], { type: 'application/json' })), link = node('a');
+    link.href = url; link.download = 'detourlab-closure-time-study.experiment.json';
+    try { link.click(); } finally { setTimeout(() => URL.revokeObjectURL(url), 1000); }
+    $('cutoff-status').textContent = 'Sampled experiment download requested. It includes schedules only, not policy limits or results. Your workspace is unchanged.';
+  } catch (error) { $('cutoff-status').textContent = `Download could not be prepared. ${formatInputError(error)} Your study and workspace are unchanged.`; }
+});
+
 $('road-search').addEventListener('input', () => filterRoads());
 $('clear-road-search').addEventListener('click', () => { $('road-search').value = ''; filterRoads(); });
 $('road-select').addEventListener('change', updateRoadDetails);
@@ -686,7 +859,7 @@ $('run-experiment').addEventListener('click', () => { importRevision += 1; compu
 for (const id of ['try-example-button', 'quick-example-button', 'guide-example-button']) $(id).addEventListener('click', () => showLessonConfirmation($(id)));
 $('lesson-start').addEventListener('click', startLesson);
 $('lesson-cancel').addEventListener('click', () => closeDialog($('lesson-dialog')));
-for (const id of ['guide-dialog', 'lesson-dialog', 'review-dialog', 'impact-dialog']) {
+for (const id of ['guide-dialog', 'lesson-dialog', 'review-dialog', 'impact-dialog', 'cutoff-dialog']) {
   const dialog = $(id);
   dialog.addEventListener('keydown', event => containDialogTab(event, dialog));
   dialog.addEventListener('close', () => restoreDialogFocus(dialog));
@@ -699,7 +872,7 @@ for (const step of lessonSteps) $('lesson-' + step.id).addEventListener('click',
 for (const id of ['guide-button', 'assumptions-button']) $(id).addEventListener('click', () => { setPlaying(false); openDialog($('guide-dialog'), $(id), $('guide-dialog-title')); });
 $('guide-close').addEventListener('click', () => closeDialog($('guide-dialog')));
 $('guide-dialog').addEventListener('click', (event) => { if (event.target === $('guide-dialog')) { const bounds = event.target.getBoundingClientRect(); if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) closeDialog(event.target); } });
-window.addEventListener('keydown', (event) => { if (event.code === 'Space' && !['INPUT','BUTTON','SELECT','TEXTAREA'].includes(document.activeElement.tagName) && !$('guide-dialog').open && !$('lesson-dialog').open && !$('review-dialog').open && !$('impact-dialog').open) { event.preventDefault(); $('play-button').click(); } });
+window.addEventListener('keydown', (event) => { if (event.code === 'Space' && !['INPUT','BUTTON','SELECT','TEXTAREA'].includes(document.activeElement.tagName) && !$('guide-dialog').open && !$('lesson-dialog').open && !$('review-dialog').open && !$('impact-dialog').open && !$('cutoff-dialog').open) { event.preventDefault(); $('play-button').click(); } });
 document.addEventListener('visibilitychange', () => { if (document.hidden) setPlaying(false); });
 let previous = performance.now();
 function frame(now) { const delta = Math.min((now - previous) / 1000, .1); previous = now; if (state.playing && !state.pending) { setTime(state.time + delta * state.speed); if (state.time >= Number($('timeline').max)) setPlaying(false); } map.render(now); requestAnimationFrame(frame); }

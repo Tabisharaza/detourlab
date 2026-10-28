@@ -49,7 +49,7 @@
       <div class="lab-heading"><div><div class="eyebrow">NETWORK RESILIENCE / 001</div><h2>What if this road disappeared?</h2></div><span class="simulation-badge"><i></i> SYNTHETIC SIMULATION</span></div>
       <button id="quick-example-button" class="button example-mobile-entry" aria-haspopup="dialog">Try a tiny example</button>
       <section id="lesson-panel" class="lesson-panel" aria-labelledby="lesson-heading" hidden><div class="lesson-heading"><div><div class="eyebrow">TINY EXPERIMENT / OPTIONAL LESSON</div><h3 id="lesson-heading">One second changes the route.</h3></div><button id="return-experiment" class="button">Return to my experiment</button></div><p class="lesson-intro">One van leaves A at 0 s and reaches B at 10 s. Its delivery at C is due at 22 s. Choose a plan, then play or scrub the map.</p><div class="lesson-steps" role="group" aria-label="Tiny example plans"><button id="lesson-clear" aria-pressed="false">1 · Clear roads <small>Start at 0 s</small></button><button id="lesson-close-at-10" aria-pressed="false">2 · Close at 10 s <small>Jump to the cutoff</small></button><button id="lesson-close-at-11" aria-pressed="false">3 · Close at 11 s <small>Already on the road</small></button></div><p id="lesson-story" class="lesson-story" role="status"></p><p class="lesson-note">Cards show final outcomes. The route inspector shows the computed path and arrival. Your previous experiment is held in memory until you return; reloading this page clears it. Export important work before reloading.</p></section>
-      <section class="variant-comparison" aria-label="All variant outcomes"><div class="comparison-heading"><div><strong id="experiment-name">Meridian experiment</strong><span>Same network. Same orders. Independent closures.</span></div><div class="run-controls"><button id="impact-button" class="button" aria-haspopup="dialog" disabled>Inspect deliveries</button><button id="review-button" class="button" aria-haspopup="dialog" disabled>Review results</button><button id="cancel-run" class="text-button" hidden>Cancel run</button><button id="run-experiment" class="button">Run all variants</button></div></div><div id="variant-results" class="variant-results"></div><p id="comparison-status" class="comparison-status" role="status">Calculating all variants…</p></section>
+      <section class="variant-comparison" aria-label="All variant outcomes"><div class="comparison-heading"><div><strong id="experiment-name">Meridian experiment</strong><span>Same network. Same orders. Independent closures.</span></div><div class="run-controls"><button id="cutoff-button" class="button" aria-haspopup="dialog" disabled>Compare closure times</button><button id="impact-button" class="button" aria-haspopup="dialog" disabled>Inspect deliveries</button><button id="review-button" class="button" aria-haspopup="dialog" disabled>Review results</button><button id="cancel-run" class="text-button" hidden>Cancel run</button><button id="run-experiment" class="button">Run all variants</button></div></div><div id="variant-results" class="variant-results"></div><p id="comparison-status" class="comparison-status" role="status">Calculating all variants…</p></section>
       <div class="metric-grid" aria-label="Final run comparison">
         <div class="metric-card"><div class="metric-title">Total fleet distance <span>↗</span></div><div class="metric-value" id="distance-value">—</div><div class="metric-bottom"><span id="distance-delta">Calculating…</span><span class="metric-baseline" id="distance-baseline"></span></div></div>
         <div class="metric-card"><div class="metric-title">Late deliveries <span>◷</span></div><div class="metric-value" id="late-value">—</div><div class="metric-bottom"><span id="late-delta">Calculating…</span><span class="metric-baseline" id="late-baseline"></span></div></div>
@@ -73,6 +73,47 @@
     </aside>
   </main>
   <div id="toast" role="status" aria-live="polite" class="toast" hidden></div>
+  <dialog id="cutoff-dialog" aria-labelledby="cutoff-dialog-title" aria-describedby="cutoff-description">
+    <button id="cutoff-close" class="dialog-close" type="button" aria-label="Close closure-time study">×</button>
+    <div class="eyebrow">DETOURLAB / TEMPORARY TIMING STUDY</div>
+    <h2 id="cutoff-dialog-title" tabindex="-1">When does the closure start?</h2>
+    <p id="cutoff-description">Compare 2–6 start times for one existing closure. Each closure stays permanent from its start time. This study uses saved workspace values, not unsaved text edits. Your variants and editor fields stay unchanged; closing discards this temporary study.</p>
+    <fieldset id="cutoff-fields" class="cutoff-fields">
+      <legend>Choose the source schedule and sample times</legend>
+      <div class="cutoff-input-grid">
+        <div><label for="cutoff-variant">Source variant</label><select id="cutoff-variant"></select></div>
+        <div><label for="cutoff-closure">Closure to vary</label><select id="cutoff-closure" aria-describedby="cutoff-source-detail"></select></div>
+      </div>
+      <p id="cutoff-source-detail"></p>
+      <label for="cutoff-times">Closure start times, in seconds</label>
+      <input id="cutoff-times" type="text" maxlength="200" autocomplete="off" placeholder="For example: 10, 11" aria-describedby="cutoff-times-help">
+      <p id="cutoff-times-help">Enter 2–6 unique numbers separated by commas, from 0 to 604800 s (7 days). Rows are sorted by time, not performance. All other closure events, network and demand are held fixed.</p>
+      <details id="cutoff-policy" class="cutoff-policy"><summary>Optional acceptance limits — leave blank to skip</summary>
+        <p>Every limit compares with the clear-road baseline, not the source variant. All supplied limits must pass. Blank means not evaluated for that limit; zero is an active limit.</p>
+        <div class="cutoff-input-grid">
+          <div><label for="cutoff-extraDistancePct">Maximum extra distance (%)</label><input id="cutoff-extraDistancePct" type="number" min="0" step="any"></div>
+          <div><label for="cutoff-extraLateJobs">Maximum extra late deliveries</label><input id="cutoff-extraLateJobs" type="number" min="0" step="any"></div>
+          <div><label for="cutoff-unreachableJobs">Maximum unreachable deliveries</label><input id="cutoff-unreachableJobs" type="number" min="0" step="any"></div>
+          <div><label for="cutoff-newlyLateJobs">Maximum newly late deliveries</label><input id="cutoff-newlyLateJobs" type="number" min="0" step="any"></div>
+          <div><label for="cutoff-maxArrivalSlipS">Maximum arrival slip (seconds)</label><input id="cutoff-maxArrivalSlipS" type="number" min="0" step="any" aria-describedby="cutoff-slip-help"></div>
+        </div>
+        <p id="cutoff-slip-help">Newly late counts on-time → late deliveries. Arrival slip uses comparable arrivals only; requesting it fails if none are comparable. Unreachable work is not a zero-second delay.</p>
+      </details>
+      <button id="cutoff-run" class="button button-primary" type="button">Run sampled comparison</button>
+    </fieldset>
+    <div class="cutoff-progress"><p id="cutoff-status" role="status" aria-live="polite" aria-atomic="true"></p><button id="cutoff-cancel" class="button" type="button" hidden>Cancel study run</button></div>
+    <section id="cutoff-results" aria-labelledby="cutoff-results-title" hidden>
+      <h3 id="cutoff-results-title">Sampled outcomes · clear-road comparison</h3>
+      <p id="cutoff-baseline"></p><p id="cutoff-policy-summary"></p>
+      <div id="cutoff-table-region" class="impact-table-region" role="region" tabindex="0" aria-label="Closure-time outcomes; scroll horizontally for all metrics">
+        <table class="impact-table cutoff-table"><caption id="cutoff-caption"></caption><thead><tr><th scope="col">Closure starts</th><th scope="col">Distance</th><th scope="col">Late deliveries</th><th scope="col">Service coverage</th><th scope="col">Supplied policy</th></tr></thead><tbody id="cutoff-rows"></tbody></table>
+      </div>
+      <p id="cutoff-warning" class="impact-limit"></p>
+      <button id="cutoff-export" class="button" type="button" disabled>Download sampled experiment (.json)</button>
+      <p class="guide-footnote">Explicit download only; no workspace replacement. This standard experiment contains the sampled schedules, not these results or policy limits. Use the CLI to create a source-identified report with explicit limits. Nothing is uploaded.</p>
+    </section>
+    <p class="impact-limit">Only your sampled times are evaluated. No best time, continuous passing interval, monotonic pattern or operational safety is established. Earlier overlapping closures can dominate. Fixed travel times, assignments and delivery order; synthetic data only.</p>
+  </dialog>
   <dialog id="impact-dialog" aria-labelledby="impact-dialog-title" aria-describedby="impact-description">
     <button id="impact-close" class="dialog-close" type="button" aria-label="Close delivery comparison">×</button>
     <div class="eyebrow">DETOURLAB / DELIVERY OUTCOMES</div>

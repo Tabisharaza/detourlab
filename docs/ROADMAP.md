@@ -50,7 +50,11 @@ The [headless cutoff workflow](CUTOFF_COMPARISON.md) builds and compares 2–6
 explicit times for one existing closure, preserving all other schedules and
 shared demand. Standard experiment export reuses the existing runner/review
 workflows. Passing samples are not optimal times, continuous passing intervals
-or operational safety decisions. Browser UI and deployment remain unchanged.
+or operational safety decisions. The [browser study](BROWSER_CUTOFF.md) now exposes
+the same builder and completed-result policy projection in a temporary modal,
+with cancellation, stale-result protection and explicit experiment download.
+It never replaces workspace variants. Source implementation and native QA are
+separate from deployment; the hosted demo is not implicitly updated.
 
 ## Release-readiness gates
 

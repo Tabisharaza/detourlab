@@ -136,7 +136,16 @@ The verifier reruns the embedded input and policy, rejects inconsistent evidence
 
 ## Compare closure timing without hand-editing variants
 
-Sample one existing closure at 2–6 explicit times while keeping the same demand and every other closure unchanged:
+In the source app, **Compare closure times** opens a temporary study: choose a
+source variant/closure, enter 2–6 start times, and optionally set the five existing
+acceptance limits. Results compare with one clear-road baseline and keep completed
+and unreachable work visible. Blank limits mean **Not evaluated**, not passed.
+The workspace stays unchanged; downloading the sampled experiment is explicit.
+[Browser workflow and verification boundaries](docs/BROWSER_CUTOFF.md). This source
+feature does not imply that the hosted demo has been redeployed.
+
+The CLI samples the same existing closure while preserving demand and every
+other closure event:
 
 ```sh
 node scripts/compare-cutoffs.js examples/minimal-experiment.json \
@@ -178,6 +187,7 @@ The human view shows the first 20 changed jobs and says how many are omitted; ve
 - Cancel/rerun, terminated superseded workers and stale-result/import guards
 - Bounded experiment JSON, backward-compatible scenario imports and deterministic CLI thresholds
 - Bounded browser delivery comparisons using completed results, with same-status timing filters and explicit missing timings
+- Temporary browser closure-start-time studies using the shared bounded builder and five optional policy gates
 - Headless per-job impact reports with complete status transitions and comparable timing differences
 - Portable all-variant review packets with embedded input, policy and readable exceptions
 - Original procedural geometry, a buildless UI, a module Worker and Node-native tests

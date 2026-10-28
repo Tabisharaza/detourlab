@@ -22,6 +22,8 @@ export const RELEASE_FILES = Object.freeze([
   'src/app.js',
   'src/browser-impact.js',
   'src/browser-review.js',
+  'src/cutoff-experiment.js',
+  'src/cutoff-comparison.js',
   'src/experiment-report.js',
   'src/job-impact.js',
   'src/job-gates.js',

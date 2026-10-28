@@ -37,7 +37,7 @@ For received-packet verification, run `node --test tests/review-verification-cli
 
 For browser delivery inspection, run `node --test tests/browser-impact.test.js tests/browser-impact-ui.test.js`. Preserve completed-result reuse, exact shared job semantics, 20-row bounds with full/filtered counts, explicit null comparisons and invalidation/focus behavior. [BROWSER_IMPACT.md](docs/BROWSER_IMPACT.md) separates source tests from pending native-browser checks.
 
-For sampled cutoff studies, run `node --test tests/cutoff-comparison.test.js tests/cutoff-comparison-cli.test.js`. Preserve the pure builder, exact non-target schedules, ordinary experiment limits and clear-road policy semantics. [CUTOFF_COMPARISON.md](docs/CUTOFF_COMPARISON.md) documents no-policy/export distinctions and sampled-not-optimal claims.
+For sampled cutoff studies, run `node --test tests/cutoff-comparison.test.js tests/cutoff-comparison-cli.test.js tests/browser-cutoff.test.js tests/browser-cutoff-ui.test.js`. The [browser study](docs/BROWSER_CUTOFF.md) must preserve workspace/editor state, cancel superseded work, reject stale results, and expose no-policy as not evaluated. Export remains an explicit action, not silent adoption. Source stand-ins are not native-browser evidence. Preserve the pure builder, exact non-target schedules, ordinary experiment limits and clear-road policy semantics. [CUTOFF_COMPARISON.md](docs/CUTOFF_COMPARISON.md) documents no-policy/export distinctions and sampled-not-optimal claims.
 
 ## Choose a scope
 

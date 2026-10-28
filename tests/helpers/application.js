@@ -4,6 +4,9 @@ import * as experimentSchema from '../../src/experiment.js';
 import * as fileInput from '../../src/file-input.js';
 import { createBrowserReview } from '../../src/browser-review.js';
 import { createBrowserImpact, pageDeliveryImpact } from '../../src/browser-impact.js';
+import { createCutoffExperiment, normalizeCutoffTimes } from '../../src/cutoff-experiment.js';
+import { summarizeCutoffResults } from '../../src/cutoff-comparison.js';
+import { normalizePolicy } from '../../src/experiment-report.js';
 import { createTutorialExperiment } from '../../src/tutorial.js';
 
 // Execute only checked-in app source with DOM/Worker stand-ins. This covers
@@ -33,7 +36,7 @@ export function application({ workerConstructionError = () => null, mapClass = n
     get className() { return [...this._classes].join(' '); }
     set className(value) { this._classes = new Set(value.split(/\s+/u).filter(Boolean)); }
     get isConnected() { return this === document.documentElement || Boolean(this.parentElement?.isConnected); }
-    get tabIndex() { return this.attributes.has('tabindex') ? Number(this.getAttribute('tabindex')) : ['BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'].includes(this.tagName) || this.attributes.has('href') ? 0 : -1; }
+    get tabIndex() { return this.attributes.has('tabindex') ? Number(this.getAttribute('tabindex')) : ['BUTTON', 'INPUT', 'SELECT', 'TEXTAREA', 'SUMMARY'].includes(this.tagName) || this.attributes.has('href') ? 0 : -1; }
     set tabIndex(value) { this.setAttribute('tabindex', value); }
     get textContent() { return this._text + this.children.map(child => child.textContent).join(''); }
     set textContent(value) { this.replaceChildren(); this._text = String(value); }
@@ -47,6 +50,7 @@ export function application({ workerConstructionError = () => null, mapClass = n
     getAttribute(name) { return this.attributes.get(name) ?? null; }
     getClientRects() {
       for (let current = this; current; current = current.parentElement) {
+        if (current.tagName === 'DETAILS' && !current.open && !current.children.find(child => child.tagName === 'SUMMARY')?.contains(this)) return [];
         if (current.hidden || current.style.display === 'none' || current.tagName === 'DIALOG' && !current.open) return [];
       }
       return this.isConnected ? [{}] : [];
@@ -163,7 +167,7 @@ export function application({ workerConstructionError = () => null, mapClass = n
   const windowListeners = new Map();
   const window = { addEventListener(name, handler) { if (!windowListeners.has(name)) windowListeners.set(name, []); windowListeners.get(name).push(handler); } };
   const environment = {
-    ...scenarioSchema, ...experimentSchema, ...fileInput, createBrowserReview: reviewBuilder, createBrowserImpact: impactBuilder, pageDeliveryImpact, createTutorialExperiment, document, getComputedStyle: computedStyle, NetworkMap: mapClass ? class extends mapClass {
+    ...scenarioSchema, ...experimentSchema, ...fileInput, createCutoffExperiment, normalizeCutoffTimes, summarizeCutoffResults, normalizePolicy, createBrowserReview: reviewBuilder, createBrowserImpact: impactBuilder, pageDeliveryImpact, createTutorialExperiment, document, getComputedStyle: computedStyle, NetworkMap: mapClass ? class extends mapClass {
       constructor(...args) { super(...args); maps.push(this); }
     } : NetworkMap, Worker: FakeWorker,
     URL, Blob, TextEncoder, TextDecoder, performance: { now }, structuredClone,
