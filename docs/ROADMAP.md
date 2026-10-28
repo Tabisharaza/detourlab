@@ -44,6 +44,14 @@ ties, service/closure boundaries, unreachable continuation and closure-cache
 time reversal between vehicles. This is Node source evidence, not new browser
 or real-world traffic verification; reroute explanations remain separately tested.
 
+## Implemented: bounded closure timing comparisons
+
+The [headless cutoff workflow](CUTOFF_COMPARISON.md) builds and compares 2–6
+explicit times for one existing closure, preserving all other schedules and
+shared demand. Standard experiment export reuses the existing runner/review
+workflows. Passing samples are not optimal times, continuous passing intervals
+or operational safety decisions. Browser UI and deployment remain unchanged.
+
 ## Release-readiness gates
 
 1. Publish a truthful README, live demo link, actual screenshot and model assumptions.

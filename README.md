@@ -132,6 +132,18 @@ node scripts/verify-review.js browser-review --compare-outcomes
 
 The verifier reruns the embedded input and policy, rejects inconsistent evidence, and keeps a reproduced policy failure at exit 1. Outcome comparison never authenticates the original implementation; hashes are not signatures.
 
+## Compare closure timing without hand-editing variants
+
+Sample one existing closure at 2–6 explicit times while keeping the same demand and every other closure unchanged:
+
+```sh
+node scripts/compare-cutoffs.js examples/minimal-experiment.json \
+  --variant close-at-10 --closure bc-closure --times 10,11 \
+  --max-extra-late 0 --max-unreachable 0
+```
+
+The 10-second sample produces 260 m and one late delivery; 11 seconds produces 200 m and no late deliveries. The command exits 1 because one sample fails, while listing 11 seconds as a passing sample, **not an optimal time or passing interval**. Use `--json` for a report or `--export-experiment` for reusable standard input without simulation. [Cutoff comparison guide and actual outputs](docs/CUTOFF_COMPARISON.md).
+
 ## Author a portable input
 
 Use a filename ending in `.scenario.json` or `.experiment.json` inside this checkout to get scoped JSON Schema diagnostics, completion and unit-rich hover help in VS Code. The [authoring guide](docs/JSON_SCHEMAS.md) includes small valid examples and explains the checks that still require the runtime. Do not add `$schema` to your data files: the import format remains strict.

@@ -1,0 +1,95 @@
+{
+  "format": "detourlab-cutoff-comparison",
+  "version": 1,
+  "engineVersion": "0.1.0",
+  "source": {
+    "experimentId": "minimal-cutoff-experiment",
+    "experimentSha256": "7a757f1b53531826e98f44a706d3c6d235986682e6517c3c542f116fa8bf7395",
+    "variantId": "close-at-10",
+    "closureId": "bc-closure",
+    "originalCutoffS": 10
+  },
+  "experimentSha256": "2189bb85cb94a88acddbf49226b4261a514528f1a4385877ddece367b309d9bd",
+  "baseline": {
+    "distanceM": 200,
+    "lateJobs": 0,
+    "unreachableJobs": 0,
+    "completedJobs": 1,
+    "totalJobs": 1,
+    "totalDelayS": 0,
+    "onTimeJobs": 1,
+    "reroutes": 0,
+    "affectedVehicles": 0,
+    "totalTravelTimeS": 20
+  },
+  "candidates": [
+    {
+      "id": "cutoff-1",
+      "cutoffS": 10,
+      "metrics": {
+        "distanceM": 260,
+        "lateJobs": 1,
+        "unreachableJobs": 0,
+        "completedJobs": 1,
+        "totalJobs": 1,
+        "totalDelayS": 4,
+        "onTimeJobs": 0,
+        "reroutes": 1,
+        "affectedVehicles": 1,
+        "totalTravelTimeS": 26
+      },
+      "delta": {
+        "distanceM": 60,
+        "extraDistancePct": 30,
+        "extraLateJobs": 1,
+        "unreachableJobs": 0
+      },
+      "verdict": "failed",
+      "violations": [
+        {
+          "metric": "extraLateJobs",
+          "actual": 1,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "id": "cutoff-2",
+      "cutoffS": 11,
+      "metrics": {
+        "distanceM": 200,
+        "lateJobs": 0,
+        "unreachableJobs": 0,
+        "completedJobs": 1,
+        "totalJobs": 1,
+        "totalDelayS": 0,
+        "onTimeJobs": 1,
+        "reroutes": 0,
+        "affectedVehicles": 0,
+        "totalTravelTimeS": 20
+      },
+      "delta": {
+        "distanceM": 0,
+        "extraDistancePct": 0,
+        "extraLateJobs": 0,
+        "unreachableJobs": 0
+      },
+      "verdict": "passed",
+      "violations": []
+    }
+  ],
+  "thresholds": {
+    "extraLateJobs": 0,
+    "unreachableJobs": 0
+  },
+  "verdict": "failed",
+  "passingSampleTimesS": [
+    11
+  ],
+  "warnings": [],
+  "limitations": [
+    "Only the explicitly sampled times were evaluated; no optimal cutoff, continuous passing interval, monotonicity or operational safety is established.",
+    "Every candidate is compared with the clear-road baseline, not with the source variant. All other closure records remain unchanged; overlapping earlier closures can dominate.",
+    "Fixed travel times, vehicle assignments and delivery order; arrival deadlines. Fingerprints identify content, not authenticity."
+  ]
+}

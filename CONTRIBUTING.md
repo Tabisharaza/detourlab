@@ -35,6 +35,8 @@ For received-packet verification, run `node --test tests/review-verification-cli
 
 For browser delivery inspection, run `node --test tests/browser-impact.test.js tests/browser-impact-ui.test.js`. Preserve completed-result reuse, exact shared job semantics, 20-row bounds with full/filtered counts, explicit null comparisons and invalidation/focus behavior. [BROWSER_IMPACT.md](docs/BROWSER_IMPACT.md) separates source tests from pending native-browser checks.
 
+For sampled cutoff studies, run `node --test tests/cutoff-comparison.test.js tests/cutoff-comparison-cli.test.js`. Preserve the pure builder, exact non-target schedules, ordinary experiment limits and clear-road policy semantics. [CUTOFF_COMPARISON.md](docs/CUTOFF_COMPARISON.md) documents no-policy/export distinctions and sampled-not-optimal claims.
+
 ## Choose a scope
 
 Start with [open contribution issues](https://github.com/Tabisharaza/detourlab/issues). [Additional issue scopes](docs/ISSUE_DRAFTS.md) include reproducible problems, acceptance criteria and explicit non-goals, and distinguish published issues from proposals. Before adding a solver, city dataset, dependency or storage service, propose the interface and its effect on licensing, privacy and reproducibility.
