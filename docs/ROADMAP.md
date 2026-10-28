@@ -35,6 +35,15 @@ failures; unsigned fingerprints never establish authorship or original provenanc
 
 The [road picker](ROAD_PICKER.md) filters the native selector by road name, full endpoint ID or representative edge ID, with result counts and saved-schedule context. It preserves existing grouping, direction semantics and variant independence. The v9 demo has bounded desktop Chromium evidence. A run-lifecycle focus finding was corrected with regression tests and independent review, then deployed in v10. Native cancellation/completion retests and served-manifest parity passed; [public GitHub source mapping and exact-commit CI passed](VERIFICATION.md#v10-native-focus-checks-and-screenshot).
 
+## Implemented: independent bounded routing evidence
+
+The [exhaustive-path test oracle](ROUTING_ORACLE.md) independently checks 96
+small directed scenarios, 4,800 ordered path comparisons, complete traversal
+and delivery records, and numeric outcomes. Hand-checkable cases exercise
+ties, service/closure boundaries, unreachable continuation and closure-cache
+time reversal between vehicles. This is Node source evidence, not new browser
+or real-world traffic verification; reroute explanations remain separately tested.
+
 ## Release-readiness gates
 
 1. Publish a truthful README, live demo link, actual screenshot and model assumptions.

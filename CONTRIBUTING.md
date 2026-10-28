@@ -41,6 +41,8 @@ Start with [open contribution issues](https://github.com/Tabisharaza/detourlab/i
 
 A bug report should identify the source revision, Node/browser/OS version, expected and observed outcomes, and the smallest synthetic input that reproduces it. Do not attach production fleet data or secrets.
 
+For routing or ledger changes, run `node --test tests/routing-oracle.test.js` as well as the engine tests. The [independent bounded oracle](docs/ROUTING_ORACLE.md) checks exact dyadic paths and delivery outcomes without sharing routing or closure-cache code. Preserve its independence and explicit exclusions; failed seeds can be emitted as synthetic reproducers.
+
 ## Preserve the model contract
 
 - Keep the engine usable unchanged in Node and browser Workers.
