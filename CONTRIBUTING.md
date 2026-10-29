@@ -39,6 +39,8 @@ For browser delivery inspection, run `node --test tests/browser-impact.test.js t
 
 For sampled cutoff studies, run `node --test tests/cutoff-comparison.test.js tests/cutoff-comparison-cli.test.js tests/browser-cutoff.test.js tests/browser-cutoff-ui.test.js`. The [browser study](docs/BROWSER_CUTOFF.md) must preserve workspace/editor state, cancel superseded work, reject stale results, and expose no-policy as not evaluated. Export remains an explicit action, not silent adoption. Source stand-ins are not native-browser evidence. Preserve the pure builder, exact non-target schedules, ordinary experiment limits and clear-road policy semantics. [CUTOFF_COMPARISON.md](docs/CUTOFF_COMPARISON.md) documents no-policy/export distinctions and sampled-not-optimal claims.
 
+For bounded Meridian seed studies, run `node --test tests/meridian-study.test.js tests/seed-study-cli.test.js`. [SEED_STUDIES.md](docs/SEED_STUDIES.md) defines the generated-only contract. Never treat arbitrary imported seed metadata as a recipe, pair jobs across seeds, or replace per-sample policy evaluation with an aggregate mean. Preserve exact named-plan schedules, ordinary experiment export, bounded sequential work, complete failure reports and explicit non-statistical claims.
+
 ## Choose a scope
 
 Start with [open contribution issues](https://github.com/Tabisharaza/detourlab/issues). [Additional issue scopes](docs/ISSUE_DRAFTS.md) include reproducible problems, acceptance criteria and explicit non-goals, and distinguish published issues from proposals. Before adding a solver, city dataset, dependency or storage service, propose the interface and its effect on licensing, privacy and reproducibility.

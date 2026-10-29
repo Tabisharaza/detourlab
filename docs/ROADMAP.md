@@ -56,6 +56,17 @@ with cancellation, stale-result protection and explicit experiment download.
 It never replaces workspace variants. Source implementation and native QA are
 separate from deployment; the hosted demo is not implicitly updated.
 
+## Implemented: bounded synthetic fixture seed studies
+
+The [Meridian seed study](SEED_STUDIES.md) addresses the single-fixture limitation
+of closure comparisons with 2–12 explicit original generator seeds and 2–4
+named plans. Every sample retains its own baseline, input fingerprint and policy
+verdict; descriptive ranges never substitute for every-sample acceptance. A
+single-seed ordinary experiment export enables existing reproduction/review
+workflows. This is generated-only synthetic sensitivity, not arbitrary input
+regeneration, statistical confidence or real-world prediction. Independent
+design review kept this headless scope separate from engine and browser changes.
+
 ## Release-readiness gates
 
 1. Publish a truthful README, live demo link, actual screenshot and model assumptions.
@@ -72,7 +83,7 @@ separate from deployment; the hosted demo is not implicitly updated.
 - Actual browser interruption/import/export coverage
 - Paused-render and large-fixture profiling, with repeatable measurements
 - Additional independent routing oracles and cross-browser deterministic fixtures
-- Synchronized side-by-side map panes and bounded multi-seed summaries, after a clear design review
+- Synchronized side-by-side map panes, after a clear design review
 
 Start with the [published contribution issues](https://github.com/Tabisharaza/detourlab/issues). [ISSUE_DRAFTS.md](ISSUE_DRAFTS.md) links the selected public scopes and retains other proposals with concrete acceptance boundaries. An open issue is not an assignment or delivery commitment.
 

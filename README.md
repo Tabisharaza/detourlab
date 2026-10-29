@@ -176,6 +176,24 @@ The [job-impact report](docs/JOB_IMPACT.md) compares each delivery’s status, a
 
 The human view shows the first 20 changed jobs and says how many are omitted; versioned JSON includes all jobs and the input fingerprint. It uses the same bounded simulation as the threshold runner and does not infer per-job routes or complete closure causality.
 
+## Compare more than one synthetic seed
+
+The [Meridian seed study](docs/SEED_STUDIES.md) checks the same closure plans
+across 2–12 explicit original fixture seeds, with every sample's own baseline,
+policy verdict and descriptive per-plan ranges:
+
+```sh
+node scripts/compare-seeds.js --seeds 0,42,4294967295 --max-extra-late 120
+```
+
+For those samples, the 05:00 bridge plan has 122, 118 and 105 late arrivals.
+Its mean is 115, but the study correctly fails the 120-job limit on seed 0.
+The 10:00 plan has 109, 106 and 101 and passes all three. These are synthetic
+examples, not statistical confidence or real-world predictions. Seeds vary
+travel costs, destinations, service durations and deadline slack. Export any
+sample as an ordinary experiment with `--export-seed N` for existing CLI,
+review and browser-format workflows; no arbitrary imported file is reseeded.
+
 ## What is here
 
 - 432 junctions, 1,614 directed edges, 24 vehicles and 192 seeded jobs in the default district

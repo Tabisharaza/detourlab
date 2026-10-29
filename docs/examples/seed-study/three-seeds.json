@@ -1,0 +1,660 @@
+{
+  "format": "detourlab-meridian-seed-study",
+  "version": 1,
+  "engineVersion": "0.1.0",
+  "generator": "DetourLab original Meridian fixture (createDemoScenario)",
+  "seeds": [
+    0,
+    42,
+    4294967295
+  ],
+  "plans": [
+    "market-05",
+    "market-10"
+  ],
+  "thresholds": {
+    "extraLateJobs": 120
+  },
+  "verdict": "failed",
+  "runs": [
+    {
+      "seed": 0,
+      "experimentSha256": "5614a91f5a1ccbeead5709a5240a04b6dd85345b5e8e6e9d457d17502a308161",
+      "baseline": {
+        "distanceM": 322560,
+        "lateJobs": 0,
+        "unreachableJobs": 0,
+        "completedJobs": 192,
+        "totalJobs": 192,
+        "totalDelayS": 0,
+        "onTimeJobs": 192,
+        "reroutes": 0,
+        "affectedVehicles": 0,
+        "totalTravelTimeS": 31650
+      },
+      "variants": [
+        {
+          "id": "market-05",
+          "name": "Market Bridge at 05:00",
+          "metrics": {
+            "distanceM": 380400,
+            "lateJobs": 122,
+            "unreachableJobs": 0,
+            "completedJobs": 192,
+            "totalJobs": 192,
+            "totalDelayS": 19730,
+            "onTimeJobs": 70,
+            "reroutes": 92,
+            "affectedVehicles": 24,
+            "totalTravelTimeS": 39238
+          },
+          "delta": {
+            "distanceM": 57840,
+            "extraDistancePct": 17.931548,
+            "extraLateJobs": 122,
+            "unreachableJobs": 0
+          },
+          "jobComparison": {
+            "totalJobs": 192,
+            "comparableJobs": 192,
+            "uncomparableJobs": 0,
+            "newlyLateJobs": 122,
+            "maxArrivalSlipS": 504
+          },
+          "verdict": "failed",
+          "violations": [
+            {
+              "metric": "extraLateJobs",
+              "actual": 122,
+              "limit": 120
+            }
+          ]
+        },
+        {
+          "id": "market-10",
+          "name": "Market Bridge at 10:00",
+          "metrics": {
+            "distanceM": 376800,
+            "lateJobs": 109,
+            "unreachableJobs": 0,
+            "completedJobs": 192,
+            "totalJobs": 192,
+            "totalDelayS": 17076,
+            "onTimeJobs": 83,
+            "reroutes": 82,
+            "affectedVehicles": 24,
+            "totalTravelTimeS": 38754
+          },
+          "delta": {
+            "distanceM": 54240,
+            "extraDistancePct": 16.815476,
+            "extraLateJobs": 109,
+            "unreachableJobs": 0
+          },
+          "jobComparison": {
+            "totalJobs": 192,
+            "comparableJobs": 192,
+            "uncomparableJobs": 0,
+            "newlyLateJobs": 109,
+            "maxArrivalSlipS": 494
+          },
+          "verdict": "passed",
+          "violations": []
+        }
+      ]
+    },
+    {
+      "seed": 42,
+      "experimentSha256": "6ee1711f37e49625c830b935670e662fc6547637a9a60b76aceb29902f846d14",
+      "baseline": {
+        "distanceM": 311800,
+        "lateJobs": 0,
+        "unreachableJobs": 0,
+        "completedJobs": 192,
+        "totalJobs": 192,
+        "totalDelayS": 0,
+        "onTimeJobs": 192,
+        "reroutes": 0,
+        "affectedVehicles": 0,
+        "totalTravelTimeS": 30848
+      },
+      "variants": [
+        {
+          "id": "market-05",
+          "name": "Market Bridge at 05:00",
+          "metrics": {
+            "distanceM": 377080,
+            "lateJobs": 118,
+            "unreachableJobs": 0,
+            "completedJobs": 192,
+            "totalJobs": 192,
+            "totalDelayS": 20139,
+            "onTimeJobs": 74,
+            "reroutes": 94,
+            "affectedVehicles": 24,
+            "totalTravelTimeS": 39236
+          },
+          "delta": {
+            "distanceM": 65280,
+            "extraDistancePct": 20.936498,
+            "extraLateJobs": 118,
+            "unreachableJobs": 0
+          },
+          "jobComparison": {
+            "totalJobs": 192,
+            "comparableJobs": 192,
+            "uncomparableJobs": 0,
+            "newlyLateJobs": 118,
+            "maxArrivalSlipS": 486
+          },
+          "verdict": "passed",
+          "violations": []
+        },
+        {
+          "id": "market-10",
+          "name": "Market Bridge at 10:00",
+          "metrics": {
+            "distanceM": 376600,
+            "lateJobs": 106,
+            "unreachableJobs": 0,
+            "completedJobs": 192,
+            "totalJobs": 192,
+            "totalDelayS": 19269,
+            "onTimeJobs": 86,
+            "reroutes": 86,
+            "affectedVehicles": 24,
+            "totalTravelTimeS": 39083
+          },
+          "delta": {
+            "distanceM": 64800,
+            "extraDistancePct": 20.782553,
+            "extraLateJobs": 106,
+            "unreachableJobs": 0
+          },
+          "jobComparison": {
+            "totalJobs": 192,
+            "comparableJobs": 192,
+            "uncomparableJobs": 0,
+            "newlyLateJobs": 106,
+            "maxArrivalSlipS": 459
+          },
+          "verdict": "passed",
+          "violations": []
+        }
+      ]
+    },
+    {
+      "seed": 4294967295,
+      "experimentSha256": "102d0f22f99b9137d68e7963ae79ef8a5f8ad0e0130874757993806ec446d500",
+      "baseline": {
+        "distanceM": 316800,
+        "lateJobs": 0,
+        "unreachableJobs": 0,
+        "completedJobs": 192,
+        "totalJobs": 192,
+        "totalDelayS": 0,
+        "onTimeJobs": 192,
+        "reroutes": 0,
+        "affectedVehicles": 0,
+        "totalTravelTimeS": 31433
+      },
+      "variants": [
+        {
+          "id": "market-05",
+          "name": "Market Bridge at 05:00",
+          "metrics": {
+            "distanceM": 370560,
+            "lateJobs": 105,
+            "unreachableJobs": 0,
+            "completedJobs": 192,
+            "totalJobs": 192,
+            "totalDelayS": 15689,
+            "onTimeJobs": 87,
+            "reroutes": 85,
+            "affectedVehicles": 24,
+            "totalTravelTimeS": 38427
+          },
+          "delta": {
+            "distanceM": 53760,
+            "extraDistancePct": 16.969697,
+            "extraLateJobs": 105,
+            "unreachableJobs": 0
+          },
+          "jobComparison": {
+            "totalJobs": 192,
+            "comparableJobs": 192,
+            "uncomparableJobs": 0,
+            "newlyLateJobs": 105,
+            "maxArrivalSlipS": 574
+          },
+          "verdict": "passed",
+          "violations": []
+        },
+        {
+          "id": "market-10",
+          "name": "Market Bridge at 10:00",
+          "metrics": {
+            "distanceM": 370080,
+            "lateJobs": 101,
+            "unreachableJobs": 0,
+            "completedJobs": 192,
+            "totalJobs": 192,
+            "totalDelayS": 15275,
+            "onTimeJobs": 91,
+            "reroutes": 78,
+            "affectedVehicles": 24,
+            "totalTravelTimeS": 38340
+          },
+          "delta": {
+            "distanceM": 53280,
+            "extraDistancePct": 16.818182,
+            "extraLateJobs": 101,
+            "unreachableJobs": 0
+          },
+          "jobComparison": {
+            "totalJobs": 192,
+            "comparableJobs": 192,
+            "uncomparableJobs": 0,
+            "newlyLateJobs": 101,
+            "maxArrivalSlipS": 578
+          },
+          "verdict": "passed",
+          "violations": []
+        }
+      ]
+    }
+  ],
+  "variants": [
+    {
+      "id": "market-05",
+      "name": "Market Bridge at 05:00",
+      "verdict": "failed",
+      "failedSeeds": [
+        0
+      ],
+      "summary": {
+        "metrics": {
+          "distanceM": {
+            "samples": 3,
+            "missingSamples": 0,
+            "min": 370560,
+            "max": 380400,
+            "mean": 376013.333333,
+            "minSeeds": [
+              4294967295
+            ],
+            "maxSeeds": [
+              0
+            ]
+          },
+          "lateJobs": {
+            "samples": 3,
+            "missingSamples": 0,
+            "min": 105,
+            "max": 122,
+            "mean": 115,
+            "minSeeds": [
+              4294967295
+            ],
+            "maxSeeds": [
+              0
+            ]
+          },
+          "unreachableJobs": {
+            "samples": 3,
+            "missingSamples": 0,
+            "min": 0,
+            "max": 0,
+            "mean": 0,
+            "minSeeds": [
+              0,
+              42,
+              4294967295
+            ],
+            "maxSeeds": [
+              0,
+              42,
+              4294967295
+            ]
+          },
+          "completedJobs": {
+            "samples": 3,
+            "missingSamples": 0,
+            "min": 192,
+            "max": 192,
+            "mean": 192,
+            "minSeeds": [
+              0,
+              42,
+              4294967295
+            ],
+            "maxSeeds": [
+              0,
+              42,
+              4294967295
+            ]
+          }
+        },
+        "delta": {
+          "distanceM": {
+            "samples": 3,
+            "missingSamples": 0,
+            "min": 53760,
+            "max": 65280,
+            "mean": 58960,
+            "minSeeds": [
+              4294967295
+            ],
+            "maxSeeds": [
+              42
+            ]
+          },
+          "extraDistancePct": {
+            "samples": 3,
+            "missingSamples": 0,
+            "min": 16.969697,
+            "max": 20.936498,
+            "mean": 18.612581,
+            "minSeeds": [
+              4294967295
+            ],
+            "maxSeeds": [
+              42
+            ]
+          },
+          "extraLateJobs": {
+            "samples": 3,
+            "missingSamples": 0,
+            "min": 105,
+            "max": 122,
+            "mean": 115,
+            "minSeeds": [
+              4294967295
+            ],
+            "maxSeeds": [
+              0
+            ]
+          },
+          "unreachableJobs": {
+            "samples": 3,
+            "missingSamples": 0,
+            "min": 0,
+            "max": 0,
+            "mean": 0,
+            "minSeeds": [
+              0,
+              42,
+              4294967295
+            ],
+            "maxSeeds": [
+              0,
+              42,
+              4294967295
+            ]
+          }
+        },
+        "jobComparison": {
+          "comparableJobs": {
+            "samples": 3,
+            "missingSamples": 0,
+            "min": 192,
+            "max": 192,
+            "mean": 192,
+            "minSeeds": [
+              0,
+              42,
+              4294967295
+            ],
+            "maxSeeds": [
+              0,
+              42,
+              4294967295
+            ]
+          },
+          "uncomparableJobs": {
+            "samples": 3,
+            "missingSamples": 0,
+            "min": 0,
+            "max": 0,
+            "mean": 0,
+            "minSeeds": [
+              0,
+              42,
+              4294967295
+            ],
+            "maxSeeds": [
+              0,
+              42,
+              4294967295
+            ]
+          },
+          "newlyLateJobs": {
+            "samples": 3,
+            "missingSamples": 0,
+            "min": 105,
+            "max": 122,
+            "mean": 115,
+            "minSeeds": [
+              4294967295
+            ],
+            "maxSeeds": [
+              0
+            ]
+          },
+          "maxArrivalSlipS": {
+            "samples": 3,
+            "missingSamples": 0,
+            "min": 486,
+            "max": 574,
+            "mean": 521.333333,
+            "minSeeds": [
+              42
+            ],
+            "maxSeeds": [
+              4294967295
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "market-10",
+      "name": "Market Bridge at 10:00",
+      "verdict": "passed",
+      "failedSeeds": [],
+      "summary": {
+        "metrics": {
+          "distanceM": {
+            "samples": 3,
+            "missingSamples": 0,
+            "min": 370080,
+            "max": 376800,
+            "mean": 374493.333333,
+            "minSeeds": [
+              4294967295
+            ],
+            "maxSeeds": [
+              0
+            ]
+          },
+          "lateJobs": {
+            "samples": 3,
+            "missingSamples": 0,
+            "min": 101,
+            "max": 109,
+            "mean": 105.333333,
+            "minSeeds": [
+              4294967295
+            ],
+            "maxSeeds": [
+              0
+            ]
+          },
+          "unreachableJobs": {
+            "samples": 3,
+            "missingSamples": 0,
+            "min": 0,
+            "max": 0,
+            "mean": 0,
+            "minSeeds": [
+              0,
+              42,
+              4294967295
+            ],
+            "maxSeeds": [
+              0,
+              42,
+              4294967295
+            ]
+          },
+          "completedJobs": {
+            "samples": 3,
+            "missingSamples": 0,
+            "min": 192,
+            "max": 192,
+            "mean": 192,
+            "minSeeds": [
+              0,
+              42,
+              4294967295
+            ],
+            "maxSeeds": [
+              0,
+              42,
+              4294967295
+            ]
+          }
+        },
+        "delta": {
+          "distanceM": {
+            "samples": 3,
+            "missingSamples": 0,
+            "min": 53280,
+            "max": 64800,
+            "mean": 57440,
+            "minSeeds": [
+              4294967295
+            ],
+            "maxSeeds": [
+              42
+            ]
+          },
+          "extraDistancePct": {
+            "samples": 3,
+            "missingSamples": 0,
+            "min": 16.815476,
+            "max": 20.782553,
+            "mean": 18.138737,
+            "minSeeds": [
+              0
+            ],
+            "maxSeeds": [
+              42
+            ]
+          },
+          "extraLateJobs": {
+            "samples": 3,
+            "missingSamples": 0,
+            "min": 101,
+            "max": 109,
+            "mean": 105.333333,
+            "minSeeds": [
+              4294967295
+            ],
+            "maxSeeds": [
+              0
+            ]
+          },
+          "unreachableJobs": {
+            "samples": 3,
+            "missingSamples": 0,
+            "min": 0,
+            "max": 0,
+            "mean": 0,
+            "minSeeds": [
+              0,
+              42,
+              4294967295
+            ],
+            "maxSeeds": [
+              0,
+              42,
+              4294967295
+            ]
+          }
+        },
+        "jobComparison": {
+          "comparableJobs": {
+            "samples": 3,
+            "missingSamples": 0,
+            "min": 192,
+            "max": 192,
+            "mean": 192,
+            "minSeeds": [
+              0,
+              42,
+              4294967295
+            ],
+            "maxSeeds": [
+              0,
+              42,
+              4294967295
+            ]
+          },
+          "uncomparableJobs": {
+            "samples": 3,
+            "missingSamples": 0,
+            "min": 0,
+            "max": 0,
+            "mean": 0,
+            "minSeeds": [
+              0,
+              42,
+              4294967295
+            ],
+            "maxSeeds": [
+              0,
+              42,
+              4294967295
+            ]
+          },
+          "newlyLateJobs": {
+            "samples": 3,
+            "missingSamples": 0,
+            "min": 101,
+            "max": 109,
+            "mean": 105.333333,
+            "minSeeds": [
+              4294967295
+            ],
+            "maxSeeds": [
+              0
+            ]
+          },
+          "maxArrivalSlipS": {
+            "samples": 3,
+            "missingSamples": 0,
+            "min": 459,
+            "max": 578,
+            "mean": 510.333333,
+            "minSeeds": [
+              42
+            ],
+            "maxSeeds": [
+              4294967295
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "warnings": [],
+  "limitations": [
+    "Only these explicit synthetic fixture seeds were evaluated. No probability, confidence interval, optimal plan, real-world robustness or operational safety is established.",
+    "Seeds vary edge travel times, delivery destinations, service durations and deadline slack. Topology, edge distances and fleet structure stay fixed; this is not demand-only variation.",
+    "Within each seed, all plans share exactly the same network, vehicles, jobs and order and are compared with that seed’s clear-road baseline. Jobs are not paired across seeds.",
+    "Every seed and plan must pass every supplied threshold; descriptive means never determine acceptance. Statistics weight each available seed equally and means are rounded to six decimals.",
+    "Arrival-slip summaries exclude null (uncomparable) samples and report missing counts. Unreachable work is not zero delay. Fingerprints identify generated input content, not authenticity or the executing implementation.",
+    "The seed is a recipe only for this original generator, not for arbitrary imported scenarios. Save the exported ordinary experiment and source revision to reproduce a sample after generator changes."
+  ]
+}
