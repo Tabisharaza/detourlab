@@ -1,0 +1,246 @@
+{
+  "format": "detourlab-browser-check",
+  "version": 1,
+  "status": "passed",
+  "startedAt": "2026-10-30T06:25:04.364Z",
+  "runtime": {
+    "node": "v24.22.1",
+    "os": "linux",
+    "release": "7.0.0-1017-azure",
+    "arch": "x64"
+  },
+  "viewport": {
+    "width": 1280,
+    "height": 900,
+    "deviceScaleFactor": 1
+  },
+  "checks": [
+    {
+      "name": "browser-two: native Worker full-ledger parity",
+      "status": "passed"
+    },
+    {
+      "name": "browser-two: first actual download and CLI parity",
+      "status": "passed",
+      "experimentSha256": "a62f139ac39abcf249760276a99dfba3b8936e127ff37800453d0c42198f115a",
+      "downloadedSha256": "ef9b3b058f3de92e403ce1acf1060846bf20a30bd97d4cf39c608472e609f8eb",
+      "download": "downloads/09b62eed-78d5-496e-a307-c555e9cb3d44"
+    },
+    {
+      "name": "browser-two: reimported download and second CLI parity",
+      "status": "passed",
+      "experimentSha256": "a62f139ac39abcf249760276a99dfba3b8936e127ff37800453d0c42198f115a",
+      "downloadedSha256": "ef9b3b058f3de92e403ce1acf1060846bf20a30bd97d4cf39c608472e609f8eb",
+      "download": "downloads/ba3f70f2-b5ac-4bf3-a07f-4b4d14e4bfb7"
+    },
+    {
+      "name": "browser-two: same-file reselection and byte-identical roundtrip",
+      "status": "passed"
+    },
+    {
+      "name": "browser-six: native Worker full-ledger parity",
+      "status": "passed"
+    },
+    {
+      "name": "browser-six: first actual download and CLI parity",
+      "status": "passed",
+      "experimentSha256": "7146dc90e602db7c0919e9525c9ae2d27c84041e19b74db2315256035090020d",
+      "downloadedSha256": "ae080f175bce09d8edeb33ef5d2485a5a14a459a8d0b1e40eb1d213e16606bea",
+      "download": "downloads/39b08235-f1e9-430b-9a4b-a53d0f038724"
+    },
+    {
+      "name": "browser-six: reimported download and second CLI parity",
+      "status": "passed",
+      "experimentSha256": "7146dc90e602db7c0919e9525c9ae2d27c84041e19b74db2315256035090020d",
+      "downloadedSha256": "ae080f175bce09d8edeb33ef5d2485a5a14a459a8d0b1e40eb1d213e16606bea",
+      "download": "downloads/930dbded-fb51-45eb-9a41-30eeb68e497a"
+    },
+    {
+      "name": "browser-six: same-file reselection and byte-identical roundtrip",
+      "status": "passed"
+    },
+    {
+      "name": "browser-labels: native Worker full-ledger parity",
+      "status": "passed"
+    },
+    {
+      "name": "browser-labels: first actual download and CLI parity",
+      "status": "passed",
+      "experimentSha256": "a1630bdb2f6fe84fae5f69bccb567d6f2acd8ec9a52713141ac9fe380047a0c6",
+      "downloadedSha256": "6fa69bea58c88b2103d40196456b238a5ea2ecd8881bedd7d544339f2997b8db",
+      "download": "downloads/29e20f0a-4c63-49f1-a845-83e9dc521122"
+    },
+    {
+      "name": "browser-labels: reimported download and second CLI parity",
+      "status": "passed",
+      "experimentSha256": "a1630bdb2f6fe84fae5f69bccb567d6f2acd8ec9a52713141ac9fe380047a0c6",
+      "downloadedSha256": "6fa69bea58c88b2103d40196456b238a5ea2ecd8881bedd7d544339f2997b8db",
+      "download": "downloads/403600eb-30d8-47f3-bcaf-fbac8ef13dae"
+    },
+    {
+      "name": "browser-labels: same-file reselection and byte-identical roundtrip",
+      "status": "passed"
+    },
+    {
+      "name": "HTML-like labels and literal replacement character stay inert text",
+      "status": "passed"
+    },
+    {
+      "name": "malformed.json: rejected without replacing current experiment",
+      "status": "passed",
+      "experimentSha256": "a1630bdb2f6fe84fae5f69bccb567d6f2acd8ec9a52713141ac9fe380047a0c6",
+      "downloadedSha256": "6fa69bea58c88b2103d40196456b238a5ea2ecd8881bedd7d544339f2997b8db",
+      "download": "downloads/8650437b-5349-43b9-a52b-7bd955fdea6e"
+    },
+    {
+      "name": "invalid-utf8.json: rejected without replacing current experiment",
+      "status": "passed",
+      "experimentSha256": "a1630bdb2f6fe84fae5f69bccb567d6f2acd8ec9a52713141ac9fe380047a0c6",
+      "downloadedSha256": "6fa69bea58c88b2103d40196456b238a5ea2ecd8881bedd7d544339f2997b8db",
+      "download": "downloads/834352aa-66f8-4f77-908c-9176499b9bcc"
+    },
+    {
+      "name": "oversized.json: rejected without replacing current experiment",
+      "status": "passed",
+      "experimentSha256": "a1630bdb2f6fe84fae5f69bccb567d6f2acd8ec9a52713141ac9fe380047a0c6",
+      "downloadedSha256": "6fa69bea58c88b2103d40196456b238a5ea2ecd8881bedd7d544339f2997b8db",
+      "download": "downloads/6f200cd3-11fa-43d4-a18e-b6ffe5f09621"
+    },
+    {
+      "name": "bom-over-limit.json: rejected without replacing current experiment",
+      "status": "passed",
+      "experimentSha256": "a1630bdb2f6fe84fae5f69bccb567d6f2acd8ec9a52713141ac9fe380047a0c6",
+      "downloadedSha256": "6fa69bea58c88b2103d40196456b238a5ea2ecd8881bedd7d544339f2997b8db",
+      "download": "downloads/ed20caaa-60d2-4a98-bc9a-c6f68626b97f"
+    },
+    {
+      "name": "BOM included in exact 2 MiB acceptance boundary",
+      "status": "passed"
+    },
+    {
+      "name": "Pending actual File read superseded by reset",
+      "status": "passed"
+    },
+    {
+      "name": "Pending actual File read superseded by newer-import",
+      "status": "passed"
+    },
+    {
+      "name": "Cancel then rerun preserves input and restores actual Worker results",
+      "status": "passed",
+      "experimentSha256": "7146dc90e602db7c0919e9525c9ae2d27c84041e19b74db2315256035090020d",
+      "downloadedSha256": "ae080f175bce09d8edeb33ef5d2485a5a14a459a8d0b1e40eb1d213e16606bea",
+      "download": "downloads/6d3e102c-03d3-4ed0-87c2-5a2b8d468027"
+    }
+  ],
+  "fixtures": [
+    {
+      "file": "fixtures/browser-two.json",
+      "sha256": "ef9b3b058f3de92e403ce1acf1060846bf20a30bd97d4cf39c608472e609f8eb",
+      "experimentSha256": "a62f139ac39abcf249760276a99dfba3b8936e127ff37800453d0c42198f115a",
+      "variants": 2
+    },
+    {
+      "file": "fixtures/browser-six.json",
+      "sha256": "ae080f175bce09d8edeb33ef5d2485a5a14a459a8d0b1e40eb1d213e16606bea",
+      "experimentSha256": "7146dc90e602db7c0919e9525c9ae2d27c84041e19b74db2315256035090020d",
+      "variants": 6
+    },
+    {
+      "file": "fixtures/browser-labels.json",
+      "sha256": "6fa69bea58c88b2103d40196456b238a5ea2ecd8881bedd7d544339f2997b8db",
+      "experimentSha256": "a1630bdb2f6fe84fae5f69bccb567d6f2acd8ec9a52713141ac9fe380047a0c6",
+      "variants": 2
+    }
+  ],
+  "limitations": [
+    "CDP file injection is not an operating-system file chooser or chooser-cancellation test.",
+    "Synthetic local Chromium integration only: not cross-browser, mobile, screen-reader, performance or deployed-site verification.",
+    "A Worker observer records actual native messages; delayed-read cases override only one selected File.arrayBuffer promise, not app handlers or Workers.",
+    "Source and fixture hashes identify bytes, not authorship or signed provenance."
+  ],
+  "sourceFiles": [
+    {
+      "path": "index.html",
+      "sha256": "54d8b87956b6144e93bcee9111ed6dacb49742b42d534efaec69a30b9cd07e34"
+    },
+    {
+      "path": "src/app.js",
+      "sha256": "b08234151d5dac304e5ee6cfc20cc596eef5eb855e81d95c2efabc48b3eb9673"
+    },
+    {
+      "path": "src/browser-impact.js",
+      "sha256": "b414b6d19fe103dd34e2be03a419ec26be6d55c3bcae661d42e6e074efd03ff3"
+    },
+    {
+      "path": "src/browser-review.js",
+      "sha256": "e3cf75b29aa5234f1dad3115d35fb37eb4c27f50157d4e82b0177c4e90f31dfb"
+    },
+    {
+      "path": "src/cutoff-comparison.js",
+      "sha256": "12339235403d492fb0b483ca4ebe5c52965735129eb3727bc07ff6c3719eaebe"
+    },
+    {
+      "path": "src/cutoff-experiment.js",
+      "sha256": "0c2daf9a919bc6cbe85a27d53004de5b6eed296ad0d93b870aa3802c5b99ab9b"
+    },
+    {
+      "path": "src/engine.js",
+      "sha256": "a3fa06223fdf95b7cc1bb0b15b05da924c6d835ac13e688327262bfc080a3016"
+    },
+    {
+      "path": "src/experiment-report.js",
+      "sha256": "656062cf1fac1d8db80dae9b075de23ff8c505d35bf941f0c420e05d8663258d"
+    },
+    {
+      "path": "src/experiment.js",
+      "sha256": "efb77801be428839dd677df9a8c5fc62812709062b20eacb0d93a39576f1eff3"
+    },
+    {
+      "path": "src/file-input.js",
+      "sha256": "9d34d0b01eff790e25d4e2f2edef56d8b4bfc6c608b266f471f932ea0bfc048a"
+    },
+    {
+      "path": "src/job-gates.js",
+      "sha256": "bd5d905cb85a3265167d58c12e67f24ab18e67e66e726631f88b805fad24e732"
+    },
+    {
+      "path": "src/job-impact.js",
+      "sha256": "537d07bd5f89114cbaca0939d563aaa9cfbebf1ddc371fdfec1fe06b78a91948"
+    },
+    {
+      "path": "src/map.js",
+      "sha256": "ceaf58ea3bb5a5c0ee12e255212eea2c515bedbb0c0a65187d25a98d243f9044"
+    },
+    {
+      "path": "src/report-results.js",
+      "sha256": "1d5877f77381a63ba68b54f809a07cb879d6357954a5a2a9d8f48c733934ca43"
+    },
+    {
+      "path": "src/scenario.js",
+      "sha256": "fd7e71c7219bf738547d129499496c77d0213dababfa686f171e8b6c6eb6e5b4"
+    },
+    {
+      "path": "src/simulation-worker.js",
+      "sha256": "3f6e4f882485a0f59d8c80af496dc6ae9acb2667ddaebe33e4db10b43276052c"
+    },
+    {
+      "path": "src/style.css",
+      "sha256": "f1816d242d9ccfa7c62f7d492037ee75edbc18e454ffab5a0913f61d3170f06e"
+    },
+    {
+      "path": "src/tutorial.js",
+      "sha256": "a2b310e8a476ab245c9c4a7c2814c73c8407fce92d20b7b35be5765919f2ccea"
+    }
+  ],
+  "sourceSha256": "0ac1d8f6bebc304849bdb56ee1c497e825da1a9d6eb312c1c8ca5b5f790ed3c9",
+  "checkoutRevision": "29db1f43b38bea44b36aa34db474a485cc2bd305",
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/156.0.8078.47",
+    "revision": "@1d17a2e2ee147bb7d6ae2ab6abdb3a2510c17775",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "jsVersion": "15.6.75.19"
+  },
+  "completedAt": "2026-10-30T06:25:16.306Z"
+}

@@ -86,6 +86,32 @@ results. The browser harness has no npm dependencies or automatic downloads.
 The current hosted runner browser is not pinned by the project; record the
 version from every run rather than extrapolating to other versions.
 
+## First hosted run — October 30, 2026
+
+[CI run 41013803019](https://github.com/Tabisharaza/detourlab/actions/runs/41013803019)
+passed on exact source
+[`29db1f43`](https://github.com/Tabisharaza/detourlab/commit/29db1f43b38bea44b36aa34db474a485cc2bd305)
+before main publication. The browser step passed **21 integration checkpoints**
+using **Headless Chrome 156.0.8078.47**, Node **24.22.1**, Linux x64 kernel
+**7.0.0-1017-azure**, and a **1280 × 900 / DPR 1** viewport. It ran from
+06:25:04.364 to 06:25:16.306 UTC; this wall-clock interval is not a performance
+benchmark. The runner image is Ubuntu 24.04; actual browser metadata is retained.
+
+The [complete evidence JSON](evidence/browser-integration-2026-10-30.json) was
+reconstructed without field changes from the job's printed `evidence.json`.
+It includes the three fixture fingerprints, actual download hashes, all
+checkpoint outcomes, source-byte identity and limitations. Its download paths
+refer to the ephemeral runner output, not files checked into this repository.
+Recreate those original fixtures/downloads by running the harness. The public
+CI log, not an invented local browser run, is the evidence source.
+
+That same job passed **1,071 core + 120 optional schema/editor = 1,191 distinct
+Node tests**, plus **211 already-counted CLI repetitions**, syntax/build checks,
+byte-identical rebuild and unchanged tracked source. The 21 browser checkpoints
+are reported separately, not added to the Node test count. Independent review
+found an evidence-status cleanup edge; it was fixed and regression-tested before
+publication. No application/model or distributed bytes changed.
+
 ## Explicitly still unverified
 
 CDP `DOM.setFileInputFiles` is automated file injection. It does **not** establish

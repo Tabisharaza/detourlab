@@ -1,5 +1,28 @@
 # CI and release verification
 
+## Real Chromium integration gate
+
+The October 30, 2026 milestone adds a separate native-browser test step using
+the Chrome already installed on the Ubuntu 24.04 runner. It installs no browser
+package and adds no npm dependency. A fresh temporary profile and anonymous CDP
+pipes keep it separate from ordinary app startup and personal browser sessions.
+Failure is not silently skipped. The workflow prints its complete evidence JSON
+on success or failure; [method, initial verified run, exact versions and limits](BROWSER_INTEGRATION.md)
+are documented separately. Existing action/runtime pins and read-only workflow
+permissions are unchanged.
+
+Local Node 24.22.1/npm 11.9.0 checks passed **1,071 core + 120 optional = 1,191
+distinct tests**, plus 211 overlapping CLI repeats and 95 core syntax checks.
+The 36 new Node tests cover the bounded driver, synthetic fixture authoring and
+no-false-pass/no-overwrite evidence cleanup. Both lockfiles installed unchanged
+with lifecycle scripts disabled; the optional dependencies came from the
+existing offline cache. All 28 static payloads plus manifest remained
+byte-identical across builds and to the preceding main source. Independent
+review has no unresolved must-fix findings. Browser evidence is not inferred
+from these local tests: the isolated shell could not start Chromium; actual
+browser checks passed on the exact-source hosted CI run linked above.
+
+
 ## Read-only review-packet verification
 
 The October 27, 2026 source adds a [single-command packet verifier](REVIEW_VERIFICATION.md)

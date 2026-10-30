@@ -1,5 +1,22 @@
 # Verification record
 
+## Automated Chromium file roundtrips — October 30, 2026
+
+The optional [browser integration harness](BROWSER_INTEGRATION.md) passed all
+21 checkpoints on [exact-source CI run 41013803019](https://github.com/Tabisharaza/detourlab/actions/runs/41013803019):
+2/6-variant synthetic input, actual downloads and reimports, native Worker/Node
+full-ledger equality, malformed/oversize/UTF-8/BOM cases, same-file reselection,
+inert labels, delayed-read supersession and Cancel/rerun. Headless Chrome
+156.0.8078.47 / Linux x64 / Node 24.22.1; full fingerprints, method and limits are
+in the linked record. No hosted app assets changed.
+
+This is **automated file injection**, not an OS file-picker/cancel or desktop
+browser download-UI check. The native portions of issue #2 remain open, as do
+cross-browser, accessibility, mobile, reduced-motion and measured rendering
+performance checks. Older verification entries below retain their historical
+scope; this later evidence does not retroactively change them.
+
+
 **Previous public demo: v10**, deployed October 19, 2026 UTC. The current v11 release is recorded below. [The v9 record](#v9-road-picker-deployment-and-bounded-desktop-checks) describes bounded desktop Chromium checks and the run-lifecycle focus finding. [The corrected v10 deployment](#v10-run-lifecycle-focus-deployment) is recorded separately. Native cancellation/completion retests and served-manifest parity passed; The [published source `addd5f6`](https://github.com/Tabisharaza/detourlab/commit/addd5f62bba1225c23b779c8c9ab684db2be1326) and [CI run 39227618544](https://github.com/Tabisharaza/detourlab/actions/runs/39227618544) are verified; both pinned Node jobs passed. Earlier version records remain historical evidence.
 
 ## v11 browser review deployment and native checks
