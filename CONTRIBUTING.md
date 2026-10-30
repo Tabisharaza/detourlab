@@ -41,6 +41,13 @@ For sampled cutoff studies, run `node --test tests/cutoff-comparison.test.js tes
 
 For bounded Meridian seed studies, run `node --test tests/meridian-study.test.js tests/seed-study-cli.test.js`. [SEED_STUDIES.md](docs/SEED_STUDIES.md) defines the generated-only contract. Never treat arbitrary imported seed metadata as a recipe, pair jobs across seeds, or replace per-sample policy evaluation with an aggregate mean. Preserve exact named-plan schedules, ordinary experiment export, bounded sequential work, complete failure reports and explicit non-statistical claims.
 
+For real Chromium integration, see [BROWSER_INTEGRATION.md](docs/BROWSER_INTEGRATION.md).
+Run `node --test tests/browser-driver.test.js tests/browser-fixtures.test.js` for
+Node-only driver/fixture checks, then run the optional harness with an explicitly
+selected browser and a new output directory. Preserve native Workers and app
+handlers, no-overwrite evidence, fresh profiles, sandbox defaults, complete-ledger
+and downloaded-file CLI comparisons. File injection is not native chooser QA.
+
 ## Choose a scope
 
 Start with [open contribution issues](https://github.com/Tabisharaza/detourlab/issues). [Additional issue scopes](docs/ISSUE_DRAFTS.md) include reproducible problems, acceptance criteria and explicit non-goals, and distinguish published issues from proposals. Before adding a solver, city dataset, dependency or storage service, propose the interface and its effect on licensing, privacy and reproducibility.

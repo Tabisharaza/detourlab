@@ -75,6 +75,11 @@ npm run benchmark    # Named-machine timing of the original paired fixture
 
 The app and its core checks have zero npm dependencies. An optional, separately locked schema/editor checker lives under `tools/schema-check`; it is not needed to run the app. The root lockfile is included. CI validates it with `npm ci --ignore-scripts --no-audit --no-fund`; this is optional for local use. Use **Node 24.22.1**, pinned in `.node-version` and CI, for current development and builds. It includes the [October 21, 2026 security fixes](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases), including the eMudhra CA remediation. The declared `>=24.2.0` range remains the release verifier's API compatibility floor, not a security recommendation or tested-minimum claim. [Initial CI on Node 24.19.0 and 24.21.0](https://github.com/Tabisharaza/detourlab/actions/runs/37995893928) is historical evidence only; those versions are no longer CI install lanes. See [the current baseline and reproducibility checks](docs/CI.md#current-node-security-baseline).
 
+Optional [real Chromium integration checks](docs/BROWSER_INTEGRATION.md) exercise
+synthetic file roundtrips, actual downloads and native Worker/Node parity in a
+fresh browser profile. They are separate from core tests and from native
+file-chooser, accessibility and deployed-site verification.
+
 ## Reproduce all variants
 
 The bundled [Meridian experiment](examples/meridian-experiment.json) contains four plans:

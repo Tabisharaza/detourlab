@@ -67,6 +67,15 @@ workflows. This is generated-only synthetic sensitivity, not arbitrary input
 regeneration, statistical confidence or real-world prediction. Independent
 design review kept this headless scope separate from engine and browser changes.
 
+## Implemented: repeatable local browser integration harness
+
+The optional [Chromium harness](BROWSER_INTEGRATION.md) checks synthetic 2/6-variant
+file injection, actual downloaded-file roundtrips, native Worker/Node ledger
+parity, invalid-byte rejection and interrupted reads. It creates a fresh profile
+and retains versioned evidence without adding runtime or npm dependencies.
+Automated injection is not native chooser/cancellation certification; issue #2
+and broader cross-browser/accessibility gates remain open.
+
 ## Release-readiness gates
 
 1. Publish a truthful README, live demo link, actual screenshot and model assumptions.

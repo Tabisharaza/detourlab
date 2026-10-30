@@ -69,5 +69,19 @@ jobs:
           npm run build
           node scripts/verify-dist.js dist "$reference"
 
+      - name: Verify real Chromium file roundtrips and Worker parity
+        timeout-minutes: 3
+        run: |
+          browser="$(command -v google-chrome)"
+          test -n "$browser"
+          node tools/browser-check/run.js --browser "$browser" --out "$RUNNER_TEMP/detourlab-browser-evidence"
+
+      - name: Record browser evidence even on failure
+        if: always()
+        run: |
+          if test -f "$RUNNER_TEMP/detourlab-browser-evidence/evidence.json"; then
+            cat "$RUNNER_TEMP/detourlab-browser-evidence/evidence.json"
+          fi
+
       - name: Confirm verification did not change tracked source
         run: git diff --exit-code && git diff --cached --exit-code
