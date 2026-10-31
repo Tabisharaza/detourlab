@@ -1,5 +1,18 @@
 # CI and release verification
 
+## Bounded native Canvas profiling gate
+
+The separate [render profiler](RENDER_PROFILE.md) uses the runner's installed
+Chrome and the same fresh-profile pipe transport as browser integration. It
+checks paint/skip expectations and final pixel/hit-point equality for the
+current guarded renderer and forced-redraw control, recording raw repeated
+call durations. No speed-ratio threshold is a CI gate. The fixed synthetic
+fixtures and renderer source stay unchanged; this does not deploy the demo.
+Evidence is printed even on failure, with failed status rather than a skipped
+or invented browser result. Runtime details and source fingerprints belong
+to each exact run, not to every environment.
+
+
 ## Real Chromium integration gate
 
 The October 30, 2026 milestone adds a separate native-browser test step using

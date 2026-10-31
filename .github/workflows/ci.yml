@@ -83,5 +83,19 @@ jobs:
             cat "$RUNNER_TEMP/detourlab-browser-evidence/evidence.json"
           fi
 
+      - name: Measure bounded native Canvas rendering and verify parity
+        timeout-minutes: 3
+        run: |
+          browser="$(command -v google-chrome)"
+          test -n "$browser"
+          node tools/render-profile/run.js --browser "$browser" --out "$RUNNER_TEMP/detourlab-render-evidence"
+
+      - name: Record render evidence even on failure
+        if: always()
+        run: |
+          if test -f "$RUNNER_TEMP/detourlab-render-evidence/evidence.json"; then
+            cat "$RUNNER_TEMP/detourlab-render-evidence/evidence.json"
+          fi
+
       - name: Confirm verification did not change tracked source
         run: git diff --exit-code && git diff --cached --exit-code

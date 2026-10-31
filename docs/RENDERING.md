@@ -1,6 +1,8 @@
 # Paused-scene redraw guard
 
-This improvement addresses part of [issue #3](https://github.com/Tabisharaza/detourlab/issues/3). It avoids repeating visible Canvas drawing when the rendered state is unchanged. Source [`74e0356`](https://github.com/Tabisharaza/detourlab/commit/74e0356c1fe0d7cfac0c2520906496aaef7869c6) was deployed to the public demo as v5 on October 10, 2026 UTC. [Desktop interaction checks passed](VERIFICATION.md#v5-renderer-deployment-and-desktop-checks); browser rendering time and before/after profiling remain unmeasured.
+This improvement addresses part of [issue #3](https://github.com/Tabisharaza/detourlab/issues/3). It avoids repeating visible Canvas drawing when the rendered state is unchanged. Source [`74e0356`](https://github.com/Tabisharaza/detourlab/commit/74e0356c1fe0d7cfac0c2520906496aaef7869c6) was deployed to the public demo as v5 on October 10, 2026 UTC. [Desktop interaction checks passed](VERIFICATION.md#v5-renderer-deployment-and-desktop-checks); the original historical before/after browser comparison remains unmeasured. The
+[new optional native-Canvas profiler](RENDER_PROFILE.md) measures the current
+guard versus a forced-redraw ablation separately.
 
 ## Two kinds of invalidation
 
@@ -48,3 +50,17 @@ Visible drawing operations during unchanged paused samples fell from 169,200 to 
 `tests/map-render.test.js` exercises the actual renderer with Canvas/DOM stand-ins. `tests/app-render.test.js` connects the actual app event handlers, its frame loop and actual renderer to synthetic DOM/Worker/Canvas stand-ins. They cover idle skips, changed times, backward seeks/replay, active playback, result arrival/clear/Cancel, variant/vehicle/view changes, zoom/resize, closure changes, import/Reset, stale imports and hit positions. `tests/render-counts.test.js` checks both fixture count reports.
 
 These tests do not establish pixel correctness, native file-chooser behavior, real ResizeObserver delivery, actual context-loss recovery, browser main-thread time or accessibility. The public v5 desktop smoke pass exercised the controls listed in [VERIFICATION.md](VERIFICATION.md#v5-renderer-deployment-and-desktop-checks). Issue #3 remains open for named-browser/device before-and-after timings, viewport/warm-up/sample details and wider real-browser rendering checks, including native resize/context-loss behavior. The broader [known QA gaps](VERIFICATION.md#known-gaps) also remain open.
+
+## Product context checked October 31, 2026
+
+[GitHub Trending](https://github.com/trending) currently includes agent tooling,
+engineering workflows and a headless browser. This is a changing discovery list,
+not evidence of DetourLab demand or a reason to add an unrelated AI feature.
+[God's Eye View](https://github.com/bilawalsidhu/gods-eye-view), the user's original
+reference, documents a bounded startup-performance observation and explicitly
+warns against extrapolating it to other machines. [GraphHopper](https://github.com/graphhopper/graphhopper)
+distinguishes routing preparation/performance tradeoffs for different modes.
+These primary-source comparisons reinforce a practical need here: give
+contributors reproducible, precisely labeled measurements before making speed
+claims. DetourLab remains an original keyless synthetic disruption workbench;
+this profiler incorporates no code, assets, live feeds or data from those projects.

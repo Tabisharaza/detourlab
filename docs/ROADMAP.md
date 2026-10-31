@@ -76,6 +76,15 @@ and retains versioned evidence without adding runtime or npm dependencies.
 Automated injection is not native chooser/cancellation certification; issue #2
 and broader cross-browser/accessibility gates remain open.
 
+## Native Canvas render-call profiling
+
+The optional [render profiler](RENDER_PROFILE.md) compares the current guard
+with a forced-redraw control on two original synthetic fixtures. It records
+repeated synchronous renderer-call timings, actual paints/skips and final-state
+pixel/hit-point parity in Chromium. This is an ablation, not the historical
+renderer comparison; native resize/context recovery and broader device checks
+remain open under issue #3.
+
 ## Release-readiness gates
 
 1. Publish a truthful README, live demo link, actual screenshot and model assumptions.

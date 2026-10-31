@@ -48,6 +48,13 @@ selected browser and a new output directory. Preserve native Workers and app
 handlers, no-overwrite evidence, fresh profiles, sandbox defaults, complete-ledger
 and downloaded-file CLI comparisons. File injection is not native chooser QA.
 
+For [native Canvas profiling](docs/RENDER_PROFILE.md), run the focused profiler
+tests and the optional harness on an explicitly selected installed browser.
+Retain raw samples and failed evidence; never gate CI on noisy elapsed-time
+ratios or describe a forced-redraw ablation as historical before/after. Pixel
+and hit-point comparisons are outside timing. No user profile or sandbox
+weakening is allowed.
+
 ## Choose a scope
 
 Start with [open contribution issues](https://github.com/Tabisharaza/detourlab/issues). [Additional issue scopes](docs/ISSUE_DRAFTS.md) include reproducible problems, acceptance criteria and explicit non-goals, and distinguish published issues from proposals. Before adding a solver, city dataset, dependency or storage service, propose the interface and its effect on licensing, privacy and reproducibility.

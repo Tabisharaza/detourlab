@@ -80,6 +80,11 @@ synthetic file roundtrips, actual downloads and native Worker/Node parity in a
 fresh browser profile. They are separate from core tests and from native
 file-chooser, accessibility and deployed-site verification.
 
+A separate [native Canvas render profiler](docs/RENDER_PROFILE.md) measures bounded
+synthetic scenes with the redraw guard enabled versus forced redraws. It records
+raw repeated call timings and final-pixel/hit-point parity, not FPS or universal
+speedup. The application and public demo are unchanged.
+
 ## Reproduce all variants
 
 The bundled [Meridian experiment](examples/meridian-experiment.json) contains four plans:
