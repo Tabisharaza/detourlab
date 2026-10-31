@@ -1,5 +1,15 @@
 # Verification record
 
+## Native Canvas profile evidence — October 31, 2026
+
+The [bounded native-Canvas profiler](RENDER_PROFILE.md#first-measured-run--october-31-2026)
+passed four fixture/mode cases on exact-source hosted CI: current guard versus
+forced-redraw ablation, repeated raw synchronous call timings, expected paints/
+skips and final pixel/hit-point equality. This is not historical before/after,
+full-app, GPU/FPS, native resize/context-loss or deployed-site verification.
+Issue #3 remains open; issue #2 native chooser scope is unaffected.
+
+
 ## Automated Chromium file roundtrips — October 30, 2026
 
 The optional [browser integration harness](BROWSER_INTEGRATION.md) passed all

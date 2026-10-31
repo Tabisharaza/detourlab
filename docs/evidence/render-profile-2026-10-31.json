@@ -1,0 +1,645 @@
+{
+  "format": "detourlab-render-profile",
+  "version": 1,
+  "status": "passed",
+  "startedAt": "2026-10-31T06:55:36.901Z",
+  "runtime": {
+    "node": "v24.22.1",
+    "os": "linux",
+    "release": "7.0.0-1017-azure",
+    "arch": "x64",
+    "cpuModel": "AMD EPYC 7763 64-Core Processor",
+    "logicalCpuCount": 4
+  },
+  "viewport": {
+    "width": 1280,
+    "height": 1600,
+    "deviceScaleFactor": 1
+  },
+  "settings": {
+    "batches": 6,
+    "callsPerBatch": 60,
+    "warmupCalls": 12,
+    "startTimeS": 360,
+    "stepS": 1,
+    "width": 1000,
+    "height": 700
+  },
+  "method": "Current renderer guarded versus forced invalidateFrame ablation; synchronous performance.now render-loop durations, not historical before/after or GPU/FPS measurements.",
+  "limitations": [
+    "Headless hosted environment is not a representative end-user device.",
+    "No app RAF, full-application CPU, native resize/context-loss, historical renderer, cross-browser or deployed-site certification.",
+    "Pixel readback and hit-point equality check only the final state of each mode, outside all timed batches.",
+    "Timing is descriptive and noisy; correctness has gates but speed does not. Source hashes are identity, not signed provenance."
+  ],
+  "results": [
+    {
+      "fixture": "meridian-seed-42",
+      "nodes": 432,
+      "directedEdges": 1614,
+      "vehicles": 24,
+      "jobs": 192,
+      "stateSha256": "aa311bc37457ef22ba102cdfb39b3db5620ef47d5eff745baedd6b1148ef07b8",
+      "mode": "paused",
+      "order": [
+        [
+          "guarded",
+          "forced"
+        ],
+        [
+          "forced",
+          "guarded"
+        ],
+        [
+          "guarded",
+          "forced"
+        ],
+        [
+          "forced",
+          "guarded"
+        ],
+        [
+          "guarded",
+          "forced"
+        ],
+        [
+          "forced",
+          "guarded"
+        ]
+      ],
+      "samples": {
+        "guarded": [
+          {
+            "batch": 0,
+            "calls": 60,
+            "paints": 0,
+            "elapsedMs": 0.19999999999708962
+          },
+          {
+            "batch": 1,
+            "calls": 60,
+            "paints": 0,
+            "elapsedMs": 0.10000000000582077
+          },
+          {
+            "batch": 2,
+            "calls": 60,
+            "paints": 0,
+            "elapsedMs": 0
+          },
+          {
+            "batch": 3,
+            "calls": 60,
+            "paints": 0,
+            "elapsedMs": 0
+          },
+          {
+            "batch": 4,
+            "calls": 60,
+            "paints": 0,
+            "elapsedMs": 0.10000000000582077
+          },
+          {
+            "batch": 5,
+            "calls": 60,
+            "paints": 0,
+            "elapsedMs": 0
+          }
+        ],
+        "forced": [
+          {
+            "batch": 0,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 28.40000000000873
+          },
+          {
+            "batch": 1,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 15
+          },
+          {
+            "batch": 2,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 15.30000000000291
+          },
+          {
+            "batch": 3,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 21.09999999999127
+          },
+          {
+            "batch": 4,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 20
+          },
+          {
+            "batch": 5,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 20.69999999999709
+          }
+        ]
+      },
+      "parity": {
+        "pixelsEqual": true,
+        "nonemptyPixels": true,
+        "hitPointsEqual": true,
+        "width": 1000,
+        "height": 700
+      },
+      "summary": {
+        "guarded": {
+          "batches": 6,
+          "calls": 360,
+          "paints": 0,
+          "minBatchMs": 0,
+          "medianBatchMs": 0.05000000000291038,
+          "maxBatchMs": 0.19999999999708962,
+          "meanCallMs": 0.0011111111111353643
+        },
+        "forced": {
+          "batches": 6,
+          "calls": 360,
+          "paints": 360,
+          "minBatchMs": 15,
+          "medianBatchMs": 20.349999999998545,
+          "maxBatchMs": 28.40000000000873,
+          "meanCallMs": 0.3347222222222222
+        }
+      }
+    },
+    {
+      "fixture": "meridian-seed-42",
+      "nodes": 432,
+      "directedEdges": 1614,
+      "vehicles": 24,
+      "jobs": 192,
+      "stateSha256": "aa311bc37457ef22ba102cdfb39b3db5620ef47d5eff745baedd6b1148ef07b8",
+      "mode": "playing",
+      "order": [
+        [
+          "guarded",
+          "forced"
+        ],
+        [
+          "forced",
+          "guarded"
+        ],
+        [
+          "guarded",
+          "forced"
+        ],
+        [
+          "forced",
+          "guarded"
+        ],
+        [
+          "guarded",
+          "forced"
+        ],
+        [
+          "forced",
+          "guarded"
+        ]
+      ],
+      "samples": {
+        "guarded": [
+          {
+            "batch": 0,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 21.80000000000291
+          },
+          {
+            "batch": 1,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 19.89999999999418
+          },
+          {
+            "batch": 2,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 13.19999999999709
+          },
+          {
+            "batch": 3,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 12.299999999988358
+          },
+          {
+            "batch": 4,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 13
+          },
+          {
+            "batch": 5,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 12.400000000008731
+          }
+        ],
+        "forced": [
+          {
+            "batch": 0,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 13.80000000000291
+          },
+          {
+            "batch": 1,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 13.19999999999709
+          },
+          {
+            "batch": 2,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 12.400000000008731
+          },
+          {
+            "batch": 3,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 14.599999999991269
+          },
+          {
+            "batch": 4,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 12.400000000008731
+          },
+          {
+            "batch": 5,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 12.60000000000582
+          }
+        ]
+      },
+      "parity": {
+        "pixelsEqual": true,
+        "nonemptyPixels": true,
+        "hitPointsEqual": true,
+        "width": 1000,
+        "height": 700
+      },
+      "summary": {
+        "guarded": {
+          "batches": 6,
+          "calls": 360,
+          "paints": 360,
+          "minBatchMs": 12.299999999988358,
+          "medianBatchMs": 13.099999999998545,
+          "maxBatchMs": 21.80000000000291,
+          "meanCallMs": 0.257222222222198
+        },
+        "forced": {
+          "batches": 6,
+          "calls": 360,
+          "paints": 360,
+          "minBatchMs": 12.400000000008731,
+          "medianBatchMs": 12.900000000001455,
+          "maxBatchMs": 14.599999999991269,
+          "meanCallMs": 0.21944444444448485
+        }
+      }
+    },
+    {
+      "fixture": "render-grid-40x40",
+      "nodes": 1600,
+      "directedEdges": 6240,
+      "vehicles": 48,
+      "jobs": 384,
+      "stateSha256": "1acacefb50e1758bcb4a3c6bd724582eadadebdd4d5c5d7f81b705edbe248e7f",
+      "mode": "paused",
+      "order": [
+        [
+          "guarded",
+          "forced"
+        ],
+        [
+          "forced",
+          "guarded"
+        ],
+        [
+          "guarded",
+          "forced"
+        ],
+        [
+          "forced",
+          "guarded"
+        ],
+        [
+          "guarded",
+          "forced"
+        ],
+        [
+          "forced",
+          "guarded"
+        ]
+      ],
+      "samples": {
+        "guarded": [
+          {
+            "batch": 0,
+            "calls": 60,
+            "paints": 0,
+            "elapsedMs": 0.20000000001164153
+          },
+          {
+            "batch": 1,
+            "calls": 60,
+            "paints": 0,
+            "elapsedMs": 0.10000000000582077
+          },
+          {
+            "batch": 2,
+            "calls": 60,
+            "paints": 0,
+            "elapsedMs": 0
+          },
+          {
+            "batch": 3,
+            "calls": 60,
+            "paints": 0,
+            "elapsedMs": 0
+          },
+          {
+            "batch": 4,
+            "calls": 60,
+            "paints": 0,
+            "elapsedMs": 0
+          },
+          {
+            "batch": 5,
+            "calls": 60,
+            "paints": 0,
+            "elapsedMs": 0
+          }
+        ],
+        "forced": [
+          {
+            "batch": 0,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 32.20000000001164
+          },
+          {
+            "batch": 1,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 28.39999999999418
+          },
+          {
+            "batch": 2,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 28
+          },
+          {
+            "batch": 3,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 28.5
+          },
+          {
+            "batch": 4,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 25.70000000001164
+          },
+          {
+            "batch": 5,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 28.099999999976717
+          }
+        ]
+      },
+      "parity": {
+        "pixelsEqual": true,
+        "nonemptyPixels": true,
+        "hitPointsEqual": true,
+        "width": 1000,
+        "height": 700
+      },
+      "summary": {
+        "guarded": {
+          "batches": 6,
+          "calls": 360,
+          "paints": 0,
+          "minBatchMs": 0,
+          "medianBatchMs": 0,
+          "maxBatchMs": 0.20000000001164153,
+          "meanCallMs": 0.0008333333333818397
+        },
+        "forced": {
+          "batches": 6,
+          "calls": 360,
+          "paints": 360,
+          "minBatchMs": 25.70000000001164,
+          "medianBatchMs": 28.249999999985448,
+          "maxBatchMs": 32.20000000001164,
+          "meanCallMs": 0.47472222222220606
+        }
+      }
+    },
+    {
+      "fixture": "render-grid-40x40",
+      "nodes": 1600,
+      "directedEdges": 6240,
+      "vehicles": 48,
+      "jobs": 384,
+      "stateSha256": "1acacefb50e1758bcb4a3c6bd724582eadadebdd4d5c5d7f81b705edbe248e7f",
+      "mode": "playing",
+      "order": [
+        [
+          "guarded",
+          "forced"
+        ],
+        [
+          "forced",
+          "guarded"
+        ],
+        [
+          "guarded",
+          "forced"
+        ],
+        [
+          "forced",
+          "guarded"
+        ],
+        [
+          "guarded",
+          "forced"
+        ],
+        [
+          "forced",
+          "guarded"
+        ]
+      ],
+      "samples": {
+        "guarded": [
+          {
+            "batch": 0,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 33.59999999997672
+          },
+          {
+            "batch": 1,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 29.20000000001164
+          },
+          {
+            "batch": 2,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 26.300000000017462
+          },
+          {
+            "batch": 3,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 59.70000000001164
+          },
+          {
+            "batch": 4,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 22.800000000017462
+          },
+          {
+            "batch": 5,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 22.89999999999418
+          }
+        ],
+        "forced": [
+          {
+            "batch": 0,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 28.199999999982538
+          },
+          {
+            "batch": 1,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 28.5
+          },
+          {
+            "batch": 2,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 26.20000000001164
+          },
+          {
+            "batch": 3,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 26.39999999999418
+          },
+          {
+            "batch": 4,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 22.699999999982538
+          },
+          {
+            "batch": 5,
+            "calls": 60,
+            "paints": 60,
+            "elapsedMs": 23.79999999998836
+          }
+        ]
+      },
+      "parity": {
+        "pixelsEqual": true,
+        "nonemptyPixels": true,
+        "hitPointsEqual": true,
+        "width": 1000,
+        "height": 700
+      },
+      "summary": {
+        "guarded": {
+          "batches": 6,
+          "calls": 360,
+          "paints": 360,
+          "minBatchMs": 22.800000000017462,
+          "medianBatchMs": 27.750000000014552,
+          "maxBatchMs": 59.70000000001164,
+          "meanCallMs": 0.5402777777778586
+        },
+        "forced": {
+          "batches": 6,
+          "calls": 360,
+          "paints": 360,
+          "minBatchMs": 22.699999999982538,
+          "medianBatchMs": 26.30000000000291,
+          "maxBatchMs": 28.5,
+          "meanCallMs": 0.4327777777776646
+        }
+      }
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "src/map.js",
+      "sha256": "ceaf58ea3bb5a5c0ee12e255212eea2c515bedbb0c0a65187d25a98d243f9044"
+    },
+    {
+      "path": "src/scenario.js",
+      "sha256": "fd7e71c7219bf738547d129499496c77d0213dababfa686f171e8b6c6eb6e5b4"
+    },
+    {
+      "path": "src/engine.js",
+      "sha256": "a3fa06223fdf95b7cc1bb0b15b05da924c6d835ac13e688327262bfc080a3016"
+    },
+    {
+      "path": "tests/helpers/render-fixtures.js",
+      "sha256": "908b8a77a544e1f80493773456045f7793cb345d9d9f391005f833db2affa4e5"
+    },
+    {
+      "path": "tools/render-profile/measurement.js",
+      "sha256": "9af13b16e8e0a6820246d1bf99ed98e51a14497f9092204009df599143ef1e5c"
+    },
+    {
+      "path": "tools/render-profile/run.js",
+      "sha256": "5dea8ebe2fbe9e56d5c66ea363c6fe281527c50746b9b15e87368f2f46e04dd1"
+    },
+    {
+      "path": "tools/browser-check/chromium.js",
+      "sha256": "a34c7eb7c4f52cb4f4c19b3a0b215b96722ac6233a5252fecfc890b9fe5de055"
+    },
+    {
+      "path": "tools/browser-check/run.js",
+      "sha256": "650aa2a51d5dc3a6dc3474d026ea4be45f6c95a15044c07770269887673368b1"
+    },
+    {
+      "path": "scripts/serve.js",
+      "sha256": "86eb68f3acc9ffbf0bfa81dd3d41a6d84114c6f6f80c16e0ef577fb05723c06a"
+    }
+  ],
+  "sourceSha256": "bed8e22a5f71fc1635981e541880d1626b4bc2cf4cc37572000ddfa4f9db5819",
+  "checkoutRevision": "70f1e63c846a20f897069648ce49e29d17085bff",
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/156.0.8078.47",
+    "revision": "@1d17a2e2ee147bb7d6ae2ab6abdb3a2510c17775",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "jsVersion": "15.6.75.19"
+  },
+  "completedAt": "2026-10-31T06:55:41.361Z"
+}

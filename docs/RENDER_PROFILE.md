@@ -88,6 +88,41 @@ Run focused non-browser tests with:
 node --test tests/render-profile.test.js tests/browser-check.test.js
 ```
 
+## First measured run — October 31, 2026
+
+[Exact-source CI 41178417908](https://github.com/Tabisharaza/detourlab/actions/runs/41178417908)
+passed on [`70f1e63`](https://github.com/Tabisharaza/detourlab/commit/70f1e63c846a20f897069648ce49e29d17085bff).
+The [complete evidence](evidence/render-profile-2026-10-31.json) is reconstructed
+without field changes from the job's printed evidence JSON. It records Headless
+Chrome **156.0.8078.47**, Node **24.22.1**, Linux x64 kernel **7.0.0-1017-azure**,
+CPU model **AMD EPYC 7763 64-Core Processor**, **4 visible logical CPUs**, and the
+viewport/protocol above. The runner image is Ubuntu 24.04. Hardware acceleration
+is not established.
+
+Median elapsed milliseconds per **60-call batch**, rounded here to two decimals;
+raw values, including timer-resolution zeros, remain in the evidence:
+
+| Fixture / mode | Guarded | Forced redraw | Guarded / forced paints across 360 calls |
+| --- | ---: | ---: | ---: |
+| Meridian / paused | 0.05 | 20.35 | 0 / 360 |
+| Meridian / playing | 13.10 | 12.90 | 360 / 360 |
+| 40×40 grid / paused | 0.00 | 28.25 | 0 / 360 |
+| 40×40 grid / playing | 27.75 | 26.30 | 360 / 360 |
+
+All four final pixel/hit-point comparisons passed. A rounded zero is not zero
+cost. Playing samples remain variable and do not show a general speedup; the
+guard's intended work elimination is only for unchanged paused scenes. These
+are synchronous call-loop observations on one hosted runtime, not historical
+before/after, GPU, FPS, battery or user-device measurements.
+
+The same CI passed **1,090 core + 120 optional = 1,210 distinct Node tests**,
+**211 overlapping CLI repetitions**, byte-identical rebuild, unchanged tracked
+source, and the separate **21-checkpoint browser integration suite**. Local
+checks passed the same Node totals and unchanged 28 static payloads plus manifest.
+Independent review found no remaining must-fix issue. Node tests, the 21 browser
+checkpoints and these four profile cases are separate counts, not summed tests.
+No public demo assets changed.
+
 ## Still open
 
 Native resize/context-loss recovery, wider device/browser visual checks,
