@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import http from 'node:http';
 import { once } from 'node:events';
-import { mkdir, mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { arch, cpus, platform, release, tmpdir } from 'node:os';
 import path from 'node:path';
@@ -11,7 +11,7 @@ import { spawnSync } from 'node:child_process';
 import { createRequestHandler } from '../../scripts/serve.js';
 import { renderFixtures, renderState } from '../../tests/helpers/render-fixtures.js';
 import { launchChromium } from '../browser-check/chromium.js';
-import { parseBrowserCheckArguments, finishBrowserEvidence } from '../browser-check/run.js';
+import { parseBrowserCheckArguments, finishBrowserEvidence, removeOwnedBrowserDirectory } from '../browser-check/run.js';
 import { PROFILE, summarizeSamples, assertParity, preparePage, measureBatch, comparePixels } from './measurement.js';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
@@ -94,7 +94,7 @@ export async function runProfile({ executable, output }) {
     await finishBrowserEvidence(output, evidence, [
       async () => { if (browser) await browser.close(); },
       async () => { if (server) { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); } },
-      async () => { if (temporary) await rm(temporary, { recursive: true, force: true }); },
+      async () => { if (temporary) await removeOwnedBrowserDirectory(temporary); },
     ]);
   }
   console.log(`Render profile evidence: ${path.join(output, 'evidence.json')}`);

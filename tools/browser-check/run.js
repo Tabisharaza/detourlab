@@ -43,6 +43,14 @@ export function parseBrowserCheckArguments(args) {
   return { executable: values['--browser'], output: path.resolve(values['--out']) };
 }
 
+/** Remove only a harness-owned temporary directory after closing its browser.
+ * Chromium children can briefly finish profile writes after process exit; Node's
+ * bounded retries handle ENOTEMPTY/EBUSY without hiding a permanent failure.
+ */
+export async function removeOwnedBrowserDirectory(directory, remove = rm) {
+  await remove(directory, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+}
+
 /** Cleanup all owned resources and preserve failure status before writing evidence. */
 export async function finishBrowserEvidence(output, evidence, cleanups) {
   let cleanupError;
@@ -271,7 +279,7 @@ async function run({ executable, output }) {
     await finishBrowserEvidence(output, evidence, [
       async () => { if (browser) await browser.close(); },
       async () => { if (server) { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); } },
-      async () => { if (temporary) await rm(temporary, { recursive: true, force: true }); },
+      async () => { if (temporary) await removeOwnedBrowserDirectory(temporary); },
     ]);
   }
   console.log(`Verified ${evidence.checks.length} browser integration checks. Evidence: ${path.join(output, 'evidence.json')}`);

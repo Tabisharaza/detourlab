@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import http from 'node:http';
 import { once } from 'node:events';
-import { mkdir, mkdtemp, readFile, readdir, writeFile, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, readdir, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { tmpdir, platform, release, arch } from 'node:os';
 import path from 'node:path';
@@ -11,7 +11,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { createRequestHandler } from '../../scripts/serve.js';
 import { exportExperiment, simulateExperiment } from '../../src/experiment.js';
 import { launchChromium } from '../browser-check/chromium.js';
-import { parseBrowserCheckArguments, finishBrowserEvidence, documentReadyExpression } from '../browser-check/run.js';
+import { parseBrowserCheckArguments, finishBrowserEvidence, removeOwnedBrowserDirectory, documentReadyExpression } from '../browser-check/run.js';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const hash = data => createHash('sha256').update(data).digest('hex');
@@ -122,7 +122,7 @@ export async function runSplitCheck({ executable, output }) {
     await setFile(path.join(root,'examples/minimal-experiment.json'));await until('window.__splitCheck.held===true','held file read');await evaluate("document.getElementById('run-experiment').click();document.getElementById('cancel-run').click()"); const afterCancel=(await snapshot()).requests;await evaluate('window.__splitCheck.releaseRead()');await evaluate('new Promise(resolve=>setTimeout(resolve,0))');await frames();s=await snapshot();assert.equal(s.requests,afterCancel);assert.equal(s.request.experiment.id,fixture.id);assert.equal(s.maps['network-map'].scenarioId,fixture.baseScenario.id);check('Canceled pending native File read cannot replace split workspace');
     assert.deepEqual(s.errors,[]); evidence.status='passed';
   } catch(error) { evidence.status='failed';evidence.error=String(error.stack||error);throw error; }
-  finally { await finishBrowserEvidence(output,evidence,[async()=>{if(browser)await browser.close();},async()=>{if(server){server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}},async()=>{if(temporary)await rm(temporary,{recursive:true,force:true});}]); }
+  finally { await finishBrowserEvidence(output,evidence,[async()=>{if(browser)await browser.close();},async()=>{if(server){server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}},async()=>{if(temporary)await removeOwnedBrowserDirectory(temporary);}]); }
   console.log(`Verified ${evidence.checks.length} split-view checkpoints. Evidence: ${path.join(output,'evidence.json')}`);
 }
 if(import.meta.main){try{const options=parseBrowserCheckArguments(process.argv.slice(2));if(options)await runSplitCheck(options);else console.log(usage);}catch(error){console.error(`DetourLab split-view check: ${error.message}`);process.exitCode=1;}}

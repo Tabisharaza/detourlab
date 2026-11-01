@@ -71,7 +71,12 @@ passed all 13 native split checkpoints in Chromium 156.0.8078.47 on Linux.
 Visual inspection of those captures found a selected vehicle label clipped at
 the right edge of the baseline pane. The follow-up renderer change positions
 labels within the canvas and truncates long IDs; the native selector retains
-full IDs. Final source evidence and screenshots are recorded below after rerun.
+full IDs. Final source evidence and screenshots are recorded below after rerun. Subsequent
+staging exposed two native-check lifecycle races: readiness before the HTML
+element exists and temporary-profile deletion while browser descendants finish
+shutdown. The harness now waits for the explicit ready marker and uses bounded
+filesystem retries on its own temporary directory. Persistent cleanup failures
+still fail the run and evidence; no browser safety flags or assertions are disabled.
 
 These bounded checks are not mobile-device, cross-browser, screen-reader or
 native file-chooser certification. Source publication and exact-commit CI are
