@@ -1,5 +1,16 @@
 # Verification record
 
+## Synchronized map panes — November 1, 2026
+
+The [source milestone and actual captures](SPLIT_VIEW.md#verified-source-and-captures--november-1-2026)
+passed 13 native split-map checkpoints and bounded desktop/narrow visual review.
+The same exact-source CI passed 1,111 core + 120 optional Node tests, 21 existing
+browser checkpoints, four render-profile cases and reproducible distribution.
+Selected labels were corrected after screenshot inspection; navigation/readiness
+and temporary-profile cleanup races were fixed without weakening failure gates.
+No hosted assets changed. Device, assistive-technology, context-loss and native
+chooser gaps remain separate; issues #2 and #3 remain open.
+
 ## Native Canvas profile evidence — October 31, 2026
 
 The [bounded native-Canvas profiler](RENDER_PROFILE.md#first-measured-run--october-31-2026)

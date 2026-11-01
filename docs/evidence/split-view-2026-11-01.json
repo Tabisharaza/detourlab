@@ -1,0 +1,215 @@
+{
+  "format": "detourlab-split-view-check",
+  "version": 1,
+  "status": "passed",
+  "startedAt": "2026-11-01T06:44:54.688Z",
+  "runtime": {
+    "node": "v24.22.1",
+    "os": "linux",
+    "release": "7.0.0-1017-azure",
+    "arch": "x64"
+  },
+  "checks": [
+    {
+      "name": "Opening split reuses completed native results and produces equal desktop panes",
+      "status": "passed",
+      "geometry": {
+        "primary": {
+          "x": 793,
+          "y": 642.09375,
+          "width": 471,
+          "height": 930.40625
+        },
+        "baseline": {
+          "x": 321,
+          "y": 642.09375,
+          "width": 471,
+          "height": 930.40625
+        },
+        "overflow": false
+      }
+    },
+    {
+      "name": "Keyboard leaves split toggle for shared zoom controls without a hidden-canvas stop",
+      "status": "passed"
+    },
+    {
+      "name": "Tiny cutoff keeps native Worker/Node parity and shows different positions at shared 20 seconds",
+      "status": "passed"
+    },
+    {
+      "name": "Shared zoom updates both projections",
+      "status": "passed"
+    },
+    {
+      "name": "Global road editing leaves baseline read-only",
+      "status": "passed"
+    },
+    {
+      "name": "Repeated split/overlay toggles preserve results without Worker reruns",
+      "status": "passed"
+    },
+    {
+      "name": "Narrow CSS viewport stacks equal usable panes without horizontal overflow",
+      "status": "passed",
+      "geometry": {
+        "primary": {
+          "x": 14,
+          "y": 1187.015625,
+          "width": 347,
+          "height": 325
+        },
+        "baseline": {
+          "x": 14,
+          "y": 806.015625,
+          "width": 347,
+          "height": 325
+        },
+        "overflow": false
+      }
+    },
+    {
+      "name": "Returning from lesson restores prior split workspace",
+      "status": "passed"
+    },
+    {
+      "name": "Long HTML-like variant label remains inert and keeps pane dimensions aligned",
+      "status": "passed"
+    },
+    {
+      "name": "Native pointer selection from either canvas shares one selected vehicle",
+      "status": "passed"
+    },
+    {
+      "name": "Canceled native run clears both panes before any old result can be shown",
+      "status": "passed"
+    },
+    {
+      "name": "Rerun restores both panes with complete ledger parity",
+      "status": "passed"
+    },
+    {
+      "name": "Canceled pending native File read cannot replace split workspace",
+      "status": "passed"
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "split-desktop.jpg",
+      "sha256": "26807b9e8b007dccad5a328b71a959ea00e5393c53c9392a2b3d03dc6435cab9",
+      "bytes": 98862,
+      "viewport": {
+        "width": 1600,
+        "height": 1100,
+        "deviceScaleFactor": 1,
+        "mobile": false
+      },
+      "meaning": "Unmodified screenshot of local synthetic split-map workbench; visual inspection separate."
+    },
+    {
+      "file": "split-narrow.jpg",
+      "sha256": "333c7cab5477a2a9b78ac21c933a8d10fc177f913d022d91e54a47c27fddb51a",
+      "bytes": 28637,
+      "viewport": {
+        "width": 390,
+        "height": 1100,
+        "deviceScaleFactor": 1,
+        "mobile": false
+      },
+      "meaning": "Unmodified screenshot of local synthetic split-map workbench; visual inspection separate."
+    }
+  ],
+  "limitations": [
+    "Local headless Chromium and synthetic fixtures only; not deployed, cross-browser, native chooser, mobile-device or assistive-technology certification.",
+    "Worker wrapper records native requests/results. NetworkMap.render wrapper calls the unchanged renderer and retains instance references for read-only observations.",
+    "CDP focus/key/pointer events are bounded integration evidence, not human usability testing.",
+    "Screenshots are unmodified captures; image existence/hash is not visual inspection."
+  ],
+  "sourceFiles": [
+    {
+      "path": "index.html",
+      "sha256": "7c4ee8ad9a6d349b068e8803fe2b382d9a83ad2d2dd0b660731df1d338f0d488"
+    },
+    {
+      "path": "src/app.js",
+      "sha256": "18bd4dc947a9755d277f78039117662b80444a18de85fc4d31012c029abc4231"
+    },
+    {
+      "path": "src/browser-impact.js",
+      "sha256": "b414b6d19fe103dd34e2be03a419ec26be6d55c3bcae661d42e6e074efd03ff3"
+    },
+    {
+      "path": "src/browser-review.js",
+      "sha256": "e3cf75b29aa5234f1dad3115d35fb37eb4c27f50157d4e82b0177c4e90f31dfb"
+    },
+    {
+      "path": "src/cutoff-comparison.js",
+      "sha256": "12339235403d492fb0b483ca4ebe5c52965735129eb3727bc07ff6c3719eaebe"
+    },
+    {
+      "path": "src/cutoff-experiment.js",
+      "sha256": "0c2daf9a919bc6cbe85a27d53004de5b6eed296ad0d93b870aa3802c5b99ab9b"
+    },
+    {
+      "path": "src/engine.js",
+      "sha256": "a3fa06223fdf95b7cc1bb0b15b05da924c6d835ac13e688327262bfc080a3016"
+    },
+    {
+      "path": "src/experiment-report.js",
+      "sha256": "656062cf1fac1d8db80dae9b075de23ff8c505d35bf941f0c420e05d8663258d"
+    },
+    {
+      "path": "src/experiment.js",
+      "sha256": "efb77801be428839dd677df9a8c5fc62812709062b20eacb0d93a39576f1eff3"
+    },
+    {
+      "path": "src/file-input.js",
+      "sha256": "9d34d0b01eff790e25d4e2f2edef56d8b4bfc6c608b266f471f932ea0bfc048a"
+    },
+    {
+      "path": "src/job-gates.js",
+      "sha256": "bd5d905cb85a3265167d58c12e67f24ab18e67e66e726631f88b805fad24e732"
+    },
+    {
+      "path": "src/job-impact.js",
+      "sha256": "537d07bd5f89114cbaca0939d563aaa9cfbebf1ddc371fdfec1fe06b78a91948"
+    },
+    {
+      "path": "src/map.js",
+      "sha256": "c2e08b8f8fea8882f30cb3208a156b3b75ea28b4eb317744fc8773946e322162"
+    },
+    {
+      "path": "src/report-results.js",
+      "sha256": "1d5877f77381a63ba68b54f809a07cb879d6357954a5a2a9d8f48c733934ca43"
+    },
+    {
+      "path": "src/scenario.js",
+      "sha256": "fd7e71c7219bf738547d129499496c77d0213dababfa686f171e8b6c6eb6e5b4"
+    },
+    {
+      "path": "src/simulation-worker.js",
+      "sha256": "3f6e4f882485a0f59d8c80af496dc6ae9acb2667ddaebe33e4db10b43276052c"
+    },
+    {
+      "path": "src/style.css",
+      "sha256": "cffa7271e33466b6bbe58572e3f531c0b9fb9b60d44ded892ffcac4a6249e87c"
+    },
+    {
+      "path": "src/tutorial.js",
+      "sha256": "a2b310e8a476ab245c9c4a7c2814c73c8407fce92d20b7b35be5765919f2ccea"
+    },
+    {
+      "path": "tools/split-view-check/run.js",
+      "sha256": "71c54dcec8d208394b5d909f4f4adc7667f4c0d044c6c8bdf6ffdab922e13408"
+    }
+  ],
+  "sourceSha256": "af0643e7ba6198c0050feb54d0c059299001aa96bd13bbb9f24e9af97b20bb77",
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/156.0.8078.47",
+    "revision": "@1d17a2e2ee147bb7d6ae2ab6abdb3a2510c17775",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "jsVersion": "15.6.75.19"
+  },
+  "completedAt": "2026-11-01T06:45:01.553Z"
+}

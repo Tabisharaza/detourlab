@@ -93,6 +93,11 @@ vehicle selection, without starting another simulation. The panes stack on
 narrow screens; the baseline stays read-only. **Compare** still overlays both
 routes in one map. [Behavior, checks and limits](docs/SPLIT_VIEW.md).
 
+![Actual source split-map comparison in CI Chromium](docs/images/split-desktop-2026-11-01.jpg)
+
+*Actual source capture, November 1, 2026: one replay clock, baseline left,
+selected variant right. [Checks, raw narrow capture and provenance](docs/SPLIT_VIEW.md#verified-source-and-captures--november-1-2026).*
+
 This source milestone does not imply that the hosted demo has been redeployed.
 
 ## Reproduce all variants

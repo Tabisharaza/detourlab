@@ -71,7 +71,7 @@ passed all 13 native split checkpoints in Chromium 156.0.8078.47 on Linux.
 Visual inspection of those captures found a selected vehicle label clipped at
 the right edge of the baseline pane. The follow-up renderer change positions
 labels within the canvas and truncates long IDs; the native selector retains
-full IDs. Final source evidence and screenshots are recorded below after rerun. Subsequent
+full IDs. Final source evidence and screenshots are recorded below. Subsequent
 staging exposed two native-check lifecycle races: readiness before the HTML
 element exists and temporary-profile deletion while browser descendants finish
 shutdown. The harness now waits for the explicit ready marker and uses bounded
@@ -81,6 +81,38 @@ still fail the run and evidence; no browser safety flags or assertions are disab
 These bounded checks are not mobile-device, cross-browser, screen-reader or
 native file-chooser certification. Source publication and exact-commit CI are
 separate from the unchanged hosted demo.
+
+## Verified source and captures — November 1, 2026
+
+[Staging source `9af4196`](https://github.com/Tabisharaza/detourlab/commit/9af4196d14fb3d6f07f690478d705621ea976a59)
+passed [CI 41281972231](https://github.com/Tabisharaza/detourlab/actions/runs/41281972231).
+The [complete split evidence](evidence/split-view-2026-11-01.json) is reconstructed
+without field changes from that job's printed JSON. It records Node 24.22.1,
+Headless Chrome 156.0.8078.47 and Linux x64. All 13 checkpoints passed: native
+Worker/Node ledger equality, shared replay/zoom/selection, read-only baseline,
+no extra Worker on toggles, hidden-pane suppression, responsive geometry,
+literal long labels, pointer selection, lesson restore and canceled/stale reads.
+
+The same run passed **1,111 core + 120 optional = 1,231 distinct Node tests**,
+211 overlapping CLI repetitions, 21 separate browser integration checkpoints,
+four separate render-profile cases, byte-identical rebuild of 28 release files
+plus manifest, and unchanged tracked source. These are different kinds of checks,
+not one combined test count.
+
+Actual raw CI captures were visually inspected after download: baseline vehicle
+labels now fit, pane headings and routes are legible, desktop panes align, narrow
+panes stack, and neither capture has a toast covering replay controls. This is
+bounded visual inspection, not assistive-technology or real-device testing.
+
+![Actual CI split-map desktop capture](images/split-desktop-2026-11-01.jpg)
+
+[Open the narrow capture](images/split-narrow-2026-11-01.jpg).
+The desktop viewport was 1600×1100 CSS pixels and the narrow viewport 390×1100,
+both DPR 1 with mobile emulation **off**. JPEG quality 65; no retouching or crop.
+The tiny synthetic example is paused at 20 seconds with **Close at 10 s** selected.
+Capture SHA-256 hashes and byte sizes are in the evidence. These are local CI
+source screenshots, **not screenshots of a new hosted release**. The public
+hosted demo remains the separately recorded v11 release.
 
 ## Design provenance
 
