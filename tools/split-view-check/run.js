@@ -11,7 +11,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { createRequestHandler } from '../../scripts/serve.js';
 import { exportExperiment, simulateExperiment } from '../../src/experiment.js';
 import { launchChromium } from '../browser-check/chromium.js';
-import { parseBrowserCheckArguments, finishBrowserEvidence } from '../browser-check/run.js';
+import { parseBrowserCheckArguments, finishBrowserEvidence, documentReadyExpression } from '../browser-check/run.js';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const hash = data => createHash('sha256').update(data).digest('hex');
@@ -78,7 +78,7 @@ export async function runSplitCheck({ executable, output }) {
     await send('Emulation.setDeviceMetricsOverride', desktop);
     await send('Page.addScriptToEvaluateOnNewDocument', { source: observeWorkers });
     await send('Page.navigate', { url: `http://127.0.0.1:${server.address().port}` });
-    await until("document.documentElement.dataset.ready === 'true'", 'initial render'); await evaluate(observeRenderers); await frames();
+    await until(documentReadyExpression, 'initial render'); await evaluate(observeRenderers); await frames();
     const initial = await snapshot(); assert.equal(initial.requests, 1); assert.equal(initial.maps['baseline-map'], undefined);
     await click('view-split'); await frames(); const opened = await snapshot();
     assert.equal(opened.requests, initial.requests); assert.deepEqual(opened.result, initial.result); assert.equal(opened.hidden, false);

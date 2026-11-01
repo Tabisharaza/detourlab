@@ -15,6 +15,9 @@ import { decodeFileInput } from '../../src/file-input.js';
 import { launchChromium } from './chromium.js';
 import { browserFixtures, invalidBrowserFiles } from './fixtures.js';
 
+// CDP navigation may return before the new document has an html element.
+export const documentReadyExpression = "document.documentElement?.dataset.ready === 'true'";
+
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const usage = `Optional DetourLab real Chromium integration check (Node 24.22.1)
@@ -117,7 +120,7 @@ async function run({ executable, output }) {
     await send('Emulation.setDeviceMetricsOverride', { ...evidence.viewport, mobile: false });
     await send('Page.addScriptToEvaluateOnNewDocument', { source: observation });
     await send('Page.navigate', { url: origin });
-    await until("document.documentElement.dataset.ready === 'true'", 'initial native Worker run');
+    await until(documentReadyExpression, 'initial native Worker run');
     const check = (name, detail = {}) => { evidence.checks.push({ name, status: 'passed', ...detail }); console.log(`PASS ${name}`); };
     const snapshot = () => evaluate(`({ request: window.__detourlabCheck.request, result: window.__detourlabCheck.result,
       revision: document.documentElement.dataset.revision, status: document.getElementById('status-line').textContent,
