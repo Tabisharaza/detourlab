@@ -85,6 +85,14 @@ pixel/hit-point parity in Chromium. This is an ablation, not the historical
 renderer comparison; native resize/context recovery and broader device checks
 remain open under issue #3.
 
+## Implemented in source: synchronized side-by-side replay
+
+The [split-map mode](SPLIT_VIEW.md) displays the clear-road baseline and selected
+variant with one absolute clock, vehicle selection and zoom. It reuses completed
+results, preserves the original overlay mode, stacks on narrow layouts and keeps
+baseline road editing read-only. Source checks and local/CI browser evidence are
+separate from hosted deployment and broader device/accessibility certification.
+
 ## Release-readiness gates
 
 1. Publish a truthful README, live demo link, actual screenshot and model assumptions.
@@ -101,7 +109,7 @@ remain open under issue #3.
 - Actual browser interruption/import/export coverage
 - Paused-render and large-fixture profiling, with repeatable measurements
 - Additional independent routing oracles and cross-browser deterministic fixtures
-- Synchronized side-by-side map panes, after a clear design review
+- Broader device and assistive-technology review of synchronized map panes
 
 Start with the [published contribution issues](https://github.com/Tabisharaza/detourlab/issues). [ISSUE_DRAFTS.md](ISSUE_DRAFTS.md) links the selected public scopes and retains other proposals with concrete acceptance boundaries. An open issue is not an assignment or delivery commitment.
 

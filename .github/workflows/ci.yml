@@ -97,5 +97,27 @@ jobs:
             cat "$RUNNER_TEMP/detourlab-render-evidence/evidence.json"
           fi
 
+      - name: Verify synchronized split-map replay in Chromium
+        timeout-minutes: 3
+        run: |
+          browser="$(command -v google-chrome)"
+          test -n "$browser"
+          node tools/split-view-check/run.js --browser "$browser" --out "$RUNNER_TEMP/detourlab-split-evidence"
+
+      - name: Record split-map evidence and bounded synthetic snapshots
+        if: always()
+        run: |
+          if test -f "$RUNNER_TEMP/detourlab-split-evidence/evidence.json"; then
+            cat "$RUNNER_TEMP/detourlab-split-evidence/evidence.json"
+            node --input-type=module -e '
+              import { readFile } from "node:fs/promises";
+              for (const name of ["split-desktop.jpg", "split-narrow.jpg"]) {
+                try { const bytes = await readFile(process.env.RUNNER_TEMP + "/detourlab-split-evidence/" + name);
+                  if (bytes.length > 1048576) throw new Error("Snapshot exceeds log bound");
+                  console.log("SPLIT_SNAPSHOT " + name + " " + bytes.toString("base64"));
+                } catch (error) { if (error.code !== "ENOENT") throw error; }
+              }'
+          fi
+
       - name: Confirm verification did not change tracked source
         run: git diff --exit-code && git diff --cached --exit-code

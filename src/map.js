@@ -25,6 +25,8 @@ export class NetworkMap {
     const pixelWidth = Math.round(width * dpr), pixelHeight = Math.round(height * dpr);
     if (this.width === width && this.height === height && this.dpr === dpr && this.canvas.width === pixelWidth && this.canvas.height === pixelHeight) return;
     this.width = width; this.height = height; this.dpr = dpr;
+    this.vehiclePoints = []; this.edgePoints = [];
+    if (this.sceneState) this.events.onHover?.('', 0, 0);
     // Assigning either canvas dimension erases its pixels, even at the same size.
     if (this.canvas.width !== pixelWidth) this.canvas.width = pixelWidth;
     if (this.canvas.height !== pixelHeight) this.canvas.height = pixelHeight;

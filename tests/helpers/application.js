@@ -145,7 +145,7 @@ export function application({ workerConstructionError = () => null, mapClass = n
   function computedStyle(item) { return { visibility: item.style.visibility || (item.parentElement ? computedStyle(item.parentElement).visibility : 'visible') }; }
   class NetworkMap {
     constructor(_element, state, handlers) { this.width = 800; this.state = state; this.handlers = handlers; maps.push(this); }
-    invalidate() {} invalidateFrame() {} render() {}
+    invalidate() {} invalidateFrame() {} resize() {} render() {}
   }
   class FakeWorker {
     constructor(url, options) {
@@ -178,7 +178,7 @@ export function application({ workerConstructionError = () => null, mapClass = n
   // No scenario data is evaluated as code.
   new Function(...Object.keys(environment), source)(...Object.values(environment));
   return {
-    element, document, created, posted, workers, timers,
+    element, document, created, posted, workers, timers, maps,
     pendingDialogCloseEvents: () => closeEvents.length,
     async flushDialogCloseEvents() { const callbacks = closeEvents.splice(0); for (const callback of callbacks) await callback(); return callbacks.length; },
     windowEvent(name, properties = {}) { const event = { target: document.activeElement, defaultPrevented: false, preventDefault() { this.defaultPrevented = true; }, ...properties }; for (const handler of windowListeners.get(name) ?? []) handler(event); return event; },

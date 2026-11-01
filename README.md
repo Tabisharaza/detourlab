@@ -85,6 +85,16 @@ synthetic scenes with the redraw guard enabled versus forced redraws. It records
 raw repeated call timings and final-pixel/hit-point parity, not FPS or universal
 speedup. The application and public demo are unchanged.
 
+## Inspect two maps at the same instant
+
+The current source adds **Side by side** beside the existing map modes. Compare
+clear-road and selected-variant routes using the same replay clock, zoom and
+vehicle selection, without starting another simulation. The panes stack on
+narrow screens; the baseline stays read-only. **Compare** still overlays both
+routes in one map. [Behavior, checks and limits](docs/SPLIT_VIEW.md).
+
+This source milestone does not imply that the hosted demo has been redeployed.
+
 ## Reproduce all variants
 
 The bundled [Meridian experiment](examples/meridian-experiment.json) contains four plans:

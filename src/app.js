@@ -19,6 +19,7 @@ function createInitialExperiment() { const experiment = experimentFromScenario(c
 const initialExperiment = createInitialExperiment();
 const initialScenario = scenarioForVariant(initialExperiment, initialExperiment.variants[0].id);
 const state = { experiment: initialExperiment, selectedVariantId: initialExperiment.variants[0].id, allResults: null, scenario: initialScenario, baseline: null, disrupted: null, time: 360, playing: false, speed: 60, selectedVehicle: null, view: 'disruption', editing: false, zoom: 1, pending: true, lessonActive: false, lessonModified: false };
+let baselineMap;
 let worker;
 let revision = 0;
 let importRevision = 0;
@@ -54,7 +55,34 @@ const map = new NetworkMap($('network-map'), state, {
 function toast(message, error = false) { const el = $('toast'); el.textContent = message; el.classList.toggle('error', error); el.hidden = false; clearTimeout(toastTimeout); toastTimeout = setTimeout(() => { el.hidden = true; }, error ? 9000 : 4500); }
 function setPlaying(value) { state.playing = value; $('play-button').textContent = value ? 'Ⅱ' : '▶'; $('play-button').setAttribute('aria-label', value ? 'Pause simulation' : 'Play simulation'); }
 function setTime(value) { state.time = Math.max(0, Math.min(Number($('timeline').max), Number(value))); $('timeline').value = String(Math.floor(state.time)); $('clock-label').textContent = clock(state.time); updateVehicleStatus(); }
-function setView(view) { state.view = view; for (const other of ['disruption', 'baseline', 'compare']) { $('view-' + other).classList.toggle('active', other === view); $('view-' + other).setAttribute('aria-pressed', String(other === view)); } map.invalidateFrame(); }
+function setView(view) {
+  const layoutChanged = (state.view === 'split') !== (view === 'split');
+  state.view = view;
+  const split = view === 'split';
+  for (const other of ['disruption', 'baseline', 'compare', 'split']) {
+    $('view-' + other).classList.toggle('active', other === view);
+    $('view-' + other).setAttribute('aria-pressed', String(other === view));
+  }
+  $('baseline-pane').hidden = !split; $('variant-pane-label').hidden = !split;
+  $('split-help').hidden = !split; $('map-panes').classList.toggle('split', split);
+  $('map-tooltip').hidden = true;
+  if (split && !baselineMap) {
+    // Stable read-only view: no copied time/results that can drift or go stale.
+    const baselineState = new Proxy(state, {
+      get: (target, key) => key === 'view' ? 'baseline' : key === 'editing' ? false : target[key],
+      set: () => { throw new Error('Baseline pane state is read-only.'); },
+    });
+    baselineMap = new NetworkMap($('baseline-map'), baselineState, {
+      onRoad: () => {}, onHover: () => {},
+      onVehicle: id => { state.selectedVehicle = id; $('vehicle-select').value = id; updateInspector(); },
+    });
+  }
+  // Clear old hit targets before the next frame after a layout transition.
+  for (const renderer of [map, baselineMap].filter(Boolean)) {
+    if (layoutChanged) { renderer.vehiclePoints = []; renderer.edgePoints = []; renderer.resize(); renderer.invalidate(); }
+    else renderer.invalidateFrame();
+  }
+}
 function setEditing(value) { state.editing = value; $('edit-roads').setAttribute('aria-pressed', String(value)); $('map-help').textContent = value ? 'Click a road to edit the selected direction in this variant' : 'Click a vehicle to inspect its route'; }
 function closedIds() { return new Set(state.scenario.closures.flatMap(closure => closure.edgeIds)); }
 function closureAt() { return Number($('closure-time').value); }
@@ -239,6 +267,8 @@ function updateRoadDetails() {
 }
 function updateControls() {
   const scenario = state.scenario;
+  $('variant-pane-label').textContent = `Selected variant: ${activeVariant().name}`;
+  $('variant-pane-label').title = $('variant-pane-label').textContent;
   $('scene-name').textContent = scenario.name;
   $('map-scene-title').textContent = `${scenario.name.toUpperCase()} / EXPERIMENT VIEW`;
   $('map-watermark-name').textContent = scenario.name.toUpperCase();
@@ -812,7 +842,7 @@ $('road-direction').addEventListener('change', updateRoadDetails);
 $('toggle-road').addEventListener('click', () => { const edge = selectedRoad(); if (edge) toggleRoad(edge.id); });
 $('edit-roads').setAttribute('aria-pressed', 'false');
 $('edit-roads').addEventListener('click', () => setEditing(!state.editing));
-for (const view of ['disruption', 'baseline', 'compare']) $('view-' + view).addEventListener('click', () => setView(view));
+for (const view of ['disruption', 'baseline', 'compare', 'split']) $('view-' + view).addEventListener('click', () => setView(view));
 $('vehicle-select').addEventListener('change', (event) => { state.selectedVehicle = event.target.value; updateInspector(); });
 $('play-button').addEventListener('click', () => { if (state.time >= Number($('timeline').max)) setTime(0); setPlaying(!state.playing); });
 $('timeline').addEventListener('input', (event) => { setPlaying(false); setTime(event.target.value); });
@@ -875,5 +905,5 @@ $('guide-dialog').addEventListener('click', (event) => { if (event.target === $(
 window.addEventListener('keydown', (event) => { if (event.code === 'Space' && !['INPUT','BUTTON','SELECT','TEXTAREA'].includes(document.activeElement.tagName) && !$('guide-dialog').open && !$('lesson-dialog').open && !$('review-dialog').open && !$('impact-dialog').open && !$('cutoff-dialog').open) { event.preventDefault(); $('play-button').click(); } });
 document.addEventListener('visibilitychange', () => { if (document.hidden) setPlaying(false); });
 let previous = performance.now();
-function frame(now) { const delta = Math.min((now - previous) / 1000, .1); previous = now; if (state.playing && !state.pending) { setTime(state.time + delta * state.speed); if (state.time >= Number($('timeline').max)) setPlaying(false); } map.render(now); requestAnimationFrame(frame); }
+function frame(now) { const delta = Math.min((now - previous) / 1000, .1); previous = now; if (state.playing && !state.pending) { setTime(state.time + delta * state.speed); if (state.time >= Number($('timeline').max)) setPlaying(false); } map.render(now); if (state.view === 'split') baselineMap?.render(now); requestAnimationFrame(frame); }
 makeRoads(); updateControls(); compute(); requestAnimationFrame(frame);
