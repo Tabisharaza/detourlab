@@ -33,6 +33,35 @@ export class NetworkMap {
     this.invalidate();
   }
   project(x, y, lift = 0) { return { x: this.offsetX + (x - y * .51) * this.scale, y: this.offsetY + (y * .64 + x * .245) * this.scale - lift }; }
+  // Keep the selected marker's label inside each pane, including at zoomed edges.
+  // Only the painted label is shortened; IDs in state and the vehicle selector stay intact.
+  drawVehicleLabel(p, id) {
+    const ctx = this.ctx, margin = 4, padding = 6, height = 17;
+    const maxWidth = Math.min(160, this.width - margin * 2);
+    if (maxWidth < padding * 2 + 8 || this.height < height + margin * 2) return;
+    ctx.font = '8px ui-monospace, monospace';
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    const available = maxWidth - padding * 2;
+    let text = id.toUpperCase();
+    if (ctx.measureText(text).width > available) {
+      const points = Array.from(text), ellipsis = '…';
+      let low = 0, high = points.length;
+      while (low < high) {
+        const mid = Math.ceil((low + high) / 2);
+        if (ctx.measureText(points.slice(0, mid).join('') + ellipsis).width <= available) low = mid;
+        else high = mid - 1;
+      }
+      text = points.slice(0, low).join('') + ellipsis;
+    }
+    const width = ctx.measureText(text).width + padding * 2;
+    const preferredX = p.x + 11 + width <= this.width - margin ? p.x + 11 : p.x - 11 - width;
+    const preferredY = p.y - 19 >= margin ? p.y - 19 : p.y + 11;
+    const x = Math.max(margin, Math.min(preferredX, this.width - margin - width));
+    const y = Math.max(margin, Math.min(preferredY, this.height - margin - height));
+    ctx.fillStyle = '#112c25ee'; ctx.fillRect(x, y, width, height);
+    ctx.strokeStyle = '#6b985e'; ctx.strokeRect(x, y, width, height);
+    ctx.fillStyle = '#d4f6b6'; ctx.fillText(text, x + padding, y + 12);
+  }
   nearestRoad(p) { if (!this.edgePoints) return null; let best = null; for (const item of this.edgePoints) { const distance = distanceToSegment(p, item.a, item.b); if (!best || distance < best.distance) best = { ...item, distance }; } return best; }
   path(ctx, points, fill, stroke, width = 1) { if (!points.length) return; ctx.beginPath(); points.forEach((point, i) => i ? ctx.lineTo(point.x, point.y) : ctx.moveTo(point.x, point.y)); ctx.closePath(); if (fill) { ctx.fillStyle = fill; ctx.fill(); } if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = width; ctx.stroke(); } }
   line(ctx, a, b, color, width = 1) { ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.strokeStyle = color; ctx.lineWidth = width; ctx.stroke(); }
@@ -171,7 +200,7 @@ export class NetworkMap {
     // Depots correspond to actual vehicle starting nodes.
     const depots=new Set(scenario.vehicles.map(v=>v.startNode));for(const id of depots){const n=this.nodeMap.get(id),p=this.project(n.x,n.y);ctx.save();ctx.translate(p.x,p.y);ctx.rotate(Math.PI/4);ctx.fillStyle='#c8f38c';ctx.strokeStyle='#142723';ctx.lineWidth=2;ctx.fillRect(-4,-4,8,8);ctx.strokeRect(-4,-4,8,8);ctx.restore();}
     this.vehiclePoints=[];
-    const drawVehicles=(run,ghost)=>{if(!run)return;for(const vehicle of run.vehicles){const p=this.position(vehicle);if(!ghost)this.vehiclePoints.push({...p,id:vehicle.id});const isSelected=vehicle.id===selectedVehicle;ctx.save();ctx.globalAlpha=ghost?.45:1;ctx.beginPath();ctx.arc(p.x,p.y,isSelected?4.5:2.5,0,Math.PI*2);ctx.fillStyle=ghost?colors.teal:isSelected?colors.lime:'#bad4d6';ctx.shadowColor=isSelected?colors.lime:colors.teal;ctx.shadowBlur=isSelected?12:3;ctx.fill();ctx.shadowBlur=0;if(isSelected){ctx.beginPath();ctx.arc(p.x,p.y,8,0,Math.PI*2);ctx.strokeStyle=ghost?colors.teal:'#c6f988aa';ctx.lineWidth=1;ctx.stroke();if(!ghost){ctx.font='8px ui-monospace, monospace';const text=vehicle.id.toUpperCase(),w=ctx.measureText(text).width;ctx.fillStyle='#112c25ee';ctx.fillRect(p.x+11,p.y-19,w+12,17);ctx.strokeStyle='#6b985e';ctx.strokeRect(p.x+11,p.y-19,w+12,17);ctx.fillStyle='#d4f6b6';ctx.fillText(text,p.x+17,p.y-7);}}ctx.restore();}};
+    const drawVehicles=(run,ghost)=>{if(!run)return;for(const vehicle of run.vehicles){const p=this.position(vehicle);if(!ghost)this.vehiclePoints.push({...p,id:vehicle.id});const isSelected=vehicle.id===selectedVehicle;ctx.save();ctx.globalAlpha=ghost?.45:1;ctx.beginPath();ctx.arc(p.x,p.y,isSelected?4.5:2.5,0,Math.PI*2);ctx.fillStyle=ghost?colors.teal:isSelected?colors.lime:'#bad4d6';ctx.shadowColor=isSelected?colors.lime:colors.teal;ctx.shadowBlur=isSelected?12:3;ctx.fill();ctx.shadowBlur=0;if(isSelected){ctx.beginPath();ctx.arc(p.x,p.y,8,0,Math.PI*2);ctx.strokeStyle=ghost?colors.teal:'#c6f988aa';ctx.lineWidth=1;ctx.stroke();if(!ghost)this.drawVehicleLabel(p,vehicle.id);}ctx.restore();}};
     if(view==='compare')drawVehicles(baseline,true);drawVehicles(view==='baseline'?baseline:disrupted,false);
     // Retain hit points on skipped frames and publish the signature only after a
     // complete paint, so a failed/interrupted render can be retried.

@@ -54,10 +54,28 @@ labels, tiny-lesson return, actual renderer hit geometry and paused/hidden paint
 using explicit DOM/Worker/Canvas stand-ins. These are not browser pixels or
 screen-reader tests.
 
-Native Chromium evidence and screenshots are recorded separately with the
-optional split-view checker. Its bounded checks are not mobile-device,
-cross-browser, screen-reader or native file-chooser certification. Source
-publication and exact-commit CI must be verified independently of local checks.
+The dependency-free native checker can be run against an installed Chromium:
+
+```sh
+node tools/split-view-check/run.js --browser /path/to/chromium --out /tmp/split-evidence
+```
+
+The output directory must not exist. It creates a fresh browser profile and
+loopback server, records real Worker results and renderer observations, then
+writes `evidence.json` and raw desktop/narrow JPEG captures. CI also records this
+bounded synthetic evidence in its job log. The checker waits for transient
+notifications to dismiss before capture; it does not retouch the images.
+
+Initial staging [CI 41281292335](https://github.com/Tabisharaza/detourlab/actions/runs/41281292335)
+passed all 13 native split checkpoints in Chromium 156.0.8078.47 on Linux.
+Visual inspection of those captures found a selected vehicle label clipped at
+the right edge of the baseline pane. The follow-up renderer change positions
+labels within the canvas and truncates long IDs; the native selector retains
+full IDs. Final source evidence and screenshots are recorded below after rerun.
+
+These bounded checks are not mobile-device, cross-browser, screen-reader or
+native file-chooser certification. Source publication and exact-commit CI are
+separate from the unchanged hosted demo.
 
 ## Design provenance
 
