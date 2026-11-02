@@ -91,6 +91,7 @@ The current source adds **Save replay** and **Open replay**. Download the valida
 experiment together with the selected variant, vehicle, exact time, map mode and
 zoom; reopen after recomputation at a paused comparison. No cached results,
 accounts, URL sharing or background persistence. [Format, example and limits](docs/REPLAY_BOOKMARKS.md).
+[Actual desktop/narrow captures and native download evidence](docs/REPLAY_BOOKMARKS.md#verified-source-evidence--november-2-2026).
 This source addition is separate from the unchanged hosted demo.
 
 ## Inspect two maps at the same instant

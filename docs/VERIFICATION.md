@@ -1,5 +1,15 @@
 # Verification record
 
+## Portable replay bookmarks — November 2, 2026
+
+The [bookmark source milestone and actual captures](REPLAY_BOOKMARKS.md#verified-source-evidence--november-2-2026)
+passed 11 native Chromium checkpoints, including actual download/reimport
+byte equality, complete Worker/Node ledger parity and stale-read supersession.
+The same exact-source CI passed 1,143 core + 120 optional Node tests, existing
+21 browser and 13 split checkpoints, four rendering cases and reproducible
+29-file distribution. Desktop/narrow captures were visually inspected.
+No hosted assets changed; native OS chooser/device/accessibility gates remain.
+
 ## Synchronized map panes — November 1, 2026
 
 The [source milestone and actual captures](SPLIT_VIEW.md#verified-source-and-captures--november-1-2026)

@@ -1,0 +1,182 @@
+{
+  "format": "detourlab-replay-bookmark-check",
+  "version": 1,
+  "status": "passed",
+  "startedAt": "2026-11-02T06:38:33.119Z",
+  "runtime": {
+    "node": "v24.22.1",
+    "os": "linux",
+    "release": "7.0.0-1017-azure",
+    "arch": "x64"
+  },
+  "checks": [
+    {
+      "name": "Bookmark recomputes complete native Worker ledger then restores paused fractional-time split perspective",
+      "status": "passed"
+    },
+    {
+      "name": "Imported HTML-like labels remain literal text",
+      "status": "passed"
+    },
+    {
+      "name": "Actual app download contains validated inputs and perspective, not trusted results",
+      "status": "passed",
+      "downloadSha256": "f295f57b7be086d196317d58f9686012c4d59970eeb1131594a00aa0962df2c6"
+    },
+    {
+      "name": "Downloaded bookmark reimports and exports byte-identically",
+      "status": "passed"
+    },
+    {
+      "name": "Same bookmark can be selected repeatedly",
+      "status": "passed"
+    },
+    {
+      "name": "Native replay controls focus without exposing hidden file input",
+      "status": "passed"
+    },
+    {
+      "name": "Narrow replay controls remain within viewport",
+      "status": "passed"
+    },
+    {
+      "name": "Invalid selection references preserve workspace and do not request a Worker",
+      "status": "passed"
+    },
+    {
+      "name": "Beyond-duration bookmarks clamp explicitly to recomputed replay range",
+      "status": "passed"
+    },
+    {
+      "name": "Reset supersedes delayed bookmark read without restoring stale perspective",
+      "status": "passed"
+    },
+    {
+      "name": "New user view navigation supersedes delayed bookmark read",
+      "status": "passed"
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "replay-desktop.jpg",
+      "sha256": "bbe2e969a1b4a4a619bec7743b80ee6f0655d0a6f64b907e123ebec24bfdca14",
+      "bytes": 108630,
+      "viewport": {
+        "width": 1600,
+        "height": 1100,
+        "deviceScaleFactor": 1,
+        "mobile": false
+      },
+      "meaning": "Unmodified screenshot of local synthetic split-map workbench; visual inspection separate."
+    },
+    {
+      "file": "replay-narrow.jpg",
+      "sha256": "3977c0c9d29cb976497029585d81304677df65e49936e64fc09e2b8132b66d49",
+      "bytes": 40713,
+      "viewport": {
+        "width": 390,
+        "height": 1100,
+        "deviceScaleFactor": 1,
+        "mobile": false
+      },
+      "meaning": "Unmodified screenshot of local synthetic split-map workbench; visual inspection separate."
+    }
+  ],
+  "limitations": [
+    "Local headless Chromium and synthetic fixtures only; not deployed, cross-browser, native chooser, mobile-device or assistive-technology certification.",
+    "Worker wrapper records native requests/results. NetworkMap.render wrapper calls the unchanged renderer and retains instance references for read-only observations.",
+    "CDP focus/key/pointer events are bounded integration evidence, not human usability testing.",
+    "Screenshots are unmodified captures; image existence/hash is not visual inspection."
+  ],
+  "sourceFiles": [
+    {
+      "path": "index.html",
+      "sha256": "3874a612f72ba3d123a7101f949a7f42b22a67e5f7df38e25bc0720e171410a5"
+    },
+    {
+      "path": "src/app.js",
+      "sha256": "788bf5eec7270738646399cd321600b9d1692d262ec59a5d15a05f5aecfabe2c"
+    },
+    {
+      "path": "src/browser-impact.js",
+      "sha256": "b414b6d19fe103dd34e2be03a419ec26be6d55c3bcae661d42e6e074efd03ff3"
+    },
+    {
+      "path": "src/browser-review.js",
+      "sha256": "e3cf75b29aa5234f1dad3115d35fb37eb4c27f50157d4e82b0177c4e90f31dfb"
+    },
+    {
+      "path": "src/cutoff-comparison.js",
+      "sha256": "12339235403d492fb0b483ca4ebe5c52965735129eb3727bc07ff6c3719eaebe"
+    },
+    {
+      "path": "src/cutoff-experiment.js",
+      "sha256": "0c2daf9a919bc6cbe85a27d53004de5b6eed296ad0d93b870aa3802c5b99ab9b"
+    },
+    {
+      "path": "src/engine.js",
+      "sha256": "a3fa06223fdf95b7cc1bb0b15b05da924c6d835ac13e688327262bfc080a3016"
+    },
+    {
+      "path": "src/experiment-report.js",
+      "sha256": "656062cf1fac1d8db80dae9b075de23ff8c505d35bf941f0c420e05d8663258d"
+    },
+    {
+      "path": "src/experiment.js",
+      "sha256": "efb77801be428839dd677df9a8c5fc62812709062b20eacb0d93a39576f1eff3"
+    },
+    {
+      "path": "src/file-input.js",
+      "sha256": "9d34d0b01eff790e25d4e2f2edef56d8b4bfc6c608b266f471f932ea0bfc048a"
+    },
+    {
+      "path": "src/job-gates.js",
+      "sha256": "bd5d905cb85a3265167d58c12e67f24ab18e67e66e726631f88b805fad24e732"
+    },
+    {
+      "path": "src/job-impact.js",
+      "sha256": "537d07bd5f89114cbaca0939d563aaa9cfbebf1ddc371fdfec1fe06b78a91948"
+    },
+    {
+      "path": "src/map.js",
+      "sha256": "c2e08b8f8fea8882f30cb3208a156b3b75ea28b4eb317744fc8773946e322162"
+    },
+    {
+      "path": "src/replay-bookmark.js",
+      "sha256": "621a22f480f407d5f6ce2e809c820cd290a410e814ea2cb1deb294d74553dd8b"
+    },
+    {
+      "path": "src/report-results.js",
+      "sha256": "1d5877f77381a63ba68b54f809a07cb879d6357954a5a2a9d8f48c733934ca43"
+    },
+    {
+      "path": "src/scenario.js",
+      "sha256": "fd7e71c7219bf738547d129499496c77d0213dababfa686f171e8b6c6eb6e5b4"
+    },
+    {
+      "path": "src/simulation-worker.js",
+      "sha256": "3f6e4f882485a0f59d8c80af496dc6ae9acb2667ddaebe33e4db10b43276052c"
+    },
+    {
+      "path": "src/style.css",
+      "sha256": "9f380024b47b6929a3b615eab813a30b7a29894eaffba66e27076bd496ade1f5"
+    },
+    {
+      "path": "src/tutorial.js",
+      "sha256": "a2b310e8a476ab245c9c4a7c2814c73c8407fce92d20b7b35be5765919f2ccea"
+    },
+    {
+      "path": "tools/replay-bookmark-check/run.js",
+      "sha256": "124381612f99fff93e0e0cb17407e5bf12526c47dba3dce8543e156991f31f91"
+    }
+  ],
+  "sourceSha256": "7107b1ecdcf6fc05acdaa031f2f4c60ee2cfba81c38d51828ee445734e3e3091",
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/156.0.8078.47",
+    "revision": "@1d17a2e2ee147bb7d6ae2ab6abdb3a2510c17775",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "jsVersion": "15.6.75.19"
+  },
+  "completedAt": "2026-11-02T06:38:39.921Z"
+}

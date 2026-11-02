@@ -80,6 +80,44 @@ injection is not OS file-picker certification. Captures are raw screenshots;
 their existence alone is not a visual review. Native evidence is recorded only
 after a successful run; hosted deployment is a separate gate.
 
+## Verified source evidence — November 2, 2026
+
+[Source c8173cf](https://github.com/Tabisharaza/detourlab/commit/c8173cfb2fe01a9686db1b360a7d54f28f5ccc31)
+passed [exact-source CI 41400985719](https://github.com/Tabisharaza/detourlab/actions/runs/41400985719).
+The [complete bookmark evidence](evidence/replay-bookmark-2026-11-02.json) is
+reconstructed without field changes from that job's printed JSON. It records
+Headless Chrome 156.0.8078.47, Node 24.22.1 and Linux x64.
+
+All **11 native bookmark checkpoints** passed: exact fractional perspective,
+complete native Worker/Node ledger equality, literal hostile labels, actual
+local download, byte-identical downloaded-file reopening/re-export, repeated
+loads, keyboard focus, narrow overflow, invalid-reference preservation,
+explicit duration clamping, Reset and newer-view supersession of delayed reads.
+The first checkpoint combines perspective and ledger checks; these descriptions
+are coverage, not additional test counts.
+
+The same CI passed **1,143 core + 120 optional = 1,263 distinct Node tests**,
+211 overlapping CLI repetitions, 21 existing browser checkpoints, 13 split-map
+checkpoints and four rendering-profile cases. Its **29 release files** and
+manifest rebuilt byte-for-byte, and verification left tracked source unchanged.
+Core/app stand-ins additionally cover canceled/stale Workers, road-edit and
+variant-card navigation, null selections, failed recomputation and lessons.
+
+Actual raw captures were inspected: controls and exact-time status are legible,
+the narrow layout has no horizontal overflow, and the HTML-like experiment
+name is visible literal text—not executed markup. The map remains at the saved
+1.2× zoom; cropped network edges are the saved view, not missing scenario data.
+The narrow capture shows the controls and upper workbench, not the entire page.
+
+![Actual CI replay-bookmark controls and restored comparison](images/replay-desktop-2026-11-02.jpg)
+
+[Open narrow capture](images/replay-narrow-2026-11-02.jpg). Viewports are
+1600×1100 and 390×1100 CSS pixels, DPR 1, mobile emulation off, JPEG quality 65.
+Images are unretouched captures after transient notifications dismiss. Hashes
+and sizes are recorded in the evidence. These are local CI source captures,
+not a new hosted release. The public hosted demo remains v11. OS file chooser,
+real-device, assistive-technology and cross-browser checks remain separate.
+
 ## Design provenance
 
 The November 2, 2026 read-only comparison of
