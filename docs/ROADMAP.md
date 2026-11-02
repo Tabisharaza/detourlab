@@ -93,6 +93,13 @@ results, preserves the original overlay mode, stacks on narrow layouts and keeps
 baseline road editing read-only. Source checks and local/CI browser evidence are
 separate from hosted deployment and broader device/accessibility certification.
 
+## Implemented in source: portable replay perspectives
+
+[Replay bookmarks](REPLAY_BOOKMARKS.md) preserve validated inputs and a selected
+comparison moment without trusting cached results or adding network storage.
+Reopening recomputes, restores a paused view and respects newer navigation and
+cancellation. This does not close native chooser, device or deployment gates.
+
 ## Release-readiness gates
 
 1. Publish a truthful README, live demo link, actual screenshot and model assumptions.

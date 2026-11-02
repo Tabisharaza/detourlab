@@ -1,3 +1,4 @@
+import * as replayBookmark from '../../src/replay-bookmark.js';
 import { readFileSync } from 'node:fs';
 import * as scenarioSchema from '../../src/scenario.js';
 import * as experimentSchema from '../../src/experiment.js';
@@ -167,7 +168,7 @@ export function application({ workerConstructionError = () => null, mapClass = n
   const windowListeners = new Map();
   const window = { addEventListener(name, handler) { if (!windowListeners.has(name)) windowListeners.set(name, []); windowListeners.get(name).push(handler); } };
   const environment = {
-    ...scenarioSchema, ...experimentSchema, ...fileInput, createCutoffExperiment, normalizeCutoffTimes, summarizeCutoffResults, normalizePolicy, createBrowserReview: reviewBuilder, createBrowserImpact: impactBuilder, pageDeliveryImpact, createTutorialExperiment, document, getComputedStyle: computedStyle, NetworkMap: mapClass ? class extends mapClass {
+    ...scenarioSchema, ...experimentSchema, ...fileInput, ...replayBookmark, createCutoffExperiment, normalizeCutoffTimes, summarizeCutoffResults, normalizePolicy, createBrowserReview: reviewBuilder, createBrowserImpact: impactBuilder, pageDeliveryImpact, createTutorialExperiment, document, getComputedStyle: computedStyle, NetworkMap: mapClass ? class extends mapClass {
       constructor(...args) { super(...args); maps.push(this); }
     } : NetworkMap, Worker: FakeWorker,
     URL, Blob, TextEncoder, TextDecoder, performance: { now }, structuredClone,

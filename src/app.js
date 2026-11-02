@@ -1,3 +1,4 @@
+import { parseReplayBookmark, exportReplayBookmark } from './replay-bookmark.js';
 import { createDemoScenario, createPresets, validateScenario, LIMITS } from './scenario.js';
 import { experimentFromScenario, validateExperiment, parseExperiment, scenarioForVariant, exportExperiment, EXPERIMENT_LIMITS } from './experiment.js';
 import { createBrowserReview } from './browser-review.js';
@@ -23,6 +24,8 @@ let baselineMap;
 let worker;
 let revision = 0;
 let importRevision = 0;
+let pendingReplay = null;
+let replayNavigation = 0;
 let workerTimeout;
 let toastTimeout;
 let initial = true;
@@ -48,7 +51,7 @@ let edgesById = new Map();
 let roadPairs = new Map();
 const map = new NetworkMap($('network-map'), state, {
   onRoad: (edgeId) => { if (state.editing) toggleRoad(edgeId); },
-  onVehicle: (id) => { state.selectedVehicle = id; $('vehicle-select').value = id; updateInspector(); },
+  onVehicle: (id) => { abandonReplayNavigation(); state.selectedVehicle = id; $('vehicle-select').value = id; updateInspector(); },
   onHover: (text, x, y) => { const tip = $('map-tooltip'); tip.hidden = !text; tip.textContent = text; tip.style.left = `${Math.min(x + 12, Math.max(0, map.width - 210))}px`; tip.style.top = `${Math.max(0, y - 38)}px`; },
 });
 
@@ -74,7 +77,7 @@ function setView(view) {
     });
     baselineMap = new NetworkMap($('baseline-map'), baselineState, {
       onRoad: () => {}, onHover: () => {},
-      onVehicle: id => { state.selectedVehicle = id; $('vehicle-select').value = id; updateInspector(); },
+      onVehicle: id => { abandonReplayNavigation(); state.selectedVehicle = id; $('vehicle-select').value = id; updateInspector(); },
     });
   }
   // Clear old hit targets before the next frame after a layout transition.
@@ -127,6 +130,7 @@ function toggleRoad(id, forceReopen = false) {
 }
 function selectVariant(id) {
   if (!state.experiment.variants.some(variant => variant.id === id)) return;
+  abandonReplayNavigation();
   importRevision += 1;
   state.selectedVariantId = id; state.scenario = scenarioForVariant(state.experiment, id);
   updateControls(); showSelectedResult();
@@ -299,6 +303,8 @@ function updateControls() {
   updateVariants(); updateEvents(); updateLesson(); updateRoadDetails(); map.invalidate();
 }
 function clearResults() {
+  if (pendingReplay) $('replay-status').textContent = 'Replay restore canceled because the run or experiment changed.';
+  pendingReplay = null; updateReplayAvailability();
   invalidateReview();
   invalidateImpact();
   for (const id of ['distance', 'late', 'unreachable']) { $(id + '-value').textContent = '—'; $(id + '-delta').textContent = 'Calculating…'; $(id + '-baseline').textContent = ''; }
@@ -308,7 +314,8 @@ function clearResults() {
   $('job-list').replaceChildren(); $('job-count').textContent = ''; $('vehicle-status').textContent = 'Calculating…';
 }
 function computationFailed(message) {
-  state.pending = false;
+  if (pendingReplay) $('replay-status').textContent = 'Replay computation failed. Saved perspective was not restored; run again to retry.';
+  state.pending = false; pendingReplay = null; updateReplayAvailability();
   for (const id of ['distance', 'late', 'unreachable']) $(id + '-delta').textContent = 'Unavailable';
   $('route-reason').textContent = message; $('status-line').parentElement.setAttribute('aria-busy', 'false');
 }
@@ -351,7 +358,7 @@ function compute() {
     clearTimeout(workerTimeout); state.pending = false; $('status-line').parentElement.setAttribute('aria-busy', 'false'); hideCancelRun();
     currentWorker.terminate(); if (worker === currentWorker) worker = null;
     if (data.error) { computationFailed(data.error); toast(`The experiment could not run: ${data.error}`, true); $('status-line').textContent = 'Experiment failed. Edit or import a smaller experiment.'; $('comparison-status').textContent = 'No partial results shown. ' + data.error; updateVariants(true); return; }
-    state.allResults = { baseline: data.baseline, variants: data.variants }; showSelectedResult(); updateReviewAvailability(); updateImpactAvailability();
+    state.allResults = { baseline: data.baseline, variants: data.variants }; showSelectedResult(); restoreReplay(id); updateReplayAvailability(); updateReviewAvailability(); updateImpactAvailability();
     $('status-line').textContent = `${state.scenario.jobs.length} shared orders · ${state.experiment.variants.length} variants · synchronized replay`;
     $('comparison-status').textContent = `Open-network baseline: ${distanceText(data.baseline.metrics.distanceM)}, ${data.baseline.metrics.lateJobs} late, ${data.baseline.metrics.unreachableJobs} unreachable. Cards show final modeled outcomes.`;
     if (initial) { initial = false; document.documentElement.dataset.ready = 'true'; }
@@ -444,6 +451,7 @@ function loadScenario(scenario) { loadExperiment(experimentFromScenario(scenario
 function updateLesson() {
   $('lesson-panel').hidden = !state.lessonActive;
   $('import-button').disabled = state.lessonActive;
+  updateReplayAvailability();
   $('lesson-import-help').hidden = !state.lessonActive;
   $('reset-button').textContent = state.lessonActive ? '↺ Reset lesson' : '↺ Reset experiment';
   $('closure-time').step = state.lessonActive ? '1' : '60';
@@ -853,6 +861,63 @@ $('zoom-out').addEventListener('click', () => { state.zoom = Math.max(.65, state
 $('zoom-reset').addEventListener('click', () => { state.zoom = 1; map.invalidate(); });
 $('reset-button').addEventListener('click', () => { if (state.lessonActive) { resetLesson(); focusFirst([$('lesson-clear'), $('return-experiment')]); toast('Lesson reset. Your previous experiment is still kept in memory.'); return; } setEditing(false); setView('disruption'); $('closure-time').value = '300'; loadExperiment(createInitialExperiment()); toast('Original experiment restored: seed 42, Market Bridge closure.'); });
 $('export-button').addEventListener('click', () => { const serialized = exportExperiment(state.experiment); const blob = new Blob([serialized], { type: 'application/json' }); const url = URL.createObjectURL(blob); const link = node('a'); link.href = url; link.download = `detourlab-experiment-${state.experiment.id}.json`; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); toast('All variants exported. Reproduce them with the experiment CLI.'); });
+function updateReplayAvailability() {
+  const save = $('save-replay'), open = $('open-replay');
+  const disabled = state.lessonActive || state.pending || !state.allResults;
+  if ((disabled && document.activeElement === save) || (state.lessonActive && document.activeElement === open)) focusFirst([$('run-experiment'), $('return-experiment')]);
+  save.disabled = disabled; open.disabled = state.lessonActive;
+}
+function abandonReplayNavigation() {
+  replayNavigation += 1;
+  if (pendingReplay) $('replay-status').textContent = 'Replay input loaded. Your newer navigation is kept; saved perspective was not restored.';
+  pendingReplay = null;
+}
+function restoreReplay(workerRevision) {
+  const pending = pendingReplay; pendingReplay = null;
+  if (!pending || pending.revision !== workerRevision || pending.experiment !== state.experiment || pending.importRevision !== importRevision || pending.navigation !== replayNavigation) return;
+  const p = pending.perspective, maximum = Number($('timeline').max);
+  setPlaying(false); setView(p.view); state.zoom = p.zoom; state.selectedVehicle = p.vehicleId;
+  $('vehicle-select').value = p.vehicleId ?? '';
+  setTime(Math.min(p.timeS, maximum));
+  if (p.vehicleId !== null) updateInspector();
+  else {
+    $('vehicle-name').textContent = 'No vehicle selected'; $('vehicle-status').textContent = 'Select a vehicle to inspect its route.';
+    for (const id of ['route-baseline-distance', 'route-scenario-distance', 'route-baseline-time', 'route-scenario-time']) $(id).textContent = '—';
+    $('route-reason').textContent = 'Select a vehicle in either map or the vehicle selector.'; $('route-path').textContent = ''; $('route-path').hidden = true;
+    $('job-list').replaceChildren(); $('job-count').textContent = '';
+  }
+  map.invalidate(); baselineMap?.invalidate();
+  $('replay-status').textContent = `Replay loaded and recomputed; paused at ${state.time} s, ${p.view} view, zoom ${p.zoom}, vehicle ${p.vehicleId ?? 'none'}.` + (p.timeS > maximum ? ` Saved time ${p.timeS} s exceeds this run; clamped to ${maximum} s.` : '');
+}
+$('save-replay').addEventListener('click', () => {
+  if (state.lessonActive || state.pending || !state.allResults) return;
+  try {
+    const serialized = exportReplayBookmark(state.experiment, { variantId: state.selectedVariantId, vehicleId: state.selectedVehicle, timeS: state.time, view: state.view, zoom: state.zoom });
+    const url = URL.createObjectURL(new Blob([serialized], { type: 'application/json' })), link = node('a');
+    link.href = url; link.download = 'detourlab.replay.json';
+    try { link.click(); } finally { setTimeout(() => URL.revokeObjectURL(url), 1000); }
+    $('replay-status').textContent = `Replay download requested at ${state.time} s. Contains experiment input and perspective, not results; opens paused after recomputing.`;
+  } catch (error) { $('replay-status').textContent = `Replay could not be saved. ${formatInputError(error)}`; }
+});
+$('open-replay').addEventListener('click', () => { if (!state.lessonActive) $('replay-input').click(); });
+$('replay-input').addEventListener('change', async event => {
+  const file = event.target.files?.[0]; event.target.value = ''; if (!file || state.lessonActive) return;
+  const id = ++importRevision, navigation = replayNavigation; pendingReplay = null;
+  try {
+    if (file.size > FILE_INPUT_MAX_BYTES) throw new Error('File must be at most 2 MiB.');
+    const bytes = await file.arrayBuffer();
+    if (id !== importRevision || state.lessonActive) return;
+    const bookmark = parseReplayBookmark(decodeFileInput(bytes));
+    if (navigation !== replayNavigation) { $('replay-status').textContent = 'Replay opening canceled because you navigated while the file was being read.'; return; }
+    loadExperiment(bookmark.experiment, { selectedVariantId: bookmark.perspective.variantId, time: 0, editing: false });
+    if (state.pending) pendingReplay = { perspective: bookmark.perspective, experiment: state.experiment, revision, importRevision, navigation };
+    $('replay-status').textContent = state.pending ? 'Replay input loaded. Recomputing before restoring the saved perspective, paused.' : 'Replay input loaded, but computation could not start. Run again to retry; saved perspective was not restored.';
+  } catch (error) { if (id === importRevision) $('replay-status').textContent = `Replay rejected. ${formatInputError(error)} Current experiment preserved.`; }
+});
+// User navigation must win over a delayed file read or pending replay restore.
+for (const id of ['edit-roads', 'view-disruption', 'view-baseline', 'view-compare', 'view-split', 'play-button', 'replay-button', 'zoom-in', 'zoom-out', 'zoom-reset']) $(id).addEventListener('click', abandonReplayNavigation);
+for (const id of ['vehicle-select', 'speed']) $(id).addEventListener('change', abandonReplayNavigation);
+$('timeline').addEventListener('input', abandonReplayNavigation);
 $('import-button').addEventListener('click', () => { if (!state.lessonActive) $('import-input').click(); });
 $('import-input').addEventListener('change', async (event) => {
   const file = event.target.files?.[0]; event.target.value = ''; if (!file || state.lessonActive) return;

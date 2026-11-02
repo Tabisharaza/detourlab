@@ -85,6 +85,14 @@ synthetic scenes with the redraw guard enabled versus forced redraws. It records
 raw repeated call timings and final-pixel/hit-point parity, not FPS or universal
 speedup. The application and public demo are unchanged.
 
+## Hand off a specific replay moment
+
+The current source adds **Save replay** and **Open replay**. Download the validated
+experiment together with the selected variant, vehicle, exact time, map mode and
+zoom; reopen after recomputation at a paused comparison. No cached results,
+accounts, URL sharing or background persistence. [Format, example and limits](docs/REPLAY_BOOKMARKS.md).
+This source addition is separate from the unchanged hosted demo.
+
 ## Inspect two maps at the same instant
 
 The current source adds **Side by side** beside the existing map modes. Compare

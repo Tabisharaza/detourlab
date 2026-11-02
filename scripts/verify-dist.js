@@ -38,6 +38,7 @@ export const RELEASE_FILES = Object.freeze([
   'src/simulation-worker.js',
   'src/style.css',
   'src/tutorial.js',
+  'src/replay-bookmark.js',
 ]);
 
 const allowedFiles = new Set([...RELEASE_FILES, 'manifest.json']);

@@ -26,3 +26,8 @@
 @media(max-width:760px){.map-panes{min-height:325px}.map-top .segmented button{font-size:9px;padding:7px}.split-help{font-size:10px}.pane-label{font-size:11px}}
 
 .map-panes.split .pane-label{height:54px;min-height:54px;flex-shrink:0;box-sizing:border-box}#variant-pane-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.replay-bookmark { margin-bottom: 16px; padding: 14px; border: 1px solid var(--line); border-radius: 10px; }
+.replay-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.replay-bookmark p { overflow-wrap: anywhere; margin: 8px 0 0; }
+#replay-status { font-size: 12px; line-height: 1.5; }

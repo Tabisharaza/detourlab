@@ -55,6 +55,11 @@ ratios or describe a forced-redraw ablation as historical before/after. Pixel
 and hit-point comparisons are outside timing. No user profile or sandbox
 weakening is allowed.
 
+For [portable replay bookmarks](docs/REPLAY_BOOKMARKS.md), preserve the separate
+versioned format, 2 MiB UTF-8 bound, strict references, exact fractional time,
+canonical inputs and recomputation-only restoration. Tests must cover stale
+file/Worker completion and later navigation, not just successful reopening.
+
 ## Choose a scope
 
 Start with [open contribution issues](https://github.com/Tabisharaza/detourlab/issues). [Additional issue scopes](docs/ISSUE_DRAFTS.md) include reproducible problems, acceptance criteria and explicit non-goals, and distinguish published issues from proposals. Before adding a solver, city dataset, dependency or storage service, propose the interface and its effect on licensing, privacy and reproducibility.
