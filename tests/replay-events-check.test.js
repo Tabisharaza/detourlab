@@ -6,7 +6,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { simulateExperiment, validateExperiment } from '../src/experiment.js';
-import { runReplayEventsCheck, eventNavigationFixture, lateClosureFixture, expectedLedgerRows, usage } from '../tools/replay-events-check/run.js';
+import { runReplayEventsCheck, eventNavigationFixture, lateClosureFixture, expectedLedgerRows, nativeKeySequence, usage } from '../tools/replay-events-check/run.js';
 
 const runner = 'tools/replay-events-check/run.js';
 const tiny = JSON.parse(await readFile(new URL('../examples/minimal-experiment.json', import.meta.url), 'utf8'));
@@ -97,4 +97,23 @@ test('late schedule fixture keeps a navigable event beyond every completed ledge
   const rows = expectedLedgerRows(fixture, result, 'van-1', 'close-at-10');
   assert.equal(rows.length, 17);
   assert.deepEqual(rows.filter(row => row.time > 60), [{ run: 'schedule', kind: 'closure-start', category: 'closures', time: 123.375 }]);
+});
+
+
+test('native keyboard protocol includes activation text without substituting DOM clicks', () => {
+  assert.deepEqual(nativeKeySequence('Enter'), [
+    { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r', unmodifiedText: '\r' },
+    { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 },
+  ]);
+  assert.deepEqual(nativeKeySequence('Space'), [
+    { type: 'keyDown', key: ' ', code: 'Space', windowsVirtualKeyCode: 32, text: ' ', unmodifiedText: ' ' },
+    { type: 'keyUp', key: ' ', code: 'Space', windowsVirtualKeyCode: 32 },
+  ]);
+  assert.deepEqual(nativeKeySequence('Tab'), [
+    { type: 'rawKeyDown', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 },
+    { type: 'keyUp', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 },
+  ]);
+  for (const key of ['Escape', 'constructor', '__proto__', '']) assert.throws(() => nativeKeySequence(key), /Choose Tab, Enter or Space/u);
+  const sequence = nativeKeySequence('Enter'); sequence[0].text = 'changed';
+  assert.equal(nativeKeySequence('Enter')[0].text, '\r', 'callers cannot alter later key definitions');
 });

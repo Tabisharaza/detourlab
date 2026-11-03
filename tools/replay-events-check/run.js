@@ -24,6 +24,24 @@ Native Workers and unchanged renderers are observed, never replaced. Raw JPEG ca
 Output must not exist. Failed runs retain failed evidence and clean owned resources.
 Not native-chooser, mobile-device, screen-reader, cross-browser or deployed-site certification.`;
 
+/** Protocol input, not a DOM dispatch: text-bearing keys need native character data.
+ * CDP does not infer Enter's carriage return or Space's text from key/code alone.
+ * Nontext keys use rawKeyDown; keyUp must not repeat character data.
+ */
+export function nativeKeySequence(key) {
+  const definitions = {
+    Tab: { key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 },
+    Enter: { key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r' },
+    Space: { key: ' ', code: 'Space', windowsVirtualKeyCode: 32, text: ' ' },
+  };
+  if (!Object.hasOwn(definitions, key)) throw new Error('Choose Tab, Enter or Space for the native keyboard check.');
+  const { text, ...identity } = definitions[key];
+  return [
+    { type: text ? 'keyDown' : 'rawKeyDown', ...identity, ...(text ? { text, unmodifiedText: text } : {}) },
+    { type: 'keyUp', ...identity },
+  ];
+}
+
 /** Synthetic fractional boundaries, tied events, two vehicles and multiple pages. */
 export function eventNavigationFixture(minimal) {
   const fixture = structuredClone(minimal);
@@ -88,7 +106,11 @@ function verifyRows(actual, expected) {
 
 // Record native postMessage/message events; never fabricate a result or app state.
 const observeWorkers = `(() => {
-  window.__eventCheck = { requests: [], result: null, errors: [] };
+  window.__eventCheck = { requests: [], result: null, errors: [], keyboardEvents: [] };
+  for (const type of ['keydown', 'keypress', 'keyup', 'click']) document.addEventListener(type, event => {
+    if (!event.target.closest?.('#replay-events')) return;
+    window.__eventCheck.keyboardEvents.push({ type, key: event.key || null, eventId: event.target.closest('[data-event-id]')?.dataset.eventId || null, trusted: event.isTrusted });
+  }, true);
   const NativeWorker = window.Worker;
   window.Worker = class extends NativeWorker {
     constructor(...args) {
@@ -222,9 +244,8 @@ export async function runReplayEventsCheck({ executable, output }) {
     };
     const rowExpression = row => `document.querySelector(${JSON.stringify(`${rowSelector}[data-event-id=${JSON.stringify(row.id)}]`)})`;
     const jumpRow = async row => { await evaluate(`${rowExpression(row)}.click()`); await frames(); return snapshot(); };
-    const press = async (key, code, windowsVirtualKeyCode) => {
-      await send('Input.dispatchKeyEvent', { type: 'keyDown', key, code, windowsVirtualKeyCode });
-      await send('Input.dispatchKeyEvent', { type: 'keyUp', key, code, windowsVirtualKeyCode });
+    const press = async key => {
+      for (const event of nativeKeySequence(key)) await send('Input.dispatchKeyEvent', event);
       await frames();
     };
     const allRows = async () => {
@@ -297,16 +318,21 @@ export async function runReplayEventsCheck({ executable, output }) {
     await click('replay-events-next'); await frames(); state = await snapshot(); verifyJump(state, 10, tinyRequests);
     check('Strict temporal navigation skips all same-time ties, pauses and shares one split-map clock without rerunning');
 
-    await evaluate("document.getElementById('replay-events-filter').focus()");
-    await press('Tab', 'Tab', 9);
+    await evaluate("window.__eventCheck.keyboardEvents = []; document.getElementById('replay-events-filter').focus()");
+    await press('Tab');
     assert.equal((await snapshot()).focusId, 'replay-events-previous');
-    await press('Tab', 'Tab', 9); assert.equal((await snapshot()).focusId, 'replay-events-next');
-    await press('Tab', 'Tab', 9); state = await snapshot(); assert.equal(state.focusEvent, state.rows[0].id);
-    await press('Enter', 'Enter', 13); state = await snapshot(); verifyJump(state, 0, tinyRequests);
+    await press('Tab'); assert.equal((await snapshot()).focusId, 'replay-events-next');
+    await press('Tab'); state = await snapshot(); assert.equal(state.focusEvent, state.rows[0].id);
+    await press('Enter'); state = await snapshot(); verifyJump(state, 0, tinyRequests);
     assert.equal(state.focusEvent, state.rows[0].id, 'jump does not replace the focused row');
-    await evaluate(`${rowExpression(tinyReroute)}.focus()`); await press(' ', 'Space', 32);
+    await evaluate(`${rowExpression(tinyReroute)}.focus()`); await press('Space');
     state = await snapshot(); verifyJump(state, 10, tinyRequests); assert.equal(state.focusEvent, tinyReroute.id);
-    check('Native Tab, Enter and Space reach and activate stable event controls with retained row focus');
+    const keyboardEvents = await evaluate('window.__eventCheck.keyboardEvents');
+    for (const [key, eventId] of [['Enter', state.rows[0].id], [' ', tinyReroute.id]]) {
+      assert.ok(keyboardEvents.some(event => event.type === 'keydown' && event.key === key && event.eventId === eventId && event.trusted), 'native keydown reaches the focused row');
+      assert.ok(keyboardEvents.some(event => event.type === 'click' && event.eventId === eventId && event.trusted), 'native keyboard activation generates a trusted row click');
+    }
+    check('Native Tab, Enter and Space reach and activate stable event controls with retained row focus', { keyboardEvents });
     await capture('event-desktop.jpg', desktop);
     const narrow = { width: 390, height: 1100, deviceScaleFactor: 1, mobile: false };
     await send('Emulation.setDeviceMetricsOverride', narrow); await frames(); await capture('event-narrow.jpg', narrow);
