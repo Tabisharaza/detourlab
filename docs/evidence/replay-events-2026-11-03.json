@@ -1,0 +1,635 @@
+{
+  "format": "detourlab-replay-events-check",
+  "version": 1,
+  "status": "passed",
+  "startedAt": "2026-11-03T06:26:32.400Z",
+  "runtime": {
+    "node": "v24.22.1",
+    "os": "linux",
+    "release": "7.0.0-1017-azure",
+    "arch": "x64"
+  },
+  "checks": [
+    {
+      "name": "Tiny native Worker matches Node ledger; all 16 rows and six tied cutoff events match completed evidence",
+      "status": "passed"
+    },
+    {
+      "name": "Strict temporal navigation skips all same-time ties, pauses and shares one split-map clock without rerunning",
+      "status": "passed"
+    },
+    {
+      "name": "Native Tab, Enter and Space reach and activate stable event controls with retained row focus",
+      "status": "passed",
+      "keyboardEvents": [
+        {
+          "type": "keydown",
+          "key": "Tab",
+          "eventId": null,
+          "trusted": true
+        },
+        {
+          "type": "keyup",
+          "key": "Tab",
+          "eventId": null,
+          "trusted": true
+        },
+        {
+          "type": "keydown",
+          "key": "Tab",
+          "eventId": null,
+          "trusted": true
+        },
+        {
+          "type": "keyup",
+          "key": "Tab",
+          "eventId": null,
+          "trusted": true
+        },
+        {
+          "type": "keydown",
+          "key": "Tab",
+          "eventId": null,
+          "trusted": true
+        },
+        {
+          "type": "keyup",
+          "key": "Tab",
+          "eventId": "baseline:segment-entry:0",
+          "trusted": true
+        },
+        {
+          "type": "keydown",
+          "key": "Enter",
+          "eventId": "baseline:segment-entry:0",
+          "trusted": true
+        },
+        {
+          "type": "keypress",
+          "key": "Enter",
+          "eventId": "baseline:segment-entry:0",
+          "trusted": true
+        },
+        {
+          "type": "click",
+          "key": null,
+          "eventId": "baseline:segment-entry:0",
+          "trusted": true
+        },
+        {
+          "type": "keyup",
+          "key": "Enter",
+          "eventId": "baseline:segment-entry:0",
+          "trusted": true
+        },
+        {
+          "type": "keydown",
+          "key": " ",
+          "eventId": "variant:reroute:0",
+          "trusted": true
+        },
+        {
+          "type": "keypress",
+          "key": " ",
+          "eventId": "variant:reroute:0",
+          "trusted": true
+        },
+        {
+          "type": "keyup",
+          "key": " ",
+          "eventId": "variant:reroute:0",
+          "trusted": true
+        },
+        {
+          "type": "click",
+          "key": null,
+          "eventId": "variant:reroute:0",
+          "trusted": true
+        }
+      ]
+    },
+    {
+      "name": "Desktop and 390px CSS viewport event panel and controls fit without horizontal overflow; raw captures saved",
+      "status": "passed"
+    },
+    {
+      "name": "Fractional fixture paginates 64 exact ledger events into 20-row pages and excludes unreachable null times",
+      "status": "passed"
+    },
+    {
+      "name": "Delivery, routing and scheduled-closure filters reset pages and preserve native Worker request count",
+      "status": "passed"
+    },
+    {
+      "name": "Real fractional reroute and service-completion rows preserve exact time while pausing playback",
+      "status": "passed"
+    },
+    {
+      "name": "Actual replay download and reimport preserve the exact event jump after native recomputation",
+      "status": "passed",
+      "downloadSha256": "6efd8bc3f63b49131ebf17a7c2958483d1d93405547f0c6daaf0f0210d8dec3f"
+    },
+    {
+      "name": "Vehicle and variant changes refresh event evidence; empty filters and blocked null arrivals remain explicit without a rerun",
+      "status": "passed"
+    },
+    {
+      "name": "New event navigation supersedes a delayed real bookmark read without restoring stale time or input",
+      "status": "passed"
+    },
+    {
+      "name": "Pending and canceled native runs immediately clear event rows and both map result layers",
+      "status": "passed"
+    },
+    {
+      "name": "Rerun repopulates only the current complete native ledger after cancellation",
+      "status": "passed"
+    },
+    {
+      "name": "Late scheduled closure extends replay beyond the 60-second engine horizon and survives exact bookmark save/reopen",
+      "status": "passed",
+      "atS": 123.375,
+      "engineDurationS": 60,
+      "downloadSha256": "cba4e1c26e1d99582d56dbdcf209254e652f4288698ea559e6b938513d1246ca"
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "event-desktop.jpg",
+      "sha256": "6fb32b9c1dfefd6585a7e163e15fad9f8a599ac1724de3089ec8cc154e85b458",
+      "bytes": 92211,
+      "viewport": {
+        "width": 1600,
+        "height": 1100,
+        "deviceScaleFactor": 1,
+        "mobile": false
+      },
+      "geometry": {
+        "width": 1600,
+        "overflow": false,
+        "panel": {
+          "left": 320,
+          "right": 1265,
+          "width": 945,
+          "height": 832.609375
+        },
+        "controls": [
+          {
+            "id": "replay-events-filter",
+            "left": 339,
+            "right": 540,
+            "width": 201,
+            "height": 44
+          },
+          {
+            "id": "replay-events-previous",
+            "left": 1009.25,
+            "right": 1135.96875,
+            "width": 126.71875,
+            "height": 44
+          },
+          {
+            "id": "replay-events-next",
+            "left": 1143.96875,
+            "right": 1246,
+            "width": 102.03125,
+            "height": 44
+          },
+          {
+            "id": "baseline:segment-entry:0",
+            "left": 341,
+            "right": 1225,
+            "width": 884,
+            "height": 85.5
+          },
+          {
+            "id": "variant:segment-entry:0",
+            "left": 341,
+            "right": 1225,
+            "width": 884,
+            "height": 85.5
+          },
+          {
+            "id": "schedule:closure-start:0",
+            "left": 341,
+            "right": 1225,
+            "width": 884,
+            "height": 85.5
+          },
+          {
+            "id": "baseline:segment-exit:0",
+            "left": 341,
+            "right": 1225,
+            "width": 884,
+            "height": 85.5
+          },
+          {
+            "id": "variant:segment-exit:0",
+            "left": 341,
+            "right": 1225,
+            "width": 884,
+            "height": 85.5
+          },
+          {
+            "id": "variant:reroute:0",
+            "left": 341,
+            "right": 1225,
+            "width": 884,
+            "height": 85.5
+          },
+          {
+            "id": "baseline:segment-entry:1",
+            "left": 341,
+            "right": 1225,
+            "width": 884,
+            "height": 85.5
+          },
+          {
+            "id": "variant:segment-entry:1",
+            "left": 341,
+            "right": 1225,
+            "width": 884,
+            "height": 85.5
+          },
+          {
+            "id": "variant:segment-exit:1",
+            "left": 341,
+            "right": 1225,
+            "width": 884,
+            "height": 85.5
+          },
+          {
+            "id": "variant:segment-entry:2",
+            "left": 341,
+            "right": 1225,
+            "width": 884,
+            "height": 85.5
+          },
+          {
+            "id": "baseline:segment-exit:1",
+            "left": 341,
+            "right": 1225,
+            "width": 884,
+            "height": 85.5
+          },
+          {
+            "id": "baseline:job-arrival:0",
+            "left": 341,
+            "right": 1225,
+            "width": 884,
+            "height": 85.5
+          },
+          {
+            "id": "baseline:job-completion:0",
+            "left": 341,
+            "right": 1225,
+            "width": 884,
+            "height": 85.5
+          },
+          {
+            "id": "variant:segment-exit:2",
+            "left": 341,
+            "right": 1225,
+            "width": 884,
+            "height": 85.5
+          },
+          {
+            "id": "variant:job-arrival:0",
+            "left": 341,
+            "right": 1225,
+            "width": 884,
+            "height": 85.5
+          },
+          {
+            "id": "variant:job-completion:0",
+            "left": 341,
+            "right": 1225,
+            "width": 884,
+            "height": 85.5
+          },
+          {
+            "id": "replay-events-page-previous",
+            "left": 339,
+            "right": 432.375,
+            "width": 93.375,
+            "height": 44
+          },
+          {
+            "id": "replay-events-page-next",
+            "left": 1177.296875,
+            "right": 1246,
+            "width": 68.703125,
+            "height": 44
+          }
+        ]
+      },
+      "meaning": "Unmodified local synthetic selected-vehicle event panel; not a deployed screenshot or a visual-inspection claim."
+    },
+    {
+      "file": "event-narrow.jpg",
+      "sha256": "09a0598d18a53bf53b64e8baad96a897865b919da9ae265930575defbaf7f04d",
+      "bytes": 45042,
+      "viewport": {
+        "width": 390,
+        "height": 1100,
+        "deviceScaleFactor": 1,
+        "mobile": false
+      },
+      "geometry": {
+        "width": 390,
+        "overflow": false,
+        "panel": {
+          "left": 13,
+          "right": 362,
+          "width": 349,
+          "height": 1044.5625
+        },
+        "controls": [
+          {
+            "id": "replay-events-filter",
+            "left": 28,
+            "right": 347,
+            "width": 319,
+            "height": 44
+          },
+          {
+            "id": "replay-events-previous",
+            "left": 28,
+            "right": 183.5,
+            "width": 155.5,
+            "height": 44
+          },
+          {
+            "id": "replay-events-next",
+            "left": 191.5,
+            "right": 347,
+            "width": 155.5,
+            "height": 44
+          },
+          {
+            "id": "baseline:segment-entry:0",
+            "left": 30,
+            "right": 326,
+            "width": 296,
+            "height": 108.5
+          },
+          {
+            "id": "variant:segment-entry:0",
+            "left": 30,
+            "right": 326,
+            "width": 296,
+            "height": 108.5
+          },
+          {
+            "id": "schedule:closure-start:0",
+            "left": 30,
+            "right": 326,
+            "width": 296,
+            "height": 125
+          },
+          {
+            "id": "baseline:segment-exit:0",
+            "left": 30,
+            "right": 326,
+            "width": 296,
+            "height": 108.5
+          },
+          {
+            "id": "variant:segment-exit:0",
+            "left": 30,
+            "right": 326,
+            "width": 296,
+            "height": 108.5
+          },
+          {
+            "id": "variant:reroute:0",
+            "left": 30,
+            "right": 326,
+            "width": 296,
+            "height": 108.5
+          },
+          {
+            "id": "baseline:segment-entry:1",
+            "left": 30,
+            "right": 326,
+            "width": 296,
+            "height": 108.5
+          },
+          {
+            "id": "variant:segment-entry:1",
+            "left": 30,
+            "right": 326,
+            "width": 296,
+            "height": 108.5
+          },
+          {
+            "id": "variant:segment-exit:1",
+            "left": 30,
+            "right": 326,
+            "width": 296,
+            "height": 108.5
+          },
+          {
+            "id": "variant:segment-entry:2",
+            "left": 30,
+            "right": 326,
+            "width": 296,
+            "height": 108.5
+          },
+          {
+            "id": "baseline:segment-exit:1",
+            "left": 30,
+            "right": 326,
+            "width": 296,
+            "height": 108.5
+          },
+          {
+            "id": "baseline:job-arrival:0",
+            "left": 30,
+            "right": 326,
+            "width": 296,
+            "height": 108.5
+          },
+          {
+            "id": "baseline:job-completion:0",
+            "left": 30,
+            "right": 326,
+            "width": 296,
+            "height": 108.5
+          },
+          {
+            "id": "variant:segment-exit:2",
+            "left": 30,
+            "right": 326,
+            "width": 296,
+            "height": 108.5
+          },
+          {
+            "id": "variant:job-arrival:0",
+            "left": 30,
+            "right": 326,
+            "width": 296,
+            "height": 108.5
+          },
+          {
+            "id": "variant:job-completion:0",
+            "left": 30,
+            "right": 326,
+            "width": 296,
+            "height": 108.5
+          },
+          {
+            "id": "replay-events-page-previous",
+            "left": 28,
+            "right": 121.375,
+            "width": 93.375,
+            "height": 44
+          },
+          {
+            "id": "replay-events-page-next",
+            "left": 278.296875,
+            "right": 347,
+            "width": 68.703125,
+            "height": 44
+          }
+        ]
+      },
+      "meaning": "Unmodified local synthetic selected-vehicle event panel; not a deployed screenshot or a visual-inspection claim."
+    }
+  ],
+  "fixtures": [
+    {
+      "file": "tiny-events.replay.json",
+      "sha256": "350a505706872651c31d9f7402cbdf23218b84b82117a01f4e493504428f99ac",
+      "bytes": 1401
+    },
+    {
+      "file": "fractional-events.experiment.json",
+      "sha256": "a0e231e15c0c1720fe266223a82d3dea7e5a46b3517b6de23bae23d1adb18350",
+      "bytes": 4571
+    },
+    {
+      "file": "late-closure.replay.json",
+      "sha256": "a2c786a74651cdc3a9478413f25d09a0a2d0c25aa7f1740d394dfa4e2f3de6e2",
+      "bytes": 1457
+    }
+  ],
+  "limitations": [
+    "Local headless Chromium and synthetic fixtures only; not deployed, cross-browser, native chooser, mobile-device or assistive-technology certification.",
+    "Worker observers record native requests/results. NetworkMap.render observation calls the unchanged renderer and retains read-only instance references.",
+    "CDP DOM file injection, focus/key and pointer events are bounded integration evidence, not human usability or operating-system chooser tests.",
+    "One delayed-read test holds a native File.arrayBuffer promise; app handlers, Worker execution and delivery are unchanged.",
+    "Screenshots are unmodified captures; image existence/hash is not visual inspection. Source hashes identify bytes, not signed provenance."
+  ],
+  "sourceFiles": [
+    {
+      "path": "examples/minimal-experiment.json",
+      "sha256": "b2572f0edd0c6af55625ef19792719bdcc2ed5dd2c84a93b13292ef9565f6cd9"
+    },
+    {
+      "path": "index.html",
+      "sha256": "0654321fc98fa81ee932356185676b2939dd7543a967dc3761af81b7f9f1410a"
+    },
+    {
+      "path": "scripts/serve.js",
+      "sha256": "86eb68f3acc9ffbf0bfa81dd3d41a6d84114c6f6f80c16e0ef577fb05723c06a"
+    },
+    {
+      "path": "src/app.js",
+      "sha256": "63a05a639794509ae0e98c78d80dbaf2cfc20f88671ac62b91f6ac6a22d5f4b8"
+    },
+    {
+      "path": "src/browser-impact.js",
+      "sha256": "b414b6d19fe103dd34e2be03a419ec26be6d55c3bcae661d42e6e074efd03ff3"
+    },
+    {
+      "path": "src/browser-review.js",
+      "sha256": "e3cf75b29aa5234f1dad3115d35fb37eb4c27f50157d4e82b0177c4e90f31dfb"
+    },
+    {
+      "path": "src/cutoff-comparison.js",
+      "sha256": "12339235403d492fb0b483ca4ebe5c52965735129eb3727bc07ff6c3719eaebe"
+    },
+    {
+      "path": "src/cutoff-experiment.js",
+      "sha256": "0c2daf9a919bc6cbe85a27d53004de5b6eed296ad0d93b870aa3802c5b99ab9b"
+    },
+    {
+      "path": "src/engine.js",
+      "sha256": "a3fa06223fdf95b7cc1bb0b15b05da924c6d835ac13e688327262bfc080a3016"
+    },
+    {
+      "path": "src/experiment-report.js",
+      "sha256": "656062cf1fac1d8db80dae9b075de23ff8c505d35bf941f0c420e05d8663258d"
+    },
+    {
+      "path": "src/experiment.js",
+      "sha256": "efb77801be428839dd677df9a8c5fc62812709062b20eacb0d93a39576f1eff3"
+    },
+    {
+      "path": "src/file-input.js",
+      "sha256": "9d34d0b01eff790e25d4e2f2edef56d8b4bfc6c608b266f471f932ea0bfc048a"
+    },
+    {
+      "path": "src/job-gates.js",
+      "sha256": "bd5d905cb85a3265167d58c12e67f24ab18e67e66e726631f88b805fad24e732"
+    },
+    {
+      "path": "src/job-impact.js",
+      "sha256": "537d07bd5f89114cbaca0939d563aaa9cfbebf1ddc371fdfec1fe06b78a91948"
+    },
+    {
+      "path": "src/map.js",
+      "sha256": "c2e08b8f8fea8882f30cb3208a156b3b75ea28b4eb317744fc8773946e322162"
+    },
+    {
+      "path": "src/replay-bookmark.js",
+      "sha256": "621a22f480f407d5f6ce2e809c820cd290a410e814ea2cb1deb294d74553dd8b"
+    },
+    {
+      "path": "src/replay-events.js",
+      "sha256": "d66879fc9c6095f9667be89256d1e6ca96ddd55fefe944e002cb3736fbb5936e"
+    },
+    {
+      "path": "src/report-results.js",
+      "sha256": "1d5877f77381a63ba68b54f809a07cb879d6357954a5a2a9d8f48c733934ca43"
+    },
+    {
+      "path": "src/scenario.js",
+      "sha256": "fd7e71c7219bf738547d129499496c77d0213dababfa686f171e8b6c6eb6e5b4"
+    },
+    {
+      "path": "src/simulation-worker.js",
+      "sha256": "3f6e4f882485a0f59d8c80af496dc6ae9acb2667ddaebe33e4db10b43276052c"
+    },
+    {
+      "path": "src/style.css",
+      "sha256": "ca4fa5d65f2ee525b9c300ad409d1ea07891c66fbbc5ebd52cd6e4ec46ab340d"
+    },
+    {
+      "path": "src/tutorial.js",
+      "sha256": "a2b310e8a476ab245c9c4a7c2814c73c8407fce92d20b7b35be5765919f2ccea"
+    },
+    {
+      "path": "tools/browser-check/chromium.js",
+      "sha256": "a34c7eb7c4f52cb4f4c19b3a0b215b96722ac6233a5252fecfc890b9fe5de055"
+    },
+    {
+      "path": "tools/browser-check/run.js",
+      "sha256": "71477ddd31df21055a2c14aaa876633c1d9e10489ad3b8922dd46ec2c90daa4f"
+    },
+    {
+      "path": "tools/replay-events-check/run.js",
+      "sha256": "ae375e0505e115073f4f0dd8d782cba340f52fc9caa94ebfde8944a14bf41a0e"
+    }
+  ],
+  "sourceSha256": "845914503d0ba5f6db22ed2098bb8e3e242e08ace5cbe83069e1a7e7e5a0ab8b",
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/156.0.8078.47",
+    "revision": "@1d17a2e2ee147bb7d6ae2ab6abdb3a2510c17775",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "jsVersion": "15.6.75.19"
+  },
+  "completedAt": "2026-11-03T06:26:35.098Z"
+}

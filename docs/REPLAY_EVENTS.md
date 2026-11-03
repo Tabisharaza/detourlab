@@ -83,3 +83,39 @@ A November 3, 2026 read-only comparison of
 inspectable time/evidence without changing this fixed-order synthetic model
 into a live-data platform or optimizer. No code or data was copied. Current
 GitHub Trending observations are not evidence of demand or promised traction.
+
+## Recorded source verification — November 3, 2026
+
+[Source `7f6e6d4`](https://github.com/Tabisharaza/detourlab/commit/7f6e6d4ff08e199def0a8d206b7c9581f23f3343)
+passed [CI run 41589694093](https://github.com/Tabisharaza/detourlab/actions/runs/41589694093)
+on Node 24.22.1 and headless Chrome 156.0.8078.47:
+
+- 1,183 core Node tests and 120 optional schema/editor tests passed: **1,303
+  distinct tests**. The separately repeated 211 CLI tests overlap the core suite.
+- All 13 new native event checkpoints passed, alongside the existing 21 browser,
+  13 split-map and 11 bookmark checkpoints and four rendering-profile cases.
+- The 30-file static release passed the independent allowlist/source/hash check;
+  a second build reproduced every byte, including the manifest.
+- A Node fixture generated 500,000 actual result segments across the experiment.
+  Its selected comparison contained 1,008,000 indexed events and 50,400 pages,
+  each bounded to 20 display records. This is a correctness/bounded-allocation
+  check, not a native responsiveness benchmark or maximum-device guarantee.
+
+The [unaltered native evidence](evidence/replay-events-2026-11-03.json) records
+source hashes, runtime, fixture hashes and actual checks. It includes trusted
+native Enter/Space row activation, exact 29.375-second download/reopen and a
+123.375-second scheduled closure after the 60-second engine horizon. The first
+staging attempt failed because the test harness omitted Enter's CDP activation
+text; the corrected harness retains the exact-time assertions and also requires
+trusted keyboard-generated clicks. No app behavior was changed to pass that test.
+
+The raw captures below were inspected at desktop and 390px CSS viewport widths:
+the panel, native controls, source labels, focused reroute row and explanatory
+text are legible without horizontal clipping. The list is intentionally scrolled
+around the selected event, so partial neighboring rows show its scroll boundary.
+This is bounded local-source evidence, **not a hosted deployment** or certification
+of native mobile devices, OS file choosers or assistive technology.
+
+![Desktop replay events with a focused reroute at 10 seconds](images/event-desktop-2026-11-03.jpg)
+
+![Narrow replay event panel with wrapping labels and native navigation controls](images/event-narrow-2026-11-03.jpg)
