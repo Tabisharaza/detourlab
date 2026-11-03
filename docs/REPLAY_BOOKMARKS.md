@@ -22,7 +22,8 @@ lesson. Opening a bookmark is separate from ordinary experiment import. Invalid
 files do not replace the current workspace. Later navigation, edits, imports,
 Reset or Cancel must not be overwritten by an older pending replay restore.
 
-If a saved time exceeds the recomputed timeline, restoration clamps it to that
+The recomputed playback timeline includes result durations and scheduled closure
+starts across all variants. If a saved time exceeds this timeline, restoration clamps it to that
 timeline and explicitly reports the change. Playback speed, playing state,
 road-edit mode, modal contents and prepared reviews are not persisted. Imported
 views are paused and road editing is off. A null vehicle means no selection.

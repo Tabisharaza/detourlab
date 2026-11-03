@@ -85,6 +85,14 @@ synthetic scenes with the redraw guard enabled versus forced redraws. It records
 raw repeated call timings and final-pixel/hit-point parity, not FPS or universal
 speedup. The application and public demo are unchanged.
 
+## Inspect the exact event behind a replay
+
+The current source adds a selected-vehicle **Replay events** panel. Jump to
+recorded route boundaries, reroutes, arrivals and service completion in either
+run, or inspect globally scheduled closures. Filters and 20-row pages preserve
+exact timestamps, including simultaneous and fractional events. The shared
+clock changes without rerunning the model. [Behavior, examples and evidence](docs/REPLAY_EVENTS.md).
+
 ## Hand off a specific replay moment
 
 The current source adds **Save replay** and **Open replay**. Download the validated

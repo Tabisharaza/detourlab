@@ -1,4 +1,5 @@
 import { parseReplayBookmark, exportReplayBookmark } from './replay-bookmark.js';
+import { createReplayEvents, pageReplayEvents, adjacentReplayEvent } from './replay-events.js';
 import { createDemoScenario, createPresets, validateScenario, LIMITS } from './scenario.js';
 import { experimentFromScenario, validateExperiment, parseExperiment, scenarioForVariant, exportExperiment, EXPERIMENT_LIMITS } from './experiment.js';
 import { createBrowserReview } from './browser-review.js';
@@ -26,6 +27,9 @@ let revision = 0;
 let importRevision = 0;
 let pendingReplay = null;
 let replayNavigation = 0;
+let inspectedReplayEvents = null;
+let replayEventsPage = 0;
+let replayEventsRenderRevision = 0;
 let workerTimeout;
 let toastTimeout;
 let initial = true;
@@ -57,7 +61,7 @@ const map = new NetworkMap($('network-map'), state, {
 
 function toast(message, error = false) { const el = $('toast'); el.textContent = message; el.classList.toggle('error', error); el.hidden = false; clearTimeout(toastTimeout); toastTimeout = setTimeout(() => { el.hidden = true; }, error ? 9000 : 4500); }
 function setPlaying(value) { state.playing = value; $('play-button').textContent = value ? 'Ⅱ' : '▶'; $('play-button').setAttribute('aria-label', value ? 'Pause simulation' : 'Play simulation'); }
-function setTime(value) { state.time = Math.max(0, Math.min(Number($('timeline').max), Number(value))); $('timeline').value = String(Math.floor(state.time)); $('clock-label').textContent = clock(state.time); updateVehicleStatus(); }
+function setTime(value) { state.time = Math.max(0, Math.min(Number($('timeline').max), Number(value))); $('timeline').value = String(Math.floor(state.time)); $('clock-label').textContent = clock(state.time); updateVehicleStatus(); updateReplayEventNavigation(); }
 function setView(view) {
   const layoutChanged = (state.view === 'split') !== (view === 'split');
   state.view = view;
@@ -307,6 +311,7 @@ function clearResults() {
   pendingReplay = null; updateReplayAvailability();
   invalidateReview();
   invalidateImpact();
+  updateReplayEvents();
   for (const id of ['distance', 'late', 'unreachable']) { $(id + '-value').textContent = '—'; $(id + '-delta').textContent = 'Calculating…'; $(id + '-baseline').textContent = ''; }
   for (const id of ['route-baseline-distance', 'route-scenario-distance', 'route-baseline-time', 'route-scenario-time']) $(id).textContent = '—';
   $('route-reason').textContent = 'Calculating this experiment. No previous results are shown.';
@@ -315,7 +320,7 @@ function clearResults() {
 }
 function computationFailed(message) {
   if (pendingReplay) $('replay-status').textContent = 'Replay computation failed. Saved perspective was not restored; run again to retry.';
-  state.pending = false; pendingReplay = null; updateReplayAvailability();
+  state.pending = false; pendingReplay = null; updateReplayAvailability(); updateReplayEvents();
   for (const id of ['distance', 'late', 'unreachable']) $(id + '-delta').textContent = 'Unavailable';
   $('route-reason').textContent = message; $('status-line').parentElement.setAttribute('aria-busy', 'false');
 }
@@ -332,12 +337,15 @@ function cancelComputation(message = 'Run canceled. Your variants are preserved.
 }
 function showSelectedResult() {
   const selected = state.allResults?.variants.find(variant => variant.id === state.selectedVariantId);
-  if (!selected) { state.baseline = null; state.disrupted = null; map.invalidateFrame(); return; }
+  if (!selected) { state.baseline = null; state.disrupted = null; updateReplayEvents(); map.invalidateFrame(); return; }
   state.baseline = state.allResults.baseline; state.disrupted = selected.result;
   if (!state.selectedVehicle || !state.disrupted.vehicles.some(vehicle => vehicle.id === state.selectedVehicle)) state.selectedVehicle = state.disrupted.vehicles[0]?.id ?? null;
   $('vehicle-select').replaceChildren(...state.disrupted.vehicles.map(vehicle => { const option = node('option', `${vehicle.id.toUpperCase()} · ${vehicle.jobs.length} deliveries`); option.value = vehicle.id; return option; }));
   $('vehicle-select').value = state.selectedVehicle;
-  const duration = Math.max(state.baseline.durationS, ...state.allResults.variants.map(variant => variant.result.durationS), 1);
+  // Scheduled closures are inspectable even after the fleet has finished. Keep
+  // one horizon for every variant and both panes, without changing result data.
+  const lastClosure = state.experiment.variants.reduce((maximum, variant) => variant.closures.reduce((atS, closure) => Math.max(atS, closure.atS), maximum), 0);
+  const duration = Math.max(state.baseline.durationS, ...state.allResults.variants.map(variant => variant.result.durationS), lastClosure, 1);
   $('timeline').max = String(duration); $('duration-label').textContent = clock(duration); setTime(Math.min(state.time, duration));
   updateMetrics(); updateInspector(); updateVariants(true); updateImpactSelection(); map.invalidateFrame();
 }
@@ -392,6 +400,7 @@ function updateVehicleStatus() {
   $('vehicle-status').textContent = state.time < source.startTimeS ? 'Waiting for dispatch' : state.time >= vehicle.finishS ? 'Run finished' : `${completed} / ${vehicle.jobs.length} stops completed`;
 }
 function updateInspector() {
+  updateReplayEvents();
   if (!state.disrupted || !state.selectedVehicle) return;
   const vehicle = state.disrupted.vehicles.find(v => v.id === state.selectedVehicle);
   const base = state.baseline.vehicles.find(v => v.id === state.selectedVehicle); if (!vehicle || !base) return;
@@ -422,6 +431,103 @@ function updateInspector() {
   }));
   updateVehicleStatus(); map.invalidateFrame();
 }
+// The projection is tied to completed result identities, never to animation
+// frames. Paging materializes at most 20 records; time changes only seek the
+// adjacent event in the cached index and update the small navigation controls.
+function replayEventsAreCurrent(context = inspectedReplayEvents) {
+  return Boolean(context && !state.pending && context.results === state.allResults && context.experiment === state.experiment && context.scenario === state.scenario && context.variantId === state.selectedVariantId && context.vehicleId === state.selectedVehicle);
+}
+function replayEventSource(event, context) {
+  return event.run === 'baseline' ? 'Clear-road baseline' : `${event.run === 'schedule' ? 'Variant schedule' : 'Variant'} · ${context.index.variant.name}`;
+}
+function replayEventFocusFallback() { return [$('replay-events-filter'), $('vehicle-select'), $('run-experiment')]; }
+function updateReplayEventNavigation() {
+  const previous = $('replay-events-previous'), next = $('replay-events-next'), focused = document.activeElement;
+  const current = replayEventsAreCurrent(), filter = $('replay-events-filter').value || 'all';
+  for (const [direction, button] of [['previous', previous], ['next', next]]) {
+    const event = current ? adjacentReplayEvent(inspectedReplayEvents.index, state.time, direction, filter) : null;
+    button.disabled = !event;
+    const label = event ? `${direction === 'previous' ? 'Previous' : 'Next'} event at ${event.atS} s` : `No ${direction} event`;
+    if (button.getAttribute('aria-label') !== label) button.setAttribute('aria-label', label);
+  }
+  const time = `Shared replay time: ${state.time} s`;
+  if ($('replay-events-time').textContent !== time) $('replay-events-time').textContent = time;
+  if ((focused === previous || focused === next) && focused.disabled) focusFirst([previous, next, ...replayEventFocusFallback()]);
+}
+function jumpToReplayEvent(context, event) {
+  if (!replayEventsAreCurrent(context) || inspectedReplayEvents !== context || !event) return;
+  abandonReplayNavigation(); setPlaying(false); setTime(event.atS);
+  map.invalidateFrame(); baselineMap?.invalidateFrame();
+  $('replay-events-announcement').textContent = `Paused at ${event.atS} s. ${replayEventSource(event, context)}: ${event.label}. Both map panes use this exact time.`;
+}
+function renderReplayEventsPage() {
+  if (!replayEventsAreCurrent()) return;
+  const context = inspectedReplayEvents, renderRevision = ++replayEventsRenderRevision;
+  const page = pageReplayEvents(context.index, $('replay-events-filter').value || 'all', replayEventsPage);
+  replayEventsPage = page.pageIndex;
+  const list = $('replay-events-list'), focused = document.activeElement, lostRowFocus = list.contains(focused);
+  list.replaceChildren(...page.events.map(event => {
+    const item = node('li'), button = node('button', undefined, 'replay-event'); button.type = 'button';
+    Object.assign(button.dataset, { eventId: event.id, time: String(event.atS), kind: event.kind, run: event.run, category: event.category });
+    const source = replayEventSource(event, context);
+    button.setAttribute('aria-label', `Jump to ${event.atS} seconds. ${source}. ${event.label}. ${event.detail}`);
+    button.append(node('span', `${event.atS} s`, 'replay-event-time'), node('span', source, `replay-event-source replay-event-${event.run}`), node('strong', event.label), node('span', event.detail, 'replay-event-detail'));
+    button.addEventListener('click', () => { if (renderRevision === replayEventsRenderRevision) jumpToReplayEvent(context, event); });
+    item.append(button); return item;
+  }));
+  list.hidden = !page.matchingEvents;
+  const previous = $('replay-events-page-previous'), next = $('replay-events-page-next');
+  previous.disabled = page.pageIndex <= 0; next.disabled = page.pageIndex + 1 >= page.pageCount;
+  const counts = `${page.matchingEvents} matching of ${page.totalEvents} total timed events.`;
+  $('replay-events-status').textContent = page.matchingEvents ? `Showing ${page.from}–${page.to}; page ${page.pageIndex + 1} of ${page.pageCount}. ${counts}` : `${page.totalEvents ? 'No events match this filter. Choose All events to show the full sequence.' : 'No timed events for this vehicle or variant schedule.'} ${counts}`;
+  updateReplayEventNavigation();
+  if (lostRowFocus) focusFirst(replayEventFocusFallback());
+  else if ((focused === previous || focused === next) && focused.disabled) focusFirst([previous, next, ...replayEventFocusFallback()]);
+}
+function updateReplayEvents() {
+  if (replayEventsAreCurrent()) return;
+  const list = $('replay-events-list'), focused = document.activeElement;
+  const lostRowFocus = list.contains(focused);
+  inspectedReplayEvents = null; replayEventsPage = 0; replayEventsRenderRevision += 1;
+  list.replaceChildren(); list.hidden = true;
+  $('replay-events-announcement').textContent = '';
+  $('replay-events-filter').disabled = true;
+  $('replay-events-page-previous').disabled = true; $('replay-events-page-next').disabled = true;
+  $('replay-events').setAttribute('aria-busy', String(state.pending));
+  $('replay-events-summary').textContent = 'Vehicle events from the clear-road baseline and selected variant.';
+  if (state.pending || !state.allResults) {
+    $('replay-events-status').textContent = state.pending ? 'Calculating… Event navigation will be available when this run completes.' : 'No completed results. Run the experiment to inspect its events.';
+  } else if (!state.selectedVehicle || !state.disrupted?.vehicles.some(vehicle => vehicle.id === state.selectedVehicle)) {
+    $('replay-events-status').textContent = 'No vehicle selected. Select a vehicle to inspect its replay events.';
+  } else {
+    try {
+      const index = createReplayEvents(state.experiment, state.allResults, state.selectedVariantId, state.selectedVehicle);
+      inspectedReplayEvents = { index, experiment: state.experiment, results: state.allResults, scenario: state.scenario, variantId: state.selectedVariantId, vehicleId: state.selectedVehicle };
+      $('replay-events-filter').disabled = false;
+      const missing = index.unreachableJobs;
+      $('replay-events-summary').textContent = `${state.selectedVehicle} · Clear-road baseline and ${index.variant.name}.` + (missing && (missing.baseline || missing.variant) ? ` Unreachable deliveries: ${missing.baseline} baseline, ${missing.variant} variant. Their null arrival and service times have no events.` : '');
+      renderReplayEventsPage();
+    } catch (error) { $('replay-events-status').textContent = `Event navigation unavailable. ${formatInputError(error)}`; }
+  }
+  updateReplayEventNavigation();
+  if (lostRowFocus || $('replay-events').contains(focused) && focused.disabled) focusFirst(replayEventFocusFallback());
+}
+$('replay-events-filter').addEventListener('change', () => {
+  if (!replayEventsAreCurrent()) return;
+  replayEventsPage = 0; $('replay-events-announcement').textContent = ''; renderReplayEventsPage();
+});
+for (const direction of ['previous', 'next']) {
+  $(`replay-events-${direction}`).addEventListener('click', () => {
+    if (!replayEventsAreCurrent()) return;
+    const context = inspectedReplayEvents;
+    jumpToReplayEvent(context, adjacentReplayEvent(context.index, state.time, direction, $('replay-events-filter').value || 'all'));
+  });
+  $(`replay-events-page-${direction}`).addEventListener('click', () => {
+    if (!replayEventsAreCurrent() || $(`replay-events-page-${direction}`).disabled) return;
+    replayEventsPage += direction === 'previous' ? -1 : 1; renderReplayEventsPage();
+  });
+}
+
 function loadExperiment(experiment, workspace = {}) {
   const validated = validateExperiment(experiment);
   importRevision += 1; setPlaying(false); state.experiment = validated;
@@ -885,6 +991,7 @@ function restoreReplay(workerRevision) {
     for (const id of ['route-baseline-distance', 'route-scenario-distance', 'route-baseline-time', 'route-scenario-time']) $(id).textContent = '—';
     $('route-reason').textContent = 'Select a vehicle in either map or the vehicle selector.'; $('route-path').textContent = ''; $('route-path').hidden = true;
     $('job-list').replaceChildren(); $('job-count').textContent = '';
+    updateReplayEvents();
   }
   map.invalidate(); baselineMap?.invalidate();
   $('replay-status').textContent = `Replay loaded and recomputed; paused at ${state.time} s, ${p.view} view, zoom ${p.zoom}, vehicle ${p.vehicleId ?? 'none'}.` + (p.timeS > maximum ? ` Saved time ${p.timeS} s exceeds this run; clamped to ${maximum} s.` : '');

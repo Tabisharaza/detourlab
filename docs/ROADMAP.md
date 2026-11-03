@@ -100,6 +100,13 @@ comparison moment without trusting cached results or adding network storage.
 Reopening recomputes, restores a paused view and respects newer navigation and
 cancellation. This does not close native chooser, device or deployment gates.
 
+## Implemented in source: exact replay-event navigation
+
+[Replay events](REPLAY_EVENTS.md) connect selected-vehicle ledger facts to the
+shared map clock with filters, pagination and precise paused jumps. Baseline,
+variant and globally scheduled closure facts remain distinct. No causal events
+are invented for unreachable jobs and no simulation runs on navigation.
+
 ## Release-readiness gates
 
 1. Publish a truthful README, live demo link, actual screenshot and model assumptions.

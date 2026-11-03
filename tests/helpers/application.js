@@ -1,4 +1,5 @@
 import * as replayBookmark from '../../src/replay-bookmark.js';
+import * as replayEvents from '../../src/replay-events.js';
 import { readFileSync } from 'node:fs';
 import * as scenarioSchema from '../../src/scenario.js';
 import * as experimentSchema from '../../src/experiment.js';
@@ -12,7 +13,7 @@ import { createTutorialExperiment } from '../../src/tutorial.js';
 
 // Execute only checked-in app source with DOM/Worker stand-ins. This covers
 // handler state and result rendering, never browser layout, file pickers or QA.
-export function application({ workerConstructionError = () => null, mapClass = null, now = () => performance.now(), deferDialogClose = false, reviewBuilder = createBrowserReview, impactBuilder = createBrowserImpact } = {}) {
+export function application({ workerConstructionError = () => null, mapClass = null, now = () => performance.now(), deferDialogClose = false, reviewBuilder = createBrowserReview, impactBuilder = createBrowserImpact, replayEventsBuilder = replayEvents.createReplayEvents } = {}) {
   const created = [];
   const markup = readFileSync(new URL('../../index.html', import.meta.url), 'utf8');
   const closeEvents = [];
@@ -168,7 +169,7 @@ export function application({ workerConstructionError = () => null, mapClass = n
   const windowListeners = new Map();
   const window = { addEventListener(name, handler) { if (!windowListeners.has(name)) windowListeners.set(name, []); windowListeners.get(name).push(handler); } };
   const environment = {
-    ...scenarioSchema, ...experimentSchema, ...fileInput, ...replayBookmark, createCutoffExperiment, normalizeCutoffTimes, summarizeCutoffResults, normalizePolicy, createBrowserReview: reviewBuilder, createBrowserImpact: impactBuilder, pageDeliveryImpact, createTutorialExperiment, document, getComputedStyle: computedStyle, NetworkMap: mapClass ? class extends mapClass {
+    ...scenarioSchema, ...experimentSchema, ...fileInput, ...replayBookmark, ...replayEvents, createReplayEvents: replayEventsBuilder, createCutoffExperiment, normalizeCutoffTimes, summarizeCutoffResults, normalizePolicy, createBrowserReview: reviewBuilder, createBrowserImpact: impactBuilder, pageDeliveryImpact, createTutorialExperiment, document, getComputedStyle: computedStyle, NetworkMap: mapClass ? class extends mapClass {
       constructor(...args) { super(...args); maps.push(this); }
     } : NetworkMap, Worker: FakeWorker,
     URL, Blob, TextEncoder, TextDecoder, performance: { now }, structuredClone,
