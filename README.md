@@ -85,6 +85,13 @@ synthetic scenes with the redraw guard enabled versus forced redraws. It records
 raw repeated call timings and final-pixel/hit-point parity, not FPS or universal
 speedup. The application and public demo are unchanged.
 
+## Recover an experiment edit
+
+The source workbench now provides bounded session **Undo** and **Redo** for
+closure/cutoff edits and variant changes. Restoring an edit recomputes validated
+inputs rather than trusting old results. Successful imports and Reset start a
+new history; save a file for durable handoff. [History boundaries and verification](docs/EDIT_HISTORY.md).
+
 ## Inspect the exact event behind a replay
 
 The current source adds a selected-vehicle **Replay events** panel. Jump to
@@ -282,7 +289,7 @@ Start with a small reproducible scenario or an improvement that makes results ea
 
 ### Renderer update and live demo
 
-The current source skips unchanged paused Canvas paints while preserving playback redraws. [Reproducible operation counts and limitations](docs/RENDERING.md) document the change. The guard first shipped in v5. The v7 demo included the v6 reversible tiny lesson and added [modal keyboard focus fixes from source `fb08b57`](https://github.com/Tabisharaza/detourlab/commit/fb08b57457eb70abe107eca0cab41f6f3d30261f). Its [CI run](https://github.com/Tabisharaza/detourlab/actions/runs/38042346894) passed **231 tests per Node job**. Both dialogs were exercised with real desktop keyboard input, including boundary navigation and focus return. [Deployment and browser evidence](docs/VERIFICATION.md#v7-modal-keyboard-deployment-and-desktop-checks) retains the exact source mapping and remaining QA gaps. Browser rendering time remains unmeasured. The October 11 [v8 deployment](docs/VERIFICATION.md#v8-source-parity-deployment) included the tested import and dynamic-focus source. The [v9 road-picker deployment and bounded desktop checks](docs/VERIFICATION.md#v9-road-picker-deployment-and-bounded-desktop-checks) are separate from that historical record. The public demo is now **v10**, with [the run-lifecycle focus correction deployed](docs/VERIFICATION.md#v10-run-lifecycle-focus-deployment); its native cancellation/completion retest passed. The served manifest matches the verified local build; individual remote assets were not independently downloaded and hashed.
+The current source skips unchanged paused Canvas paints while preserving playback redraws. [Reproducible operation counts and limitations](docs/RENDERING.md) document the change. The guard first shipped in v5. The v7 demo included the v6 reversible tiny lesson and added [modal keyboard focus fixes from source `fb08b57`](https://github.com/Tabisharaza/detourlab/commit/fb08b57457eb70abe107eca0cab41f6f3d30261f). Its [CI run](https://github.com/Tabisharaza/detourlab/actions/runs/38042346894) passed **231 tests per Node job**. Both dialogs were exercised with real desktop keyboard input, including boundary navigation and focus return. [Deployment and browser evidence](docs/VERIFICATION.md#v7-modal-keyboard-deployment-and-desktop-checks) retains the exact source mapping and remaining QA gaps. Browser rendering time remains unmeasured. The October 11 [v8 deployment](docs/VERIFICATION.md#v8-source-parity-deployment) included the tested import and dynamic-focus source. The [v9 road-picker deployment and bounded desktop checks](docs/VERIFICATION.md#v9-road-picker-deployment-and-bounded-desktop-checks) are separate from that historical record. That historical deployment was **v10**, with [the run-lifecycle focus correction deployed](docs/VERIFICATION.md#v10-run-lifecycle-focus-deployment); its native cancellation/completion retest passed. The served manifest matches the verified local build; individual remote assets were not independently downloaded and hashed.
 
 ### File-input source update
 

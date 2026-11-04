@@ -1,3 +1,4 @@
+import * as experimentHistory from '../../src/experiment-history.js';
 import * as replayBookmark from '../../src/replay-bookmark.js';
 import * as replayEvents from '../../src/replay-events.js';
 import { readFileSync } from 'node:fs';
@@ -169,7 +170,7 @@ export function application({ workerConstructionError = () => null, mapClass = n
   const windowListeners = new Map();
   const window = { addEventListener(name, handler) { if (!windowListeners.has(name)) windowListeners.set(name, []); windowListeners.get(name).push(handler); } };
   const environment = {
-    ...scenarioSchema, ...experimentSchema, ...fileInput, ...replayBookmark, ...replayEvents, createReplayEvents: replayEventsBuilder, createCutoffExperiment, normalizeCutoffTimes, summarizeCutoffResults, normalizePolicy, createBrowserReview: reviewBuilder, createBrowserImpact: impactBuilder, pageDeliveryImpact, createTutorialExperiment, document, getComputedStyle: computedStyle, NetworkMap: mapClass ? class extends mapClass {
+    ...experimentHistory, ...scenarioSchema, ...experimentSchema, ...fileInput, ...replayBookmark, ...replayEvents, createReplayEvents: replayEventsBuilder, createCutoffExperiment, normalizeCutoffTimes, summarizeCutoffResults, normalizePolicy, createBrowserReview: reviewBuilder, createBrowserImpact: impactBuilder, pageDeliveryImpact, createTutorialExperiment, document, getComputedStyle: computedStyle, NetworkMap: mapClass ? class extends mapClass {
       constructor(...args) { super(...args); maps.push(this); }
     } : NetworkMap, Worker: FakeWorker,
     URL, Blob, TextEncoder, TextDecoder, performance: { now }, structuredClone,

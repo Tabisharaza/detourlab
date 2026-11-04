@@ -40,6 +40,7 @@ export const RELEASE_FILES = Object.freeze([
   'src/tutorial.js',
   'src/replay-bookmark.js',
   'src/replay-events.js',
+  'src/experiment-history.js',
 ]);
 
 const allowedFiles = new Set([...RELEASE_FILES, 'manifest.json']);

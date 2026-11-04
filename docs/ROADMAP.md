@@ -107,6 +107,13 @@ shared map clock with filters, pagination and precise paused jumps. Baseline,
 variant and globally scheduled closure facts remain distinct. No causal events
 are invented for unreachable jobs and no simulation runs on navigation.
 
+## Implemented in source: recoverable experiment editing
+
+[Session edit history](EDIT_HISTORY.md) restores validated input and selection
+through bounded Undo/Redo, then recomputes the evidence. It does not add a new
+file format, persistent storage or result cache. Workspace boundaries and
+native checks are documented separately from hosted deployment.
+
 ## Release-readiness gates
 
 1. Publish a truthful README, live demo link, actual screenshot and model assumptions.

@@ -1,3 +1,4 @@
+import { createExperimentHistory, recordExperimentHistory, selectExperimentHistory, undoExperimentHistory, redoExperimentHistory } from './experiment-history.js';
 import { parseReplayBookmark, exportReplayBookmark } from './replay-bookmark.js';
 import { createReplayEvents, pageReplayEvents, adjacentReplayEvent } from './replay-events.js';
 import { createDemoScenario, createPresets, validateScenario, LIMITS } from './scenario.js';
@@ -21,6 +22,9 @@ function createInitialExperiment() { const experiment = experimentFromScenario(c
 const initialExperiment = createInitialExperiment();
 const initialScenario = scenarioForVariant(initialExperiment, initialExperiment.variants[0].id);
 const state = { experiment: initialExperiment, selectedVariantId: initialExperiment.variants[0].id, allResults: null, scenario: initialScenario, baseline: null, disrupted: null, time: 360, playing: false, speed: 60, selectedVehicle: null, view: 'disruption', editing: false, zoom: 1, pending: true, lessonActive: false, lessonModified: false };
+// History contains validated inputs and variant selection only, never results.
+let editHistory = createExperimentHistory(state.experiment, state.selectedVariantId);
+let historyNotice = 'History starts here.';
 let baselineMap;
 let worker;
 let revision = 0;
@@ -100,23 +104,61 @@ function roadEditIds(id, forceReopen = false) {
   return forceReopen || direction === 'both' ? pairsFor(id) : direction === 'forward' ? [id] : pairsFor(id).filter(edgeId => { const item = edgesById.get(edgeId); return item.from === edge.to && item.to === edge.from; });
 }
 function activeVariant() { return state.experiment.variants.find(variant => variant.id === state.selectedVariantId); }
-function changedExperiment(experiment, selectedId = state.selectedVariantId) {
+function updateHistory() {
+  const undo = $('undo-edit'), redo = $('redo-edit'), focused = document.activeElement;
+  const undoLabel = editHistory.undo.length ? editHistory.current.label : null;
+  const redoLabel = editHistory.redo.at(-1)?.label;
+  undo.disabled = state.lessonActive || !undoLabel;
+  redo.disabled = state.lessonActive || !redoLabel;
+  for (const [button, action, label] of [[undo, 'Undo', undoLabel], [redo, 'Redo', redoLabel]]) {
+    button.setAttribute('aria-label', label && !state.lessonActive ? `${action}: ${label}` : action);
+    button.title = label && !state.lessonActive ? `${action}: ${label}` : `${action} unavailable`;
+  }
+  const message = state.lessonActive ? 'History paused for this lesson. Return to use your experiment’s edits.' : `${historyNotice} ${editHistory.undo.length} undo · ${editHistory.redo.length} redo.`;
+  if ($('history-status').textContent !== message) $('history-status').textContent = message;
+  if ([undo, redo].includes(focused) && focused.disabled) focusFirst(state.lessonActive ? [$('return-experiment'), $('variant-select')] : [undo, redo, $('variant-select')]);
+}
+function restoreEdit(direction) {
+  if (state.lessonActive) return;
+  const restored = direction === 'undo' ? undoExperimentHistory(editHistory) : redoExperimentHistory(editHistory);
+  if (!restored) return;
+  // A later history action wins over every asynchronous import or perspective.
+  importRevision += 1; abandonReplayNavigation(); setPlaying(false);
+  editHistory = restored.history;
+  historyNotice = `${direction === 'undo' ? 'Undid' : 'Redid'} ${restored.label}.`;
+  state.experiment = restored.experiment; state.selectedVariantId = restored.selectedId;
+  state.scenario = scenarioForVariant(state.experiment, state.selectedVariantId);
+  // Graph and demand cannot change within this history boundary. Keep the
+  // current view, zoom, road picker and native controls while recomputing.
+  updateControls(); compute();
+}
+function changedExperiment(experiment, selectedId = state.selectedVariantId, label = 'Edit experiment') {
   let validated;
-  try { validated = validateExperiment(experiment); }
-  catch (error) { toast(`Change rejected. ${formatInputError(error)}`, true); return false; }
+  let nextHistory;
+  try {
+    validated = validateExperiment(experiment);
+    if (!validated.variants.some(variant => variant.id === selectedId)) throw new Error('Choose a valid variant.');
+    // Lesson actions retain their existing narrative-reset behavior, even for
+    // unchanged inputs. They never enter the preserved parent history.
+    if (!state.lessonActive) {
+      nextHistory = recordExperimentHistory(editHistory, validated, selectedId, label);
+      if (nextHistory === editHistory) return true;
+    }
+  } catch (error) { toast(`Change rejected. ${formatInputError(error)}`, true); return false; }
   importRevision += 1;
+  if (!state.lessonActive) { editHistory = nextHistory; historyNotice = `${label}.`; }
   state.experiment = validated;
   if (state.lessonActive) state.lessonModified = true;
   state.selectedVariantId = selectedId;
   state.scenario = scenarioForVariant(state.experiment, selectedId);
   updateControls(); compute(); return true;
 }
-function replaceClosures(closures) {
-  return changedExperiment({ ...state.experiment, variants: state.experiment.variants.map(variant => variant.id === state.selectedVariantId ? { ...variant, closures } : variant) });
+function replaceClosures(closures, label = 'Change road closure') {
+  return changedExperiment({ ...state.experiment, variants: state.experiment.variants.map(variant => variant.id === state.selectedVariantId ? { ...variant, closures } : variant) }, state.selectedVariantId, label);
 }
-function setClosures(ids, atS = closureAt()) {
+function setClosures(ids, label, atS = closureAt()) {
   const edgeIds = [...new Set(ids)].sort();
-  replaceClosures(edgeIds.length ? [{ id: 'interactive-closure', edgeIds, atS }] : []);
+  replaceClosures(edgeIds.length ? [{ id: 'interactive-closure', edgeIds, atS }] : [], label);
 }
 function toggleRoad(id, forceReopen = false) {
   if (!id) return;
@@ -136,6 +178,7 @@ function selectVariant(id) {
   if (!state.experiment.variants.some(variant => variant.id === id)) return;
   abandonReplayNavigation();
   importRevision += 1;
+  if (!state.lessonActive) editHistory = selectExperimentHistory(editHistory, id);
   state.selectedVariantId = id; state.scenario = scenarioForVariant(state.experiment, id);
   updateControls(); showSelectedResult();
 }
@@ -201,9 +244,9 @@ function updateEvents() {
         const current = state.scenario.closures.find(item => item.id === closureId); if (!current) return;
         const atS = Number(input.value);
         if (input.value.trim() === '' || !Number.isFinite(atS) || atS < 0 || atS > LIMITS.maxTimeS) { input.value = String(current.atS); toast('Enter a closure time from 0 to 604800 seconds.', true); return; }
-        if (!replaceClosures(state.scenario.closures.map(item => item.id === closureId ? { ...item, atS } : item))) input.value = String(current.atS);
+        if (!replaceClosures(state.scenario.closures.map(item => item.id === closureId ? { ...item, atS } : item), 'Change closure time')) input.value = String(current.atS);
       });
-      remove.addEventListener('click', () => { if (state.selectedVariantId === variantId) replaceClosures(state.scenario.closures.filter(item => item.id !== closureId)); });
+      remove.addEventListener('click', () => { if (state.selectedVariantId === variantId) replaceClosures(state.scenario.closures.filter(item => item.id !== closureId), 'Remove closure'); });
       controls.append(label, input, remove); row.append(node('strong'), node('small'), controls);
     }
     const roads = [...new Set(closure.edgeIds.map(id => edgeMap.get(id).roadName))];
@@ -292,7 +335,7 @@ function updateControls() {
   updateControlList($('preset-list'), presets, (preset, button, index) => {
     if (!button) {
       button = node('button', undefined, 'preset'); button.dataset.preset = preset.id;
-      button.addEventListener('click', () => { const current = createPresets(state.scenario).find(item => item.id === button.dataset.preset); if (current) setClosures(current.edgeIds); });
+      button.addEventListener('click', () => { const current = createPresets(state.scenario).find(item => item.id === button.dataset.preset); if (current) setClosures(current.edgeIds, `Apply ${current.name}`); });
     }
     const active = preset.edgeIds.length === closed.size && preset.edgeIds.every(id => closed.has(id)); button.classList.toggle('active', active); button.setAttribute('aria-pressed', String(active));
     const names = { central: ['Bridge works', 'A busy crossing goes offline'], 'all-bridges': ['River cut', 'Three crossings. One hard limit.'], clear: ['Clear roads', 'The unchanged control run'] };
@@ -304,7 +347,7 @@ function updateControls() {
     if (!button) { button = node('button', undefined, 'closure-chip'); button.addEventListener('click', () => toggleRoad(edge.id, true)); }
     button.textContent = `${edge.roadName} ×`; button.title = `Reopen ${edge.roadName}, ${edge.from} to ${edge.to}`; button.setAttribute('aria-label', button.title); return button;
   }, roadPickerFocusTarget());
-  updateVariants(); updateEvents(); updateLesson(); updateRoadDetails(); map.invalidate();
+  updateVariants(); updateEvents(); updateLesson(); updateHistory(); updateRoadDetails(); map.invalidate();
 }
 function clearResults() {
   if (pendingReplay) $('replay-status').textContent = 'Replay restore canceled because the run or experiment changed.';
@@ -528,10 +571,11 @@ for (const direction of ['previous', 'next']) {
   });
 }
 
-function loadExperiment(experiment, workspace = {}) {
+function loadExperiment(experiment, workspace = {}, { preserveHistory = false } = {}) {
   const validated = validateExperiment(experiment);
   importRevision += 1; setPlaying(false); state.experiment = validated;
   state.selectedVariantId = validated.variants.some(variant => variant.id === workspace.selectedVariantId) ? workspace.selectedVariantId : validated.variants[0].id;
+  if (!state.lessonActive && !preserveHistory) { editHistory = createExperimentHistory(validated, state.selectedVariantId); historyNotice = 'History starts here.'; }
   state.scenario = scenarioForVariant(validated, state.selectedVariantId); state.baseline = null; state.disrupted = null; state.allResults = null;
   state.selectedVehicle = workspace.selectedVehicle ?? null; state.time = workspace.time ?? 0; state.zoom = workspace.zoom ?? 1;
   if (workspace.speed !== undefined) state.speed = workspace.speed;
@@ -653,7 +697,7 @@ function returnToExperiment() {
   if (!state.lessonActive || !lessonBackup) return;
   const backup = lessonBackup;
   state.lessonActive = false; state.lessonModified = false;
-  loadExperiment(backup.experiment, backup.workspace);
+  loadExperiment(backup.experiment, backup.workspace, { preserveHistory: true });
   lessonBackup = null;
   focusFirst(dialogReturnTargets($('lesson-dialog'), backup.focus));
   toast('Your experiment and view are restored. Playback is paused; results are being recomputed.');
@@ -1040,21 +1084,23 @@ $('import-input').addEventListener('change', async (event) => {
     if (id === importRevision) toast(`Import rejected. ${formatInputError(error)}`, true);
   }
 });
+$('undo-edit').addEventListener('click', () => restoreEdit('undo'));
+$('redo-edit').addEventListener('click', () => restoreEdit('redo'));
 $('variant-select').addEventListener('change', event => selectVariant(event.target.value));
 $('rename-variant').addEventListener('click', () => {
   const name = $('variant-name').value.trim();
   if (!name || name.length > EXPERIMENT_LIMITS.nameLength) { toast('Give the variant a short nonempty name.', true); return; }
-  changedExperiment({ ...state.experiment, variants: state.experiment.variants.map(variant => variant.id === state.selectedVariantId ? { ...variant, name } : variant) });
+  changedExperiment({ ...state.experiment, variants: state.experiment.variants.map(variant => variant.id === state.selectedVariantId ? { ...variant, name } : variant) }, state.selectedVariantId, 'Rename variant');
 });
 $('duplicate-variant').addEventListener('click', () => {
   if (state.experiment.variants.length >= EXPERIMENT_LIMITS.maxVariants) return;
   let id = 'variant-1', number = 1; while (state.experiment.variants.some(variant => variant.id === id)) id = `variant-${++number}`;
   const source = activeVariant(); const variant = { id, name: `${source.name.slice(0, 70)} copy`, closures: structuredClone(source.closures) };
-  changedExperiment({ ...state.experiment, variants: [...state.experiment.variants, variant] }, id);
+  changedExperiment({ ...state.experiment, variants: [...state.experiment.variants, variant] }, id, 'Duplicate variant');
 });
 $('delete-variant').addEventListener('click', () => {
   if (state.experiment.variants.length <= EXPERIMENT_LIMITS.minVariants) return;
-  const variants = state.experiment.variants.filter(variant => variant.id !== state.selectedVariantId); changedExperiment({ ...state.experiment, variants }, variants[0].id);
+  const variants = state.experiment.variants.filter(variant => variant.id !== state.selectedVariantId); changedExperiment({ ...state.experiment, variants }, variants[0].id, 'Remove variant');
 });
 $('cancel-run').addEventListener('click', () => { importRevision += 1; cancelComputation(); });
 $('run-experiment').addEventListener('click', () => { importRevision += 1; compute(); });

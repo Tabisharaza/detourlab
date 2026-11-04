@@ -66,6 +66,15 @@ seconds and at most 20 rendered rows. Keep closure schedules separate from
 vehicle effects. Test stale rows, result/selection changes and no extra Worker
 requests. Native evidence remains separate from DOM/Canvas stand-ins.
 
+## Preserve recoverable editing
+
+[Edit history](docs/EDIT_HISTORY.md) stores bounded serialized input, never trusted
+results. Test invalid/no-op edits, redo branching, UTF-8 byte eviction, selected
+variant restoration, stale asynchronous work, lesson/import boundaries and focus
+when history controls become unavailable. Keep global text-edit shortcuts native.
+The optional Chromium history harness supplies separate native evidence; do not
+claim its file injection verifies OS chooser behavior.
+
 ## Choose a scope
 
 Start with [open contribution issues](https://github.com/Tabisharaza/detourlab/issues). [Additional issue scopes](docs/ISSUE_DRAFTS.md) include reproducible problems, acceptance criteria and explicit non-goals, and distinguish published issues from proposals. Before adding a solver, city dataset, dependency or storage service, propose the interface and its effect on licensing, privacy and reproducibility.
