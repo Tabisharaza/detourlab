@@ -62,3 +62,47 @@ No code or data was copied and no demand or Trending outcome is promised.
 
 A bounded November 4 GitHub Trending snapshot showed mostly AI/developer tooling,
 not a relevant logistics comparator. It was not used as evidence of demand.
+
+## Recorded source verification — November 4, 2026
+
+[Source `2c8e0b1`](https://github.com/Tabisharaza/detourlab/commit/2c8e0b17d931af63f023e3bb809b09f0b7bd4631)
+passed [CI run 41785797533](https://github.com/Tabisharaza/detourlab/actions/runs/41785797533).
+The [unaltered history evidence](evidence/edit-history-2026-11-04.json) records
+source/fixture hashes, actual runtime, browser version and all 11 new native
+checkpoints.
+
+- 1,226 core Node tests plus 120 optional schema/editor tests passed: **1,346
+  distinct tests**. The 211 repeated CLI tests overlap the core suite.
+- All 11 history checkpoints passed alongside 21 file/browser, 13 split-map,
+  11 bookmark and 13 replay-event checkpoints, plus four render-profile cases.
+- The 31-file static release passed independent allowlist, source-byte, license
+  and SHA-256 checks; rebuilding reproduced every byte including the manifest.
+- Model tests cover exact 16 MiB capacity, 20 retained transitions, multibyte
+  payloads, eviction, frozen/forged state, caller mutation and independent
+  restored objects. A separate read-only 400-operation reference-model probe
+  also passed; that probe is not included in the test count above.
+
+Native checks used real Workers and complete independent Node ledger comparisons,
+trusted Enter/Space activation, road/cutoff and variant edits, divergent redo,
+terminated pending computation, delayed native file reads, rejected files and
+lesson/import/replay/Reset boundaries. The Worker cancellation check observes
+termination and replacement results; adversarial delivery after termination is
+covered separately by handler stand-ins, not claimed as a native observation.
+
+Review caught and corrected whole-history revalidation on every action before
+publication. Only module-issued fully frozen histories receive the identity
+fast path. Restoring a target still validates fresh input; externally supplied
+history states still undergo complete validation. No parsed graph or computed
+result cache is introduced. A pre-existing guided-lesson test also caught a
+no-op compatibility change; lessons retain their prior narrative-reset behavior
+while remaining excluded from parent history.
+
+Both raw captures were inspected: visible history buttons, keyboard focus,
+action status and help text are legible at desktop and 390px CSS viewport widths
+without horizontal clipping. They show local synthetic source, **not a hosted
+release**. Hosted v11, native OS chooser, device and assistive-technology status
+remain separately documented.
+
+![Desktop experiment with focused Undo, history status and synchronized maps](images/history-desktop-2026-11-04.jpg)
+
+![Narrow experiment controls with focused Undo and readable history boundaries](images/history-narrow-2026-11-04.jpg)

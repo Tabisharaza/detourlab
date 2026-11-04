@@ -1,0 +1,381 @@
+{
+  "format": "detourlab-experiment-history-check",
+  "version": 1,
+  "status": "passed",
+  "startedAt": "2026-11-04T06:31:11.644Z",
+  "runtime": {
+    "node": "v24.22.1",
+    "os": "linux",
+    "release": "7.0.0-1017-azure",
+    "arch": "x64"
+  },
+  "checks": [
+    {
+      "name": "Directed road edit and exact fractional cutoff each compute once and match complete independent Node ledgers",
+      "status": "passed"
+    },
+    {
+      "name": "Native Enter Undo and Space Redo restore input and selection paused, preserving the current workspace",
+      "status": "passed",
+      "keyboardEvents": [
+        {
+          "type": "keydown",
+          "key": "Enter",
+          "id": "undo-edit",
+          "trusted": true
+        },
+        {
+          "type": "keypress",
+          "key": "Enter",
+          "id": "undo-edit",
+          "trusted": true
+        },
+        {
+          "type": "click",
+          "key": null,
+          "id": "undo-edit",
+          "trusted": true
+        },
+        {
+          "type": "keyup",
+          "key": "Enter",
+          "id": "undo-edit",
+          "trusted": true
+        },
+        {
+          "type": "keydown",
+          "key": "Tab",
+          "id": "undo-edit",
+          "trusted": true
+        },
+        {
+          "type": "keyup",
+          "key": "Tab",
+          "id": "redo-edit",
+          "trusted": true
+        },
+        {
+          "type": "keydown",
+          "key": " ",
+          "id": "redo-edit",
+          "trusted": true
+        },
+        {
+          "type": "keypress",
+          "key": " ",
+          "id": "redo-edit",
+          "trusted": true
+        },
+        {
+          "type": "keyup",
+          "key": " ",
+          "id": "redo-edit",
+          "trusted": true
+        },
+        {
+          "type": "click",
+          "key": null,
+          "id": "redo-edit",
+          "trusted": true
+        }
+      ]
+    },
+    {
+      "name": "Desktop and 390px history controls fit without horizontal overflow; raw JPEG evidence saved",
+      "status": "passed"
+    },
+    {
+      "name": "Invalid names/times, unchanged edits, selection-only navigation and disabled boundaries create no history or computation",
+      "status": "passed"
+    },
+    {
+      "name": "Variant rename, duplicate and removal restore exact independent inputs and selected variant through Undo/Redo",
+      "status": "passed"
+    },
+    {
+      "name": "A divergent successful edit clears the redo branch; disabled Redo cannot resurrect removed variants",
+      "status": "passed"
+    },
+    {
+      "name": "Undo terminates an actual pending Worker, clears result layers and leaves only the replacement ledger visible",
+      "status": "passed",
+      "interrupted": {
+        "canceledId": 20,
+        "replacementId": 21,
+        "wasPending": true,
+        "pending": true,
+        "noResults": true,
+        "terminated": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20
+        ]
+      }
+    },
+    {
+      "name": "Undo wins over delayed native experiment and replay-bookmark reads; stale files cannot restore input or perspective",
+      "status": "passed"
+    },
+    {
+      "name": "Rejected experiment and bookmark files preserve current history and completed results",
+      "status": "passed"
+    },
+    {
+      "name": "Lesson Cancel keeps history; confirmed lesson isolates edits and reset; Return restores the parent history paused",
+      "status": "passed"
+    },
+    {
+      "name": "Successful Import, Open replay and Reset establish fresh history boundaries without undoing into another workspace",
+      "status": "passed"
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "history-desktop.jpg",
+      "sha256": "96b26c162c2f0d8502aa5c633ac9733472b2b6e357768ff26f9862bbf1be4891",
+      "bytes": 112809,
+      "viewport": {
+        "width": 1600,
+        "height": 1100,
+        "deviceScaleFactor": 1,
+        "mobile": false
+      },
+      "geometry": {
+        "width": 1600,
+        "height": 1100,
+        "overflow": false,
+        "panel": {
+          "left": 28,
+          "right": 261,
+          "top": 469.3125,
+          "bottom": 630.28125
+        },
+        "controls": [
+          {
+            "id": "undo-edit",
+            "left": 28,
+            "right": 140.5,
+            "top": 482.3125,
+            "bottom": 526.3125,
+            "width": 112.5,
+            "height": 44
+          },
+          {
+            "id": "redo-edit",
+            "left": 148.5,
+            "right": 261,
+            "top": 482.3125,
+            "bottom": 526.3125,
+            "width": 112.5,
+            "height": 44
+          }
+        ]
+      },
+      "meaning": "Unmodified local synthetic experiment-history controls; not a deployed screenshot or visual-inspection claim."
+    },
+    {
+      "file": "history-narrow.jpg",
+      "sha256": "a31bc65d1d97ac040fc8006e18d45a8d670b5fa0c68bb68dd08c4b8048bd1e78",
+      "bytes": 38766,
+      "viewport": {
+        "width": 390,
+        "height": 1100,
+        "deviceScaleFactor": 1,
+        "mobile": false
+      },
+      "geometry": {
+        "width": 390,
+        "height": 1100,
+        "overflow": false,
+        "panel": {
+          "left": 17,
+          "right": 358,
+          "top": 478.578125,
+          "bottom": 621.953125
+        },
+        "controls": [
+          {
+            "id": "undo-edit",
+            "left": 17,
+            "right": 183.5,
+            "top": 491.578125,
+            "bottom": 535.578125,
+            "width": 166.5,
+            "height": 44
+          },
+          {
+            "id": "redo-edit",
+            "left": 191.5,
+            "right": 358,
+            "top": 491.578125,
+            "bottom": 535.578125,
+            "width": 166.5,
+            "height": 44
+          }
+        ]
+      },
+      "meaning": "Unmodified local synthetic experiment-history controls; not a deployed screenshot or visual-inspection claim."
+    }
+  ],
+  "fixtures": [
+    {
+      "file": "history.experiment.json",
+      "sha256": "9b4eb9bf07c85ca5986589b2b02e6ac3402921dd9a48b7972bced64b611c7de9",
+      "bytes": 2456
+    },
+    {
+      "file": "history.replay.json",
+      "sha256": "d1d029f5f26126af0f1deaaaf2a5f5a5235225bd9a1955b94c98b73c6342b6da",
+      "bytes": 1545
+    },
+    {
+      "file": "invalid.experiment.json",
+      "sha256": "80faeeba51535b0672a5f6d993068b5592105b602a8ee4b1f8de2ba6fc59c89a",
+      "bytes": 30
+    }
+  ],
+  "limitations": [
+    "Local headless Chromium and synthetic files only; not deployed, cross-browser, native chooser, mobile-device or assistive-technology certification.",
+    "Native Worker request/message/termination observers delegate unchanged behavior. NetworkMap.render is called unchanged and its state references are read only.",
+    "CDP file injection and DOM changes drive ordinary app handlers. Undo/Redo activation uses CDP keyboard events and requires trusted generated clicks.",
+    "Two delayed-file checks hold a real File.arrayBuffer promise. No app handler or Worker delivery is replaced or fabricated.",
+    "Canceled native Workers cannot be forced to deliver a stale result. The interrupted-run check verifies actual termination and no overwrite after the replacement completes; adversarial stale callbacks belong to separate source tests.",
+    "Screenshots are unmodified captures; hashes and geometry are not visual inspection. Source hashes identify bytes, not signed provenance."
+  ],
+  "sourceFiles": [
+    {
+      "path": "examples/minimal-experiment.json",
+      "sha256": "b2572f0edd0c6af55625ef19792719bdcc2ed5dd2c84a93b13292ef9565f6cd9"
+    },
+    {
+      "path": "index.html",
+      "sha256": "5526dddf26bde43074f5ed663ee67e6eb957b2804708ec3a5584bbf559944ffd"
+    },
+    {
+      "path": "scripts/serve.js",
+      "sha256": "86eb68f3acc9ffbf0bfa81dd3d41a6d84114c6f6f80c16e0ef577fb05723c06a"
+    },
+    {
+      "path": "src/app.js",
+      "sha256": "ea2628dfce7f0c9050e14a3b87c736aec6dd9ac00c7838e09e5c465a05f65b65"
+    },
+    {
+      "path": "src/browser-impact.js",
+      "sha256": "b414b6d19fe103dd34e2be03a419ec26be6d55c3bcae661d42e6e074efd03ff3"
+    },
+    {
+      "path": "src/browser-review.js",
+      "sha256": "e3cf75b29aa5234f1dad3115d35fb37eb4c27f50157d4e82b0177c4e90f31dfb"
+    },
+    {
+      "path": "src/cutoff-comparison.js",
+      "sha256": "12339235403d492fb0b483ca4ebe5c52965735129eb3727bc07ff6c3719eaebe"
+    },
+    {
+      "path": "src/cutoff-experiment.js",
+      "sha256": "0c2daf9a919bc6cbe85a27d53004de5b6eed296ad0d93b870aa3802c5b99ab9b"
+    },
+    {
+      "path": "src/engine.js",
+      "sha256": "a3fa06223fdf95b7cc1bb0b15b05da924c6d835ac13e688327262bfc080a3016"
+    },
+    {
+      "path": "src/experiment-history.js",
+      "sha256": "44f8c674b01384694a2a1d5b61889c7b310a97d9034e36a265af10f08098a24e"
+    },
+    {
+      "path": "src/experiment-report.js",
+      "sha256": "656062cf1fac1d8db80dae9b075de23ff8c505d35bf941f0c420e05d8663258d"
+    },
+    {
+      "path": "src/experiment.js",
+      "sha256": "efb77801be428839dd677df9a8c5fc62812709062b20eacb0d93a39576f1eff3"
+    },
+    {
+      "path": "src/file-input.js",
+      "sha256": "9d34d0b01eff790e25d4e2f2edef56d8b4bfc6c608b266f471f932ea0bfc048a"
+    },
+    {
+      "path": "src/job-gates.js",
+      "sha256": "bd5d905cb85a3265167d58c12e67f24ab18e67e66e726631f88b805fad24e732"
+    },
+    {
+      "path": "src/job-impact.js",
+      "sha256": "537d07bd5f89114cbaca0939d563aaa9cfbebf1ddc371fdfec1fe06b78a91948"
+    },
+    {
+      "path": "src/map.js",
+      "sha256": "c2e08b8f8fea8882f30cb3208a156b3b75ea28b4eb317744fc8773946e322162"
+    },
+    {
+      "path": "src/replay-bookmark.js",
+      "sha256": "621a22f480f407d5f6ce2e809c820cd290a410e814ea2cb1deb294d74553dd8b"
+    },
+    {
+      "path": "src/replay-events.js",
+      "sha256": "d66879fc9c6095f9667be89256d1e6ca96ddd55fefe944e002cb3736fbb5936e"
+    },
+    {
+      "path": "src/report-results.js",
+      "sha256": "1d5877f77381a63ba68b54f809a07cb879d6357954a5a2a9d8f48c733934ca43"
+    },
+    {
+      "path": "src/scenario.js",
+      "sha256": "fd7e71c7219bf738547d129499496c77d0213dababfa686f171e8b6c6eb6e5b4"
+    },
+    {
+      "path": "src/simulation-worker.js",
+      "sha256": "3f6e4f882485a0f59d8c80af496dc6ae9acb2667ddaebe33e4db10b43276052c"
+    },
+    {
+      "path": "src/style.css",
+      "sha256": "ce5975ae4ce162a9829142c57144f7c2f1b31d559f983881dba5dcbbe92b2031"
+    },
+    {
+      "path": "src/tutorial.js",
+      "sha256": "a2b310e8a476ab245c9c4a7c2814c73c8407fce92d20b7b35be5765919f2ccea"
+    },
+    {
+      "path": "tools/browser-check/chromium.js",
+      "sha256": "a34c7eb7c4f52cb4f4c19b3a0b215b96722ac6233a5252fecfc890b9fe5de055"
+    },
+    {
+      "path": "tools/browser-check/run.js",
+      "sha256": "71477ddd31df21055a2c14aaa876633c1d9e10489ad3b8922dd46ec2c90daa4f"
+    },
+    {
+      "path": "tools/experiment-history-check/run.js",
+      "sha256": "9170c30c72f6dcf36ae1946df5c45a9bf421d01712d8499b89c1b29f1246de17"
+    },
+    {
+      "path": "tools/replay-events-check/run.js",
+      "sha256": "ae375e0505e115073f4f0dd8d782cba340f52fc9caa94ebfde8944a14bf41a0e"
+    }
+  ],
+  "sourceSha256": "46e30df49e1a94b9418956988f9a8cbab63543e10b32230d0566098c4f2b065e",
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/156.0.8078.79",
+    "revision": "@a21ce95c24ce3964416f09ae1862f53f319eb4d0",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "jsVersion": "15.6.75.27"
+  },
+  "completedAt": "2026-11-04T06:31:24.585Z"
+}
