@@ -112,3 +112,8 @@ Use the existing ESM style and platform APIs. Prefer small named helpers, safe t
 ## Security
 
 Use [SECURITY.md](SECURITY.md) for vulnerability reporting and data-handling boundaries. A draft fixture or screenshot must contain only material appropriate for a public repository.
+
+For [Canvas lifecycle reliability](docs/CANVAS_LIFECYCLE.md), run the focused
+map/lifecycle tests and optional Chromium harness. Preserve source-event versus
+native-device distinctions, exact pixel/road/vehicle parity, zero-size targets,
+no-overwrite evidence and browser security defaults.

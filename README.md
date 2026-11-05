@@ -298,3 +298,10 @@ The current source rejects malformed UTF-8 consistently, bounds all three CLI re
 ### Dynamic editor keyboard update
 
 The current source keeps comparison cards and closure-editor controls in place while their data changes, so repeated keyboard edits do not discard the active control. Deleted controls and variant-limit buttons get a nearby usable focus target. [Hosted CI for `0559eec`](https://github.com/Tabisharaza/detourlab/actions/runs/38069928417) passed **357 tests on both pinned Node versions**, including 16 new regressions; [keyboard behavior and remaining checks](docs/KEYBOARD.md) are documented separately. This source change first deployed in v8; wider native Tab/blur coverage remains separate from the specific v9 observations.
+
+### Canvas lifecycle verification
+
+[Reproduce native resize and DPR checks](docs/CANVAS_LIFECYCLE.md) to compare
+paused map pixels and click geometry after resizing, hiding and changing device
+scale. Context-loss event recovery has separate source regression coverage;
+actual GPU loss and hosted deployment are not implied.

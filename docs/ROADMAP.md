@@ -114,6 +114,13 @@ through bounded Undo/Redo, then recomputes the evidence. It does not add a new
 file format, persistent storage or result cache. Workspace boundaries and
 native checks are documented separately from hosted deployment.
 
+## Implemented in source: Canvas lifecycle reliability
+
+[Lifecycle checks](CANVAS_LIFECYCLE.md) compare native resize, hide/show and
+DPR transitions with fresh-render pixels and hit geometry. Separate context-loss
+event handling suspends stale targets and restores the scene. Native GPU loss,
+physical devices and deployment remain explicitly separate.
+
 ## Release-readiness gates
 
 1. Publish a truthful README, live demo link, actual screenshot and model assumptions.

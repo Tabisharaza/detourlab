@@ -7,8 +7,17 @@ export class NetworkMap {
   constructor(canvas, state, events) {
     this.canvas = canvas; this.ctx = canvas.getContext('2d'); this.state = state; this.events = events; this.width = 1; this.height = 1; this.dpr = 1; this.dirty = true; this.frameDirty = true; this.vehiclePoints = [];
     this.background = document.createElement('canvas'); this.reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    canvas.addEventListener('contextrestored', () => this.invalidateFrame());
-    this.background.addEventListener('contextrestored', () => this.invalidate());
+    this.visibleContextLost = false; this.backgroundContextLost = false;
+    // A lost context may silently discard drawing calls. Do not publish a new
+    // completed frame or let old projected targets remain interactive meanwhile.
+    const lose = layer => {
+      this[layer] = true; this.vehiclePoints = []; this.edgePoints = [];
+      this.events.onHover?.('', 0, 0); this.invalidate();
+    };
+    canvas.addEventListener('contextlost', () => lose('visibleContextLost'));
+    this.background.addEventListener('contextlost', () => lose('backgroundContextLost'));
+    canvas.addEventListener('contextrestored', () => { this.visibleContextLost = false; this.invalidateFrame(); });
+    this.background.addEventListener('contextrestored', () => { this.backgroundContextLost = false; this.invalidate(); });
     this.resize();
     new ResizeObserver(() => this.resize()).observe(canvas);
     canvas.addEventListener('pointermove', (event) => { const p = this.pointer(event); const edge = this.nearestRoad(p); if (this.state.editing && edge && edge.distance < 10) this.events.onHover(`${edge.edge.roadName} · click to toggle`, p.x, p.y); else this.events.onHover('', 0, 0); });
@@ -162,6 +171,7 @@ export class NetworkMap {
     if (!dashed) { ctx.save();ctx.strokeStyle=color;ctx.lineWidth=3;ctx.shadowColor=color;ctx.shadowBlur=7;ctx.beginPath();for(const segment of vehicle.segments){if(segment.startS>this.state.time||segment.endS<this.state.time-90)continue;const a=this.nodeMap.get(segment.from),b=this.nodeMap.get(segment.to),t=Math.min(1,(this.state.time-segment.startS)/(segment.endS-segment.startS)),p=this.project(a.x,a.y),q=this.project(a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t);ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);}ctx.stroke();ctx.restore(); }
   }
   render() {
+    if (this.visibleContextLost || this.backgroundContextLost) return false;
     // A DPR change can happen without a CSS-size ResizeObserver notification.
     // Only that transition needs a layout read; unchanged frames stay O(1).
     if (this.dpr !== Math.min(devicePixelRatio || 1, 2)) this.resize();

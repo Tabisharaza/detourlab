@@ -97,6 +97,20 @@ jobs:
             cat "$RUNNER_TEMP/detourlab-render-evidence/evidence.json"
           fi
 
+      - name: Verify native Canvas resize and DPR recovery
+        timeout-minutes: 3
+        run: |
+          browser="$(command -v google-chrome)"
+          test -n "$browser"
+          node tools/canvas-lifecycle-check/run.js --browser "$browser" --out "$RUNNER_TEMP/detourlab-canvas-lifecycle-evidence"
+
+      - name: Record Canvas lifecycle evidence even on failure
+        if: always()
+        run: |
+          if test -f "$RUNNER_TEMP/detourlab-canvas-lifecycle-evidence/evidence.json"; then
+            cat "$RUNNER_TEMP/detourlab-canvas-lifecycle-evidence/evidence.json"
+          fi
+
       - name: Verify synchronized split-map replay in Chromium
         timeout-minutes: 3
         run: |

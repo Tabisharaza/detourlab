@@ -64,3 +64,10 @@ These primary-source comparisons reinforce a practical need here: give
 contributors reproducible, precisely labeled measurements before making speed
 claims. DetourLab remains an original keyless synthetic disruption workbench;
 this profiler incorporates no code, assets, live feeds or data from those projects.
+
+## Canvas lifecycle follow-through
+
+[Canvas lifecycle reliability](CANVAS_LIFECYCLE.md) adds a reproducible native
+resize, hide/show and DPR consistency harness, plus separately labeled
+context-loss event handling. It does not certify native GPU loss or close every
+issue #3 acceptance criterion.

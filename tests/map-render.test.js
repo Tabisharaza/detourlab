@@ -283,3 +283,83 @@ test('restored visible and background canvas contexts repaint the appropriate la
   f.env.reset(); assert.equal(f.map.render(), false);
   assert.equal(f.ctx.operationCount + f.background.operationCount, 0);
 });
+
+for (const layer of ['visible', 'background']) test(`${layer} context loss suspends paints and stale hit targets until restoration`, t => {
+  const f = fixture(t); f.map.render();
+  const oldPoint = { ...f.map.vehiclePoints[0] };
+  const road = f.map.edgePoints[0];
+  const oldRoad = { x: (road.a.x + road.b.x) / 2, y: (road.a.y + road.b.y) / 2 };
+  const target = layer === 'visible' ? f.canvas : f.map.background;
+  target.emit('contextlost'); f.env.reset();
+  assert.deepEqual(f.map.vehiclePoints, []);
+  assert.equal(f.map.nearestRoad(oldRoad), null);
+  assert.deepEqual(f.events.hovers.at(-1), ['', 0, 0]);
+  f.canvas.emit('click', { clientX: oldPoint.x, clientY: oldPoint.y });
+  f.state.editing = true;
+  f.canvas.emit('click', { clientX: oldRoad.x, clientY: oldRoad.y });
+  assert.deepEqual(f.events.vehicles, []); assert.deepEqual(f.events.roads, []);
+  const signature = f.map.renderedFrame;
+  f.state.time = 14; f.state.zoom = 1.2;
+  for (let i = 0; i < 10; i++) assert.equal(f.map.render(), false);
+  assert.strictEqual(f.map.renderedFrame, signature);
+  assert.equal(f.ctx.operationCount + f.background.operationCount, 0);
+  f.env.resize(f.canvas, 900, 500);
+  assert.equal(f.map.render(), false);
+  target.emit('contextrestored');
+  assert.equal(f.map.render(), true);
+  assert.equal(f.background.count('setTransform'), 1);
+  assertPoint(f.map.vehiclePoints[0], f.map.project(1, .5));
+  assert.ok(f.map.edgePoints.length > 0);
+  f.state.editing = false;
+  const point = f.map.vehiclePoints[0];
+  f.canvas.emit('click', { clientX: point.x, clientY: point.y });
+  assert.deepEqual(f.events.vehicles, ['van-1']);
+  f.env.reset(); assert.equal(f.map.render(), false);
+  assert.equal(f.ctx.operationCount + f.background.operationCount, 0);
+});
+
+test('overlapping context losses require both restorations, including repeated cycles', t => {
+  const f = fixture(t); f.map.render();
+  for (let cycle = 0; cycle < 3; cycle++) {
+    f.canvas.emit('contextlost'); f.map.background.emit('contextlost');
+    f.env.reset(); f.state.time += 1;
+    f.canvas.emit('contextrestored'); assert.equal(f.map.render(), false);
+    assert.deepEqual(f.map.vehiclePoints, []);
+    assert.equal(f.ctx.operationCount + f.background.operationCount, 0);
+    f.map.background.emit('contextrestored'); assert.equal(f.map.render(), true);
+    assert.ok(f.map.vehiclePoints.length > 0);
+    f.env.reset(); assert.equal(f.map.render(), false);
+  }
+});
+
+for (const order of [['visible', 'background'], ['background', 'visible']]) test(`unchanged paused scene recovers after ${order.join(' then ')} restoration`, t => {
+  const f = fixture(t); f.map.render();
+  const points = structuredClone(f.map.vehiclePoints);
+  const targets = { visible: f.canvas, background: f.map.background };
+  targets.visible.emit('contextlost'); targets.background.emit('contextlost');
+  f.env.reset();
+  targets[order[0]].emit('contextrestored'); assert.equal(f.map.render(), false);
+  targets[order[1]].emit('contextrestored'); assert.equal(f.map.render(), true);
+  assert.deepEqual(f.map.vehiclePoints, points);
+  assert.equal(f.background.count('setTransform'), 1);
+  assert.equal(f.ctx.count('clearRect'), 1);
+  f.env.reset(); assert.equal(f.map.render(), false);
+});
+
+for (const layer of ['visible', 'background']) test(`${layer} restoration rebuilds unchanged road targets cleared by loss`, t => {
+  const f = fixture(t); f.map.render();
+  const roads = structuredClone(f.map.edgePoints);
+  const target = layer === 'visible' ? f.canvas : f.map.background;
+  target.emit('contextlost');
+  const road = roads.find(item => item.edge.id === 'bc');
+  const point = { clientX: (road.a.x + road.b.x) / 2, clientY: (road.a.y + road.b.y) / 2 };
+  f.state.editing = true;
+  f.canvas.emit('pointermove', point);
+  assert.deepEqual(f.events.hovers.at(-1), ['', 0, 0]);
+  target.emit('contextrestored'); f.env.reset();
+  assert.equal(f.map.render(), true);
+  assert.deepEqual(f.map.edgePoints, roads);
+  f.canvas.emit('click', point); assert.deepEqual(f.events.roads, ['bc']);
+  f.canvas.emit('pointermove', point); assert.match(f.events.hovers.at(-1)[0], /Second Street/);
+  f.env.reset(); assert.equal(f.map.render(), false);
+});
