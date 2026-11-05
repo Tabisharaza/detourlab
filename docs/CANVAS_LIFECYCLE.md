@@ -72,3 +72,25 @@ reinforces the value of an inspectable interactive scene. DetourLab retains its
 original synthetic logistics scope and keyless offline workflow. No reference
 code, assets or live data were copied, and popularity is not evidence of demand
 or a guarantee of adoption.
+
+## Recorded source verification — November 5, 2026
+
+[Source `fcdd349`](https://github.com/Tabisharaza/detourlab/commit/fcdd3493c40a3ec006c011f535fae9868bb83487)
+passed [hosted CI run 41983389234](https://github.com/Tabisharaza/detourlab/actions/runs/41983389234).
+The [raw lifecycle evidence](evidence/canvas-lifecycle-2026-11-05.json) is extracted
+without field changes from the job's printed JSON and retains source hashes.
+All **16 lifecycle checkpoints** passed, alongside the existing **69 browser
+checkpoints** and **four render-profile cases**. These are separate from the
+**1,240 core + 120 optional = 1,360 distinct Node tests**; the 211 CLI repetitions
+overlap the core suite. The 31-file static release passed independent byte/hash,
+allowlist and license checks, and a repeat build reproduced every byte.
+
+Local Node and build checks passed. Local native Chromium could not start due to
+an OS socket restriction, including a permitted escalation; browser evidence
+comes from the hosted job, not that failed local launch. No browser security
+flags were weakened. An additional read-only 60-cycle stand-in probe matched
+fresh road/vehicle geometry after alternating context-loss events, but is not
+included in either test count and is not native GPU-loss evidence.
+
+Independent read-only review found no remaining must-fix issue. The public demo
+has not been redeployed by this milestone; this is verified GitHub source.

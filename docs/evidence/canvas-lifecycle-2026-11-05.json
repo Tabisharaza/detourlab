@@ -1,0 +1,974 @@
+{
+  "format": "detourlab-canvas-lifecycle-check",
+  "version": 1,
+  "status": "passed",
+  "startedAt": "2026-11-05T06:54:44.994Z",
+  "runtime": {
+    "node": "v24.22.1",
+    "os": "linux",
+    "release": "7.0.0-1017-azure",
+    "arch": "x64"
+  },
+  "checks": [
+    {
+      "name": "Initial native ResizeObserver does not erase an already painted unchanged canvas",
+      "status": "passed",
+      "initial": [
+        {
+          "resizeCalls": 1,
+          "builds": 1,
+          "pixelsPreserved": true,
+          "repaint": false
+        },
+        {
+          "resizeCalls": 1,
+          "builds": 1,
+          "pixelsPreserved": true,
+          "repaint": false
+        }
+      ]
+    },
+    {
+      "name": "Initial wide canvas",
+      "status": "passed",
+      "parity": [
+        {
+          "paint": false,
+          "width": 960,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 960,
+          "pixelHeight": 420,
+          "differences": 0,
+          "nonempty": true,
+          "comparedBytes": 1612800,
+          "vehiclePointsEqual": true,
+          "roadPointsEqual": true,
+          "roadHitsEqual": true,
+          "vehicles": 24,
+          "roads": 807
+        },
+        {
+          "paint": false,
+          "width": 960,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 960,
+          "pixelHeight": 420,
+          "differences": 0,
+          "nonempty": true,
+          "comparedBytes": 1612800,
+          "vehiclePointsEqual": true,
+          "roadPointsEqual": true,
+          "roadHitsEqual": true,
+          "vehicles": 24,
+          "roads": 807
+        }
+      ],
+      "geometry": [
+        {
+          "width": 960,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 960,
+          "pixelHeight": 420,
+          "resizeCalls": 1,
+          "builds": 1,
+          "vehicles": 24,
+          "roads": 807
+        },
+        {
+          "width": 960,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 960,
+          "pixelHeight": 420,
+          "resizeCalls": 1,
+          "builds": 1,
+          "vehicles": 24,
+          "roads": 807
+        }
+      ]
+    },
+    {
+      "name": "Twenty explicit unchanged resize/render calls preserve pixels without repaint",
+      "status": "passed",
+      "unchanged": [
+        {
+          "paints": 0,
+          "buildDelta": 0,
+          "pixelsPreserved": true
+        },
+        {
+          "paints": 0,
+          "buildDelta": 0,
+          "pixelsPreserved": true
+        }
+      ]
+    },
+    {
+      "name": "Native CSS narrow resize",
+      "status": "passed",
+      "parity": [
+        {
+          "paint": true,
+          "width": 320,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 320,
+          "pixelHeight": 420,
+          "differences": 0,
+          "nonempty": true,
+          "comparedBytes": 537600,
+          "vehiclePointsEqual": true,
+          "roadPointsEqual": true,
+          "roadHitsEqual": true,
+          "vehicles": 24,
+          "roads": 807
+        },
+        {
+          "paint": true,
+          "width": 320,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 320,
+          "pixelHeight": 420,
+          "differences": 0,
+          "nonempty": true,
+          "comparedBytes": 537600,
+          "vehiclePointsEqual": true,
+          "roadPointsEqual": true,
+          "roadHitsEqual": true,
+          "vehicles": 24,
+          "roads": 807
+        }
+      ],
+      "geometry": [
+        {
+          "width": 320,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 320,
+          "pixelHeight": 420,
+          "resizeCalls": 22,
+          "builds": 2,
+          "vehicles": 24,
+          "roads": 807
+        },
+        {
+          "width": 320,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 320,
+          "pixelHeight": 420,
+          "resizeCalls": 22,
+          "builds": 2,
+          "vehicles": 24,
+          "roads": 807
+        }
+      ]
+    },
+    {
+      "name": "Native CSS wide resize",
+      "status": "passed",
+      "parity": [
+        {
+          "paint": true,
+          "width": 960,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 960,
+          "pixelHeight": 420,
+          "differences": 0,
+          "nonempty": true,
+          "comparedBytes": 1612800,
+          "vehiclePointsEqual": true,
+          "roadPointsEqual": true,
+          "roadHitsEqual": true,
+          "vehicles": 24,
+          "roads": 807
+        },
+        {
+          "paint": true,
+          "width": 960,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 960,
+          "pixelHeight": 420,
+          "differences": 0,
+          "nonempty": true,
+          "comparedBytes": 1612800,
+          "vehiclePointsEqual": true,
+          "roadPointsEqual": true,
+          "roadHitsEqual": true,
+          "vehicles": 24,
+          "roads": 807
+        }
+      ],
+      "geometry": [
+        {
+          "width": 960,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 960,
+          "pixelHeight": 420,
+          "resizeCalls": 23,
+          "builds": 3,
+          "vehicles": 24,
+          "roads": 807
+        },
+        {
+          "width": 960,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 960,
+          "pixelHeight": 420,
+          "resizeCalls": 23,
+          "builds": 3,
+          "vehicles": 24,
+          "roads": 807
+        }
+      ]
+    },
+    {
+      "name": "Native zero-size hide 1",
+      "status": "passed",
+      "parity": [
+        {
+          "paint": false,
+          "width": 0,
+          "height": 0,
+          "dpr": 1,
+          "pixelWidth": 0,
+          "pixelHeight": 0,
+          "differences": 0,
+          "nonempty": false,
+          "comparedBytes": 0,
+          "vehiclePointsEqual": true,
+          "roadPointsEqual": true,
+          "roadHitsEqual": true,
+          "vehicles": 0,
+          "roads": 0
+        },
+        {
+          "paint": false,
+          "width": 0,
+          "height": 0,
+          "dpr": 1,
+          "pixelWidth": 0,
+          "pixelHeight": 0,
+          "differences": 0,
+          "nonempty": false,
+          "comparedBytes": 0,
+          "vehiclePointsEqual": true,
+          "roadPointsEqual": true,
+          "roadHitsEqual": true,
+          "vehicles": 0,
+          "roads": 0
+        }
+      ],
+      "geometry": [
+        {
+          "width": 0,
+          "height": 0,
+          "dpr": 1,
+          "pixelWidth": 0,
+          "pixelHeight": 0,
+          "resizeCalls": 24,
+          "builds": 3,
+          "vehicles": 0,
+          "roads": 0
+        },
+        {
+          "width": 0,
+          "height": 0,
+          "dpr": 1,
+          "pixelWidth": 0,
+          "pixelHeight": 0,
+          "resizeCalls": 24,
+          "builds": 3,
+          "vehicles": 0,
+          "roads": 0
+        }
+      ]
+    },
+    {
+      "name": "Native show restores fresh pixels 1",
+      "status": "passed",
+      "parity": [
+        {
+          "paint": true,
+          "width": 960,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 960,
+          "pixelHeight": 420,
+          "differences": 0,
+          "nonempty": true,
+          "comparedBytes": 1612800,
+          "vehiclePointsEqual": true,
+          "roadPointsEqual": true,
+          "roadHitsEqual": true,
+          "vehicles": 24,
+          "roads": 807
+        },
+        {
+          "paint": true,
+          "width": 960,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 960,
+          "pixelHeight": 420,
+          "differences": 0,
+          "nonempty": true,
+          "comparedBytes": 1612800,
+          "vehiclePointsEqual": true,
+          "roadPointsEqual": true,
+          "roadHitsEqual": true,
+          "vehicles": 24,
+          "roads": 807
+        }
+      ],
+      "geometry": [
+        {
+          "width": 960,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 960,
+          "pixelHeight": 420,
+          "resizeCalls": 25,
+          "builds": 4,
+          "vehicles": 24,
+          "roads": 807
+        },
+        {
+          "width": 960,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 960,
+          "pixelHeight": 420,
+          "resizeCalls": 25,
+          "builds": 4,
+          "vehicles": 24,
+          "roads": 807
+        }
+      ]
+    },
+    {
+      "name": "Native zero-size hide 2",
+      "status": "passed",
+      "parity": [
+        {
+          "paint": false,
+          "width": 0,
+          "height": 0,
+          "dpr": 1,
+          "pixelWidth": 0,
+          "pixelHeight": 0,
+          "differences": 0,
+          "nonempty": false,
+          "comparedBytes": 0,
+          "vehiclePointsEqual": true,
+          "roadPointsEqual": true,
+          "roadHitsEqual": true,
+          "vehicles": 0,
+          "roads": 0
+        },
+        {
+          "paint": false,
+          "width": 0,
+          "height": 0,
+          "dpr": 1,
+          "pixelWidth": 0,
+          "pixelHeight": 0,
+          "differences": 0,
+          "nonempty": false,
+          "comparedBytes": 0,
+          "vehiclePointsEqual": true,
+          "roadPointsEqual": true,
+          "roadHitsEqual": true,
+          "vehicles": 0,
+          "roads": 0
+        }
+      ],
+      "geometry": [
+        {
+          "width": 0,
+          "height": 0,
+          "dpr": 1,
+          "pixelWidth": 0,
+          "pixelHeight": 0,
+          "resizeCalls": 26,
+          "builds": 4,
+          "vehicles": 0,
+          "roads": 0
+        },
+        {
+          "width": 0,
+          "height": 0,
+          "dpr": 1,
+          "pixelWidth": 0,
+          "pixelHeight": 0,
+          "resizeCalls": 26,
+          "builds": 4,
+          "vehicles": 0,
+          "roads": 0
+        }
+      ]
+    },
+    {
+      "name": "Native show restores fresh pixels 2",
+      "status": "passed",
+      "parity": [
+        {
+          "paint": true,
+          "width": 960,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 960,
+          "pixelHeight": 420,
+          "differences": 0,
+          "nonempty": true,
+          "comparedBytes": 1612800,
+          "vehiclePointsEqual": true,
+          "roadPointsEqual": true,
+          "roadHitsEqual": true,
+          "vehicles": 24,
+          "roads": 807
+        },
+        {
+          "paint": true,
+          "width": 960,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 960,
+          "pixelHeight": 420,
+          "differences": 0,
+          "nonempty": true,
+          "comparedBytes": 1612800,
+          "vehiclePointsEqual": true,
+          "roadPointsEqual": true,
+          "roadHitsEqual": true,
+          "vehicles": 24,
+          "roads": 807
+        }
+      ],
+      "geometry": [
+        {
+          "width": 960,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 960,
+          "pixelHeight": 420,
+          "resizeCalls": 27,
+          "builds": 5,
+          "vehicles": 24,
+          "roads": 807
+        },
+        {
+          "width": 960,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 960,
+          "pixelHeight": 420,
+          "resizeCalls": 27,
+          "builds": 5,
+          "vehicles": 24,
+          "roads": 807
+        }
+      ]
+    },
+    {
+      "name": "DPR-only transition to 1.5",
+      "status": "passed",
+      "parity": [
+        {
+          "paint": true,
+          "width": 960,
+          "height": 420,
+          "dpr": 1.5,
+          "pixelWidth": 1440,
+          "pixelHeight": 630,
+          "differences": 0,
+          "nonempty": true,
+          "comparedBytes": 3628800,
+          "vehiclePointsEqual": true,
+          "roadPointsEqual": true,
+          "roadHitsEqual": true,
+          "vehicles": 24,
+          "roads": 807
+        },
+        {
+          "paint": true,
+          "width": 960,
+          "height": 420,
+          "dpr": 1.5,
+          "pixelWidth": 1440,
+          "pixelHeight": 630,
+          "differences": 0,
+          "nonempty": true,
+          "comparedBytes": 3628800,
+          "vehiclePointsEqual": true,
+          "roadPointsEqual": true,
+          "roadHitsEqual": true,
+          "vehicles": 24,
+          "roads": 807
+        }
+      ],
+      "geometry": [
+        {
+          "width": 960,
+          "height": 420,
+          "dpr": 1.5,
+          "pixelWidth": 1440,
+          "pixelHeight": 630,
+          "resizeCalls": 28,
+          "builds": 6,
+          "vehicles": 24,
+          "roads": 807
+        },
+        {
+          "width": 960,
+          "height": 420,
+          "dpr": 1.5,
+          "pixelWidth": 1440,
+          "pixelHeight": 630,
+          "resizeCalls": 28,
+          "builds": 6,
+          "vehicles": 24,
+          "roads": 807
+        }
+      ]
+    },
+    {
+      "name": "DPR-only transition to 2",
+      "status": "passed",
+      "parity": [
+        {
+          "paint": true,
+          "width": 960,
+          "height": 420,
+          "dpr": 2,
+          "pixelWidth": 1920,
+          "pixelHeight": 840,
+          "differences": 0,
+          "nonempty": true,
+          "comparedBytes": 6451200,
+          "vehiclePointsEqual": true,
+          "roadPointsEqual": true,
+          "roadHitsEqual": true,
+          "vehicles": 24,
+          "roads": 807
+        },
+        {
+          "paint": true,
+          "width": 960,
+          "height": 420,
+          "dpr": 2,
+          "pixelWidth": 1920,
+          "pixelHeight": 840,
+          "differences": 0,
+          "nonempty": true,
+          "comparedBytes": 6451200,
+          "vehiclePointsEqual": true,
+          "roadPointsEqual": true,
+          "roadHitsEqual": true,
+          "vehicles": 24,
+          "roads": 807
+        }
+      ],
+      "geometry": [
+        {
+          "width": 960,
+          "height": 420,
+          "dpr": 2,
+          "pixelWidth": 1920,
+          "pixelHeight": 840,
+          "resizeCalls": 29,
+          "builds": 7,
+          "vehicles": 24,
+          "roads": 807
+        },
+        {
+          "width": 960,
+          "height": 420,
+          "dpr": 2,
+          "pixelWidth": 1920,
+          "pixelHeight": 840,
+          "resizeCalls": 29,
+          "builds": 7,
+          "vehicles": 24,
+          "roads": 807
+        }
+      ]
+    },
+    {
+      "name": "DPR-only transition to 3",
+      "status": "passed",
+      "parity": [
+        {
+          "paint": false,
+          "width": 960,
+          "height": 420,
+          "dpr": 2,
+          "pixelWidth": 1920,
+          "pixelHeight": 840,
+          "differences": 0,
+          "nonempty": true,
+          "comparedBytes": 6451200,
+          "vehiclePointsEqual": true,
+          "roadPointsEqual": true,
+          "roadHitsEqual": true,
+          "vehicles": 24,
+          "roads": 807
+        },
+        {
+          "paint": false,
+          "width": 960,
+          "height": 420,
+          "dpr": 2,
+          "pixelWidth": 1920,
+          "pixelHeight": 840,
+          "differences": 0,
+          "nonempty": true,
+          "comparedBytes": 6451200,
+          "vehiclePointsEqual": true,
+          "roadPointsEqual": true,
+          "roadHitsEqual": true,
+          "vehicles": 24,
+          "roads": 807
+        }
+      ],
+      "geometry": [
+        {
+          "width": 960,
+          "height": 420,
+          "dpr": 2,
+          "pixelWidth": 1920,
+          "pixelHeight": 840,
+          "resizeCalls": 29,
+          "builds": 7,
+          "vehicles": 24,
+          "roads": 807
+        },
+        {
+          "width": 960,
+          "height": 420,
+          "dpr": 2,
+          "pixelWidth": 1920,
+          "pixelHeight": 840,
+          "resizeCalls": 29,
+          "builds": 7,
+          "vehicles": 24,
+          "roads": 807
+        }
+      ]
+    },
+    {
+      "name": "DPR-only transition to 1",
+      "status": "passed",
+      "parity": [
+        {
+          "paint": true,
+          "width": 960,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 960,
+          "pixelHeight": 420,
+          "differences": 0,
+          "nonempty": true,
+          "comparedBytes": 1612800,
+          "vehiclePointsEqual": true,
+          "roadPointsEqual": true,
+          "roadHitsEqual": true,
+          "vehicles": 24,
+          "roads": 807
+        },
+        {
+          "paint": true,
+          "width": 960,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 960,
+          "pixelHeight": 420,
+          "differences": 0,
+          "nonempty": true,
+          "comparedBytes": 1612800,
+          "vehiclePointsEqual": true,
+          "roadPointsEqual": true,
+          "roadHitsEqual": true,
+          "vehicles": 24,
+          "roads": 807
+        }
+      ],
+      "geometry": [
+        {
+          "width": 960,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 960,
+          "pixelHeight": 420,
+          "resizeCalls": 30,
+          "builds": 8,
+          "vehicles": 24,
+          "roads": 807
+        },
+        {
+          "width": 960,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 960,
+          "pixelHeight": 420,
+          "resizeCalls": 30,
+          "builds": 8,
+          "vehicles": 24,
+          "roads": 807
+        }
+      ]
+    },
+    {
+      "name": "Two equal side-by-side panes",
+      "status": "passed",
+      "parity": [
+        {
+          "paint": true,
+          "width": 472,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 472,
+          "pixelHeight": 420,
+          "differences": 0,
+          "nonempty": true,
+          "comparedBytes": 792960,
+          "vehiclePointsEqual": true,
+          "roadPointsEqual": true,
+          "roadHitsEqual": true,
+          "vehicles": 24,
+          "roads": 807
+        },
+        {
+          "paint": true,
+          "width": 472,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 472,
+          "pixelHeight": 420,
+          "differences": 0,
+          "nonempty": true,
+          "comparedBytes": 792960,
+          "vehiclePointsEqual": true,
+          "roadPointsEqual": true,
+          "roadHitsEqual": true,
+          "vehicles": 24,
+          "roads": 807
+        }
+      ],
+      "geometry": [
+        {
+          "width": 472,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 472,
+          "pixelHeight": 420,
+          "resizeCalls": 31,
+          "builds": 9,
+          "vehicles": 24,
+          "roads": 807
+        },
+        {
+          "width": 472,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 472,
+          "pixelHeight": 420,
+          "resizeCalls": 31,
+          "builds": 9,
+          "vehicles": 24,
+          "roads": 807
+        }
+      ]
+    },
+    {
+      "name": "Narrow stacked panes",
+      "status": "passed",
+      "parity": [
+        {
+          "paint": true,
+          "width": 320,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 320,
+          "pixelHeight": 420,
+          "differences": 0,
+          "nonempty": true,
+          "comparedBytes": 537600,
+          "vehiclePointsEqual": true,
+          "roadPointsEqual": true,
+          "roadHitsEqual": true,
+          "vehicles": 24,
+          "roads": 807
+        },
+        {
+          "paint": true,
+          "width": 320,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 320,
+          "pixelHeight": 420,
+          "differences": 0,
+          "nonempty": true,
+          "comparedBytes": 537600,
+          "vehiclePointsEqual": true,
+          "roadPointsEqual": true,
+          "roadHitsEqual": true,
+          "vehicles": 24,
+          "roads": 807
+        }
+      ],
+      "geometry": [
+        {
+          "width": 320,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 320,
+          "pixelHeight": 420,
+          "resizeCalls": 32,
+          "builds": 10,
+          "vehicles": 24,
+          "roads": 807
+        },
+        {
+          "width": 320,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 320,
+          "pixelHeight": 420,
+          "resizeCalls": 32,
+          "builds": 10,
+          "vehicles": 24,
+          "roads": 807
+        }
+      ]
+    },
+    {
+      "name": "Restored side-by-side panes",
+      "status": "passed",
+      "parity": [
+        {
+          "paint": true,
+          "width": 472,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 472,
+          "pixelHeight": 420,
+          "differences": 0,
+          "nonempty": true,
+          "comparedBytes": 792960,
+          "vehiclePointsEqual": true,
+          "roadPointsEqual": true,
+          "roadHitsEqual": true,
+          "vehicles": 24,
+          "roads": 807
+        },
+        {
+          "paint": true,
+          "width": 472,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 472,
+          "pixelHeight": 420,
+          "differences": 0,
+          "nonempty": true,
+          "comparedBytes": 792960,
+          "vehiclePointsEqual": true,
+          "roadPointsEqual": true,
+          "roadHitsEqual": true,
+          "vehicles": 24,
+          "roads": 807
+        }
+      ],
+      "geometry": [
+        {
+          "width": 472,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 472,
+          "pixelHeight": 420,
+          "resizeCalls": 33,
+          "builds": 11,
+          "vehicles": 24,
+          "roads": 807
+        },
+        {
+          "width": 472,
+          "height": 420,
+          "dpr": 1,
+          "pixelWidth": 472,
+          "pixelHeight": 420,
+          "resizeCalls": 33,
+          "builds": 11,
+          "vehicles": 24,
+          "roads": 807
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Local headless Chromium with fixed synthetic state, not full-app RAF, cross-browser, performance or deployed-site certification.",
+    "DPR is changed through native Chromium device emulation, not physical monitor movement.",
+    "Two-pane layout uses isolated real canvases, not application split-view controls.",
+    "No native GPU context loss is induced or claimed. Fresh reference maps use the same current renderer, not an independent rendering implementation.",
+    "Native ResizeObserver and Canvas are not replaced; instance resize/build wrappers only count calls. Explicit unchanged resize calls are separately labeled."
+  ],
+  "sourceFiles": [
+    {
+      "path": "src/map.js",
+      "sha256": "bb58f3fd055a752d98769ef867a515191546ce1a2a9feea0f3a9bd8de7f90567"
+    },
+    {
+      "path": "src/scenario.js",
+      "sha256": "fd7e71c7219bf738547d129499496c77d0213dababfa686f171e8b6c6eb6e5b4"
+    },
+    {
+      "path": "src/engine.js",
+      "sha256": "a3fa06223fdf95b7cc1bb0b15b05da924c6d835ac13e688327262bfc080a3016"
+    },
+    {
+      "path": "tests/helpers/render-fixtures.js",
+      "sha256": "908b8a77a544e1f80493773456045f7793cb345d9d9f391005f833db2affa4e5"
+    },
+    {
+      "path": "tools/canvas-lifecycle-check/run.js",
+      "sha256": "a7e076b9ad4f2f7cb6c04eeff0cd9c3904f1479e51856c7a5c3453b88ab0bdd9"
+    },
+    {
+      "path": "tools/canvas-lifecycle-check/page.js",
+      "sha256": "f79901105a7669411f2bc4ec0930e765367204291c6a6ad20f96806ad0156e22"
+    },
+    {
+      "path": "tools/render-profile/run.js",
+      "sha256": "44e3ebea87f3bdc5b00d7630c78c80d2bc0fb623db12be91c09bdfdc97f0c8c5"
+    },
+    {
+      "path": "tools/browser-check/chromium.js",
+      "sha256": "a34c7eb7c4f52cb4f4c19b3a0b215b96722ac6233a5252fecfc890b9fe5de055"
+    },
+    {
+      "path": "tools/browser-check/run.js",
+      "sha256": "71477ddd31df21055a2c14aaa876633c1d9e10489ad3b8922dd46ec2c90daa4f"
+    },
+    {
+      "path": "scripts/serve.js",
+      "sha256": "86eb68f3acc9ffbf0bfa81dd3d41a6d84114c6f6f80c16e0ef577fb05723c06a"
+    }
+  ],
+  "sourceSha256": "7e5f3009bba10f736626238733a8adf28204ab8a10ad8b88932854673093e190",
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/156.0.8078.47",
+    "revision": "@1d17a2e2ee147bb7d6ae2ab6abdb3a2510c17775",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "jsVersion": "15.6.75.19"
+  },
+  "completedAt": "2026-11-05T06:54:48.191Z"
+}

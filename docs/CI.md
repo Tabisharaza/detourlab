@@ -409,3 +409,13 @@ The [initial publication record](PUBLICATION.md) closes the first remote-run gat
 2. Inspect the CI run for **every configured matrix version** on that exact new commit (currently Node 24.22.1 only). Record its URL, commit, runner image, Node/npm versions, and all step outcomes. A previous green run is not evidence for a changed commit; report a new run as pending until all configured jobs succeed.
 3. Investigate startup/permission failures separately from failing project checks. Do not add secrets, write permissions, or privileged triggers to make ordinary verification work.
 4. Review the browser and release evidence before publishing a changed build, and retain the existing alpha's documented QA gaps until they are actually tested. Enabling required checks or deployment is a separate maintainer decision.
+
+## November 5 Canvas lifecycle gate
+
+The [Canvas lifecycle harness](CANVAS_LIFECYCLE.md) now runs in the existing
+verification job using the installed Chromium. Its 16 bounded checkpoints retain
+raw failure/success JSON in logs and compare full pixels and hit geometry after
+native CSS resize, hide/show and emulated DPR transitions. Context-loss event
+handling is covered separately by Node stand-ins, not represented as native GPU
+loss. [Source run 41983389234](https://github.com/Tabisharaza/detourlab/actions/runs/41983389234)
+passed all stages on `fcdd3493c40a3ec006c011f535fae9868bb83487`.
