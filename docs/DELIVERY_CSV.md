@@ -115,3 +115,41 @@ reinforces making an interactive scene inspectable. DetourLab's distinct product
 need here is taking a complete synthetic delivery comparison into an existing
 review workflow. No code, assets or data were copied, and no adoption or Trending
 outcome is promised.
+
+## Recorded source verification — November 6, 2026
+
+[Source `cfaec03`](https://github.com/Tabisharaza/detourlab/commit/cfaec034b2d72ecbe168ae80ec042bd15aca0e44)
+passed [CI run 42175073010](https://github.com/Tabisharaza/detourlab/actions/runs/42175073010).
+The [raw CSV evidence](evidence/delivery-csv-2026-11-06.json) is extracted without
+field changes from the job's printed JSON. All source and screenshot hashes were
+checked against the tested bytes.
+
+- 1,307 core Node tests plus 120 optional schema/editor tests passed: **1,427
+  distinct tests**. The 211 repeated CLI checks overlap the core suite.
+- All **16 new CSV checkpoints** passed, including **14 actual completed
+  downloads** compared byte-for-byte with separate Node CLI processes. Enter and
+  Space activations generated trusted browser click events.
+- All **85 existing browser checkpoints** and **four rendering-profile cases**
+  passed separately. They are not added to the Node test total.
+- The 32-file release passed exact allowlist, source-byte, license and SHA-256
+  checks. A second build reproduced every byte, including the manifest.
+
+Review caught and corrected an incorrect filter expectation before publication.
+The first source CI then caught incomplete character data in the new keyboard
+test driver. It was fixed using the existing native-key helper and a regression
+test, retaining strict real-download/trusted-event assertions. No product
+keyboard handler was changed to accommodate the test.
+
+The local browser could not launch because the execution environment denied its
+OS socket. Native evidence is from hosted CI on Chromium 156.0.8078.79, not a
+local pass. No browser security flags were weakened. Existing native chooser,
+spreadsheet-product, physical device, screen-reader and cross-browser gaps remain.
+
+The unaltered desktop and 390px CSS-viewport captures below were visually
+inspected: the export action and complete-file/import-text guidance remain
+readable without clipping. The narrow table retains its deliberate scroll
+region. These are synthetic source captures, **not a hosted demo release**.
+
+![Desktop delivery inspector with complete CSV action and seven filtered rows](images/impact-csv-desktop-2026-11-06.jpg)
+
+![Narrow delivery inspector with readable complete-file CSV guidance](images/impact-csv-narrow-2026-11-06.jpg)

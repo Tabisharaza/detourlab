@@ -419,3 +419,16 @@ native CSS resize, hide/show and emulated DPR transitions. Context-loss event
 handling is covered separately by Node stand-ins, not represented as native GPU
 loss. [Source run 41983389234](https://github.com/Tabisharaza/detourlab/actions/runs/41983389234)
 passed all stages on `fcdd3493c40a3ec006c011f535fae9868bb83487`.
+
+## November 6 delivery CSV gate
+
+The [CSV harness](DELIVERY_CSV.md) now checks real Chromium downloads against
+separate CLI processes and complete JSON-derived rows. It covers full export
+from a paginated/filtered screen, variant switches/nulls, repeats, trusted
+Enter/Space activation, stale callbacks and zero jobs. Raw evidence and bounded
+unaltered screenshots are retained in job logs. Source run
+[42175073010](https://github.com/Tabisharaza/detourlab/actions/runs/42175073010)
+passed all 16 new checkpoints on `cfaec034b2d72ecbe168ae80ec042bd15aca0e44`,
+alongside 1,427 distinct Node tests, 85 existing browser checkpoints, four
+rendering cases and the reproducible 32-file release. Earlier keyboard-driver
+failure is documented rather than counted as a native pass.

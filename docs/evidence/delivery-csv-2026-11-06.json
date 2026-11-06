@@ -1,0 +1,534 @@
+{
+  "format": "detourlab-impact-csv-check",
+  "version": 1,
+  "status": "passed",
+  "startedAt": "2026-11-06T06:34:20.945Z",
+  "runtime": {
+    "node": "v24.22.1",
+    "os": "linux",
+    "release": "7.0.0-1017-azure",
+    "arch": "x64",
+    "nodeExecutableSha256": "e32e2d16081cf644f88392934288086e7662529d0d43277c34f7aad2207cfafb",
+    "browserLauncherSha256": "aea09d69ce7f24d5901f6bfb15dd44d0c856e793e0a498f8d8393ec7d2c308ec"
+  },
+  "checks": [
+    {
+      "name": "192-row Meridian export from 20-row page",
+      "status": "passed",
+      "rowCount": 192,
+      "cliSha256": "60e957a56cb25482c9765c0907583e42d6dd055b393f787f5374b1278a08ab3a"
+    },
+    {
+      "name": "Page two exports the same complete ledger",
+      "status": "passed",
+      "rowCount": 192,
+      "cliSha256": "60e957a56cb25482c9765c0907583e42d6dd055b393f787f5374b1278a08ab3a"
+    },
+    {
+      "name": "Seven same-status timing changes still export all 192 deliveries",
+      "status": "passed",
+      "rowCount": 192,
+      "cliSha256": "60e957a56cb25482c9765c0907583e42d6dd055b393f787f5374b1278a08ab3a"
+    },
+    {
+      "name": "Repeated download is byte-identical",
+      "status": "passed",
+      "rowCount": 192,
+      "cliSha256": "60e957a56cb25482c9765c0907583e42d6dd055b393f787f5374b1278a08ab3a"
+    },
+    {
+      "name": "Variant switch exports all-bridges-05",
+      "status": "passed",
+      "rowCount": 192,
+      "cliSha256": "8b7a397a221ac9583a12c7f7be8c1d3df623d7c8c3c71b98c1959b596c33bdf3"
+    },
+    {
+      "name": "Variant switch exports clear-roads",
+      "status": "passed",
+      "rowCount": 192,
+      "cliSha256": "f9a113b716c6c49ab36df032295bc17fa2d17a15a787107a3e077469791b998b"
+    },
+    {
+      "name": "Variant switch exports market-10",
+      "status": "passed",
+      "rowCount": 192,
+      "cliSha256": "422e41688b594c5707e5067552b33195937061cdb3612a5266e84ea47f126499"
+    },
+    {
+      "name": "Trusted Enter activation downloads CSV",
+      "status": "passed",
+      "rowCount": 192,
+      "cliSha256": "60e957a56cb25482c9765c0907583e42d6dd055b393f787f5374b1278a08ab3a"
+    },
+    {
+      "name": "Trusted Space activation downloads CSV",
+      "status": "passed",
+      "rowCount": 192,
+      "cliSha256": "60e957a56cb25482c9765c0907583e42d6dd055b393f787f5374b1278a08ab3a"
+    },
+    {
+      "name": "Closed dialog rejects forced native export callback",
+      "status": "passed"
+    },
+    {
+      "name": "Reopened comparison exports current ledger",
+      "status": "passed",
+      "rowCount": 192,
+      "cliSha256": "60e957a56cb25482c9765c0907583e42d6dd055b393f787f5374b1278a08ab3a"
+    },
+    {
+      "name": "Stale comparison rejects forced callback after recompute",
+      "status": "passed"
+    },
+    {
+      "name": "Close and reopen after recompute restores export",
+      "status": "passed",
+      "rowCount": 192,
+      "cliSha256": "60e957a56cb25482c9765c0907583e42d6dd055b393f787f5374b1278a08ab3a"
+    },
+    {
+      "name": "Tiny literal labels and nullable timing: close-at-10",
+      "status": "passed",
+      "rowCount": 1,
+      "cliSha256": "552c9d70decb422420013ef92408588a6a11522c8ee9cc2fe4675a0f31e591a0"
+    },
+    {
+      "name": "Tiny literal labels and nullable timing: unreachable",
+      "status": "passed",
+      "rowCount": 1,
+      "cliSha256": "07fb755e59335f7f4a6ddaefc3612fab9c1e4d1787b76ef3de87fc58aa42d5e1"
+    },
+    {
+      "name": "Zero-job experiment exports header only",
+      "status": "passed",
+      "rowCount": 0,
+      "cliSha256": "15ccb04bf1480217f2a12369bfc67c1fcf7c683af09aebbf998da8886106c703"
+    }
+  ],
+  "downloads": [
+    {
+      "label": "192-row Meridian export from 20-row page",
+      "file": "downloads/e4c58531-26d3-47ae-b22c-3009fb57f185",
+      "suggestedFilename": "detourlab-delivery-impact.csv",
+      "sha256": "60e957a56cb25482c9765c0907583e42d6dd055b393f787f5374b1278a08ab3a",
+      "bytes": 28988,
+      "completed": true
+    },
+    {
+      "label": "Page two exports the same complete ledger",
+      "file": "downloads/104662a7-551b-4ecc-bb03-3dc055fcefb4",
+      "suggestedFilename": "detourlab-delivery-impact.csv",
+      "sha256": "60e957a56cb25482c9765c0907583e42d6dd055b393f787f5374b1278a08ab3a",
+      "bytes": 28988,
+      "completed": true
+    },
+    {
+      "label": "Seven same-status timing changes still export all 192 deliveries",
+      "file": "downloads/b2060e68-8a5d-4f9d-b742-2a7ae7e2e51b",
+      "suggestedFilename": "detourlab-delivery-impact.csv",
+      "sha256": "60e957a56cb25482c9765c0907583e42d6dd055b393f787f5374b1278a08ab3a",
+      "bytes": 28988,
+      "completed": true
+    },
+    {
+      "label": "Repeated download is byte-identical",
+      "file": "downloads/aedebb30-4a10-41fa-9bbd-f935a7605c12",
+      "suggestedFilename": "detourlab-delivery-impact.csv",
+      "sha256": "60e957a56cb25482c9765c0907583e42d6dd055b393f787f5374b1278a08ab3a",
+      "bytes": 28988,
+      "completed": true
+    },
+    {
+      "label": "Variant switch exports all-bridges-05",
+      "file": "downloads/170b5d17-ec46-4b74-93c2-a47019bed8a5",
+      "suggestedFilename": "detourlab-delivery-impact.csv",
+      "sha256": "8b7a397a221ac9583a12c7f7be8c1d3df623d7c8c3c71b98c1959b596c33bdf3",
+      "bytes": 29009,
+      "completed": true
+    },
+    {
+      "label": "Variant switch exports clear-roads",
+      "file": "downloads/028859a5-5acf-4b36-a0f2-c5801bf32bfe",
+      "suggestedFilename": "detourlab-delivery-impact.csv",
+      "sha256": "f9a113b716c6c49ab36df032295bc17fa2d17a15a787107a3e077469791b998b",
+      "bytes": 28303,
+      "completed": true
+    },
+    {
+      "label": "Variant switch exports market-10",
+      "file": "downloads/d64d8985-be3c-419c-a498-17e1d99dbfbd",
+      "suggestedFilename": "detourlab-delivery-impact.csv",
+      "sha256": "422e41688b594c5707e5067552b33195937061cdb3612a5266e84ea47f126499",
+      "bytes": 28965,
+      "completed": true
+    },
+    {
+      "label": "Trusted Enter activation downloads CSV",
+      "file": "downloads/75c48e11-4f50-4990-a38d-29b1cbf659e6",
+      "suggestedFilename": "detourlab-delivery-impact.csv",
+      "sha256": "60e957a56cb25482c9765c0907583e42d6dd055b393f787f5374b1278a08ab3a",
+      "bytes": 28988,
+      "completed": true
+    },
+    {
+      "label": "Trusted Space activation downloads CSV",
+      "file": "downloads/36034057-5faf-4517-aeae-b572d05ae0f8",
+      "suggestedFilename": "detourlab-delivery-impact.csv",
+      "sha256": "60e957a56cb25482c9765c0907583e42d6dd055b393f787f5374b1278a08ab3a",
+      "bytes": 28988,
+      "completed": true
+    },
+    {
+      "label": "Reopened comparison exports current ledger",
+      "file": "downloads/b5d75164-7a25-4188-a052-57eb88d98115",
+      "suggestedFilename": "detourlab-delivery-impact.csv",
+      "sha256": "60e957a56cb25482c9765c0907583e42d6dd055b393f787f5374b1278a08ab3a",
+      "bytes": 28988,
+      "completed": true
+    },
+    {
+      "label": "Close and reopen after recompute restores export",
+      "file": "downloads/0a7a8af3-3d59-4414-ba92-221cfe429d8d",
+      "suggestedFilename": "detourlab-delivery-impact.csv",
+      "sha256": "60e957a56cb25482c9765c0907583e42d6dd055b393f787f5374b1278a08ab3a",
+      "bytes": 28988,
+      "completed": true
+    },
+    {
+      "label": "Tiny literal labels and nullable timing: close-at-10",
+      "file": "downloads/51b625fb-5b69-4cac-8fae-906026d20155",
+      "suggestedFilename": "detourlab-delivery-impact.csv",
+      "sha256": "552c9d70decb422420013ef92408588a6a11522c8ee9cc2fe4675a0f31e591a0",
+      "bytes": 421,
+      "completed": true
+    },
+    {
+      "label": "Tiny literal labels and nullable timing: unreachable",
+      "file": "downloads/d33d59ab-e449-4821-b263-54aeb96618df",
+      "suggestedFilename": "detourlab-delivery-impact.csv",
+      "sha256": "07fb755e59335f7f4a6ddaefc3612fab9c1e4d1787b76ef3de87fc58aa42d5e1",
+      "bytes": 374,
+      "completed": true
+    },
+    {
+      "label": "Zero-job experiment exports header only",
+      "file": "downloads/7446a85c-fd55-4587-8e9d-448e4cdeb923",
+      "suggestedFilename": "detourlab-delivery-impact.csv",
+      "sha256": "15ccb04bf1480217f2a12369bfc67c1fcf7c683af09aebbf998da8886106c703",
+      "bytes": 260,
+      "completed": true
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "impact-csv-desktop.jpg",
+      "sha256": "e3e3d9c2120a722327eeeb0b2b7cc42311e98af7b794e12d7f57997ca7e759b6",
+      "bytes": 98592,
+      "viewport": {
+        "width": 1600,
+        "height": 1100,
+        "deviceScaleFactor": 1,
+        "mobile": false
+      },
+      "geometry": {
+        "button": {
+          "x": 341.5,
+          "y": 264.6875,
+          "width": 186.71875,
+          "height": 44,
+          "right": 528.21875,
+          "bottom": 308.6875
+        },
+        "status": {
+          "x": 341.5,
+          "y": 316.6875,
+          "width": 887,
+          "height": 21.59375,
+          "right": 1228.5,
+          "bottom": 338.28125
+        },
+        "dialog": {
+          "x": 292.5,
+          "y": 82.5,
+          "width": 1000,
+          "height": 935,
+          "right": 1292.5,
+          "bottom": 1017.5
+        },
+        "viewport": {
+          "width": 1600,
+          "height": 1100
+        },
+        "overflow": false
+      },
+      "meaning": "Raw export controls capture. Visual review remains separate."
+    },
+    {
+      "file": "impact-csv-narrow.jpg",
+      "sha256": "33de9ad47ce6cba4561530734d77f02175105f990f2a500349bb11571049c1ee",
+      "bytes": 50063,
+      "viewport": {
+        "width": 390,
+        "height": 1100,
+        "deviceScaleFactor": 1,
+        "mobile": false
+      },
+      "geometry": {
+        "button": {
+          "x": 50,
+          "y": 320.875,
+          "width": 186.71875,
+          "height": 44,
+          "right": 236.71875,
+          "bottom": 364.875
+        },
+        "status": {
+          "x": 50,
+          "y": 372.875,
+          "width": 260,
+          "height": 86.375,
+          "right": 310,
+          "bottom": 459.25
+        },
+        "dialog": {
+          "x": 16,
+          "y": 82.5,
+          "width": 343,
+          "height": 935,
+          "right": 359,
+          "bottom": 1017.5
+        },
+        "viewport": {
+          "width": 390,
+          "height": 1100
+        },
+        "overflow": false
+      },
+      "meaning": "Raw export controls capture. Visual review remains separate."
+    }
+  ],
+  "limitations": [
+    "Local headless Chromium and synthetic fixtures only; not deployed, cross-browser, native chooser, mobile-device or assistive-technology certification.",
+    "Native Worker, object-URL and listener wrappers observe unchanged implementations. Retained callbacks are directly invoked only for explicit stale-state negative tests.",
+    "CDP keyboard events are bounded integration evidence, not human usability testing. Screenshots are raw captures; hashes are not visual review."
+  ],
+  "sourceFiles": [
+    {
+      "path": "index.html",
+      "sha256": "18851f2992fd2a835480c4177de42e547a57610312a815fff50ef13002e35ac9"
+    },
+    {
+      "path": "scripts/benchmark.js",
+      "sha256": "84d75732593e415e98dec42609b0c98baf2155de08bbcf2241462409afb406bd"
+    },
+    {
+      "path": "scripts/build.js",
+      "sha256": "4d555752e8eb751f1860e76356e227e726ff29ecf321650fe68db447d8dddafe"
+    },
+    {
+      "path": "scripts/check.js",
+      "sha256": "2e9c6e9467082c795c9ace946c06dae43e9c6cfb88fe88291225bebafa70f4b5"
+    },
+    {
+      "path": "scripts/cli-arguments.js",
+      "sha256": "af34a4d974e897f04702f7abc449afba6914ce6407bdf32aa4dc4afed8be62d2"
+    },
+    {
+      "path": "scripts/cli-display.js",
+      "sha256": "d2d94269e98efd142a5f154fca75a57d7b5a7955330ee33f9606fa737c5cb135"
+    },
+    {
+      "path": "scripts/compare-cutoffs.js",
+      "sha256": "98205943f7085bf8de7c33e22933f458df055988b727700a874f40effb5f195d"
+    },
+    {
+      "path": "scripts/compare-seeds.js",
+      "sha256": "b7b51aaafd3f559b5a16a5e793163d22ad9a8f3ec6ef3414bf2356013a2e9eca"
+    },
+    {
+      "path": "scripts/cutoff-comparison.js",
+      "sha256": "cd0f1d63ad234e182b05f74b4eeb71bb3d22e2b1aa70077e0ba4ac3a08cc9fae"
+    },
+    {
+      "path": "scripts/cutoff-experiment.js",
+      "sha256": "ce55391220cb9ff63bcf02591685ad04d73c8976ae134bd4f4def8c585651c54"
+    },
+    {
+      "path": "scripts/experiment-report.js",
+      "sha256": "3ad938a90615f20ad92b4ca9962caa8ee87eff650158fa70e906b27fb5aac622"
+    },
+    {
+      "path": "scripts/explain-experiment.js",
+      "sha256": "a10ec078c7edc81aa507bb7eb898f02b586c8f8751a20c960ac721d8f96619b3"
+    },
+    {
+      "path": "scripts/job-gates.js",
+      "sha256": "2fcd8eda96e61e9f6434a8567a3aabd2d3bf48aa080e237a8de90a6364cf7039"
+    },
+    {
+      "path": "scripts/job-impact.js",
+      "sha256": "31f3fa400cfe49dab36ffdf369604fa0ac523b1e72b966678a4e50c725f8c8e8"
+    },
+    {
+      "path": "scripts/measure-render-counts.js",
+      "sha256": "3ded58b276d50248a0e08c03351c9f1d4ace7272f9d52c0f0bae06556ce350a2"
+    },
+    {
+      "path": "scripts/meridian-study.js",
+      "sha256": "689dfb55e90fb828ab0cbda2a7b6f58a9827ed6e7a75cb60f3cf1acbfc814627"
+    },
+    {
+      "path": "scripts/read-input.js",
+      "sha256": "fbc500cb2a0e2b14e07ff2274b4e8bd50d4059a43cbd6aec97985aaabd01b941"
+    },
+    {
+      "path": "scripts/report-experiment.js",
+      "sha256": "8da01aca86416215dd2c612ea4617aadc822c2aff9ebb68a8043c0a01e6e62a0"
+    },
+    {
+      "path": "scripts/report-identity.js",
+      "sha256": "4c7815d05c78089a65f3d5950b5b19db05635c4979011228b38c1c3ddcf27b5c"
+    },
+    {
+      "path": "scripts/review-verification.js",
+      "sha256": "298876691aa6d2a91ba1ed12b9adfe8af59cdd9733a778293a54851feb35dab9"
+    },
+    {
+      "path": "scripts/run-experiment.js",
+      "sha256": "60ed2e894c511f76d08900c0d18ac958509708041eb3a614de60706eab1d9630"
+    },
+    {
+      "path": "scripts/run-scenario.js",
+      "sha256": "18b7f2e922727bf6c7560855dc48750bbe1f83e097cfdff454e3c173de439d27"
+    },
+    {
+      "path": "scripts/serve-options.js",
+      "sha256": "c8aecec23dab0b9a6278d4d5c53940117747c882b359c2d2522c3264867ed08d"
+    },
+    {
+      "path": "scripts/serve.js",
+      "sha256": "86eb68f3acc9ffbf0bfa81dd3d41a6d84114c6f6f80c16e0ef577fb05723c06a"
+    },
+    {
+      "path": "scripts/verify-dist.js",
+      "sha256": "6e3903f1a8cac9c5452f77c907656c68c27452d217bf088f65d192c086c0112b"
+    },
+    {
+      "path": "scripts/verify-review.js",
+      "sha256": "f17aca9d1e8171ccdb3442950f5373ceda1c3a0df3c4ff0da2472f703edf5b27"
+    },
+    {
+      "path": "scripts/write-review-packet.js",
+      "sha256": "f2c3ac0b61e299aca160143838d77bb093f2e02d0e8314b6253e394c0e131321"
+    },
+    {
+      "path": "src/app.js",
+      "sha256": "c9b82600ad8f38222cff8c09f5c27304865a0335a933cbd72cfc4e368811b59e"
+    },
+    {
+      "path": "src/browser-impact.js",
+      "sha256": "b414b6d19fe103dd34e2be03a419ec26be6d55c3bcae661d42e6e074efd03ff3"
+    },
+    {
+      "path": "src/browser-review.js",
+      "sha256": "e3cf75b29aa5234f1dad3115d35fb37eb4c27f50157d4e82b0177c4e90f31dfb"
+    },
+    {
+      "path": "src/cutoff-comparison.js",
+      "sha256": "12339235403d492fb0b483ca4ebe5c52965735129eb3727bc07ff6c3719eaebe"
+    },
+    {
+      "path": "src/cutoff-experiment.js",
+      "sha256": "0c2daf9a919bc6cbe85a27d53004de5b6eed296ad0d93b870aa3802c5b99ab9b"
+    },
+    {
+      "path": "src/engine.js",
+      "sha256": "a3fa06223fdf95b7cc1bb0b15b05da924c6d835ac13e688327262bfc080a3016"
+    },
+    {
+      "path": "src/experiment-history.js",
+      "sha256": "44f8c674b01384694a2a1d5b61889c7b310a97d9034e36a265af10f08098a24e"
+    },
+    {
+      "path": "src/experiment-report.js",
+      "sha256": "656062cf1fac1d8db80dae9b075de23ff8c505d35bf941f0c420e05d8663258d"
+    },
+    {
+      "path": "src/experiment.js",
+      "sha256": "efb77801be428839dd677df9a8c5fc62812709062b20eacb0d93a39576f1eff3"
+    },
+    {
+      "path": "src/file-input.js",
+      "sha256": "9d34d0b01eff790e25d4e2f2edef56d8b4bfc6c608b266f471f932ea0bfc048a"
+    },
+    {
+      "path": "src/job-gates.js",
+      "sha256": "bd5d905cb85a3265167d58c12e67f24ab18e67e66e726631f88b805fad24e732"
+    },
+    {
+      "path": "src/job-impact-csv.js",
+      "sha256": "f0c4836c88b428c5b1ca6c6baa0e2dd4ef4febe95b0e2086a65bec88ec7a5a90"
+    },
+    {
+      "path": "src/job-impact.js",
+      "sha256": "537d07bd5f89114cbaca0939d563aaa9cfbebf1ddc371fdfec1fe06b78a91948"
+    },
+    {
+      "path": "src/map.js",
+      "sha256": "bb58f3fd055a752d98769ef867a515191546ce1a2a9feea0f3a9bd8de7f90567"
+    },
+    {
+      "path": "src/replay-bookmark.js",
+      "sha256": "621a22f480f407d5f6ce2e809c820cd290a410e814ea2cb1deb294d74553dd8b"
+    },
+    {
+      "path": "src/replay-events.js",
+      "sha256": "d66879fc9c6095f9667be89256d1e6ca96ddd55fefe944e002cb3736fbb5936e"
+    },
+    {
+      "path": "src/report-results.js",
+      "sha256": "1d5877f77381a63ba68b54f809a07cb879d6357954a5a2a9d8f48c733934ca43"
+    },
+    {
+      "path": "src/scenario.js",
+      "sha256": "fd7e71c7219bf738547d129499496c77d0213dababfa686f171e8b6c6eb6e5b4"
+    },
+    {
+      "path": "src/simulation-worker.js",
+      "sha256": "3f6e4f882485a0f59d8c80af496dc6ae9acb2667ddaebe33e4db10b43276052c"
+    },
+    {
+      "path": "src/style.css",
+      "sha256": "245c083e0d0a4777799b907e9940697e73d099180e8f5cb7af116216c42af7cf"
+    },
+    {
+      "path": "src/tutorial.js",
+      "sha256": "a2b310e8a476ab245c9c4a7c2814c73c8407fce92d20b7b35be5765919f2ccea"
+    },
+    {
+      "path": "tools/browser-check/chromium.js",
+      "sha256": "a34c7eb7c4f52cb4f4c19b3a0b215b96722ac6233a5252fecfc890b9fe5de055"
+    },
+    {
+      "path": "tools/browser-check/run.js",
+      "sha256": "71477ddd31df21055a2c14aaa876633c1d9e10489ad3b8922dd46ec2c90daa4f"
+    },
+    {
+      "path": "tools/impact-csv-check/run.js",
+      "sha256": "d8ffdf0cbf1afeb4253e0a5182a00109b26a34ce65edfa956767d7b1c30986f1"
+    },
+    {
+      "path": "tools/replay-events-check/run.js",
+      "sha256": "ae375e0505e115073f4f0dd8d782cba340f52fc9caa94ebfde8944a14bf41a0e"
+    }
+  ],
+  "sourceSha256": "919d3e1959aeebf915da6ef9ceba8117cacd8f6a45efa4bdb5f8181eef4026f0",
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/156.0.8078.79",
+    "revision": "@a21ce95c24ce3964416f09ae1862f53f319eb4d0",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "jsVersion": "15.6.75.27"
+  },
+  "completedAt": "2026-11-06T06:34:29.884Z"
+}
