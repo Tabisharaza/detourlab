@@ -134,6 +134,7 @@
     <div class="eyebrow">DETOURLAB / DELIVERY OUTCOMES</div>
     <h2 id="impact-dialog-title" tabindex="-1">Which deliveries changed?</h2>
     <p id="impact-description">Compare the selected variant with the same clear-road baseline, using this completed run. Each value reads baseline → variant. Times and signed changes are in seconds; arrival deadlines determine lateness.</p>
+    <div class="impact-export"><button id="impact-download-csv" class="button" type="button" aria-describedby="impact-export-status" disabled>Download all deliveries CSV</button><p id="impact-export-status" role="status" aria-live="polite">CSV unavailable until a completed comparison is open.</p></div>
     <div class="impact-controls">
       <div><label for="impact-variant">Compare variant</label><select id="impact-variant" disabled></select></div>
       <div><label for="impact-filter">Show deliveries</label><select id="impact-filter" disabled><option value="changed">Changed outcomes</option><option value="status">Status changes</option><option value="timing">Same-status arrival changes</option><option value="all">All deliveries</option></select></div>

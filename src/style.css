@@ -38,3 +38,8 @@
 
 /* Session-only input history. Native buttons leave text editing shortcuts alone. */
 .edit-history{margin-top:14px;padding-top:12px;border-top:1px solid #334548}.history-actions{display:flex;flex-wrap:wrap;gap:8px}.history-actions .button{min-height:44px;flex:1;font-size:12px}.history-actions button:disabled{opacity:.5;cursor:not-allowed}.edit-history p{font-size:11px;line-height:1.6;overflow-wrap:anywhere;margin:8px 0 0}#history-status{color:#d5e9c1}#history-help{color:#9db2c0}
+
+/* Keep the full-report export distinct from paginated screen controls. */
+.impact-export { margin: 16px 0; padding: 12px; border: 1px solid #40545d; border-radius: 8px; }
+.impact-export .button { max-width: 100%; white-space: normal; min-height: 44px; }
+.impact-export p { margin: 8px 0 0; overflow-wrap: anywhere; }

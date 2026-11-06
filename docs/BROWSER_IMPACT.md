@@ -52,3 +52,11 @@ node scripts/verify-dist.js
 Focused tests cover exact CLI/report parity for all tiny and Meridian variants; 125/118/seven distinct counts; every filtered page and all 2,000 supported jobs; unreachable nulls; fractional engine tolerance; no simulation or mutation; stale/edit/import/cancel/reset/lesson/repeated-run flows; forced disabled dispatch; safe imported labels; keyboard focus, Escape and deferred close notifications; and bounded errors.
 
 Before claiming a native-browser release, separately exercise actual keyboard traversal and focus visibility, horizontal table scrolling, last/first page transitions, Escape/reopen, selection and filter announcements with assistive technology, 200% zoom, narrow/mobile layouts, reduced motion and other browsers. Run native import/recompute/cancel paths too. No screenshots or native-browser observations have been produced for this source milestone.
+
+## Complete CSV download
+
+The source inspector now offers **Download all deliveries CSV**. It exports the
+selected variant's full completed comparison regardless of filter or page,
+using the same deterministic serializer as the CLI. [Format, text precautions
+and verification](DELIVERY_CSV.md) distinguish this source feature from hosted
+deployment and spreadsheet-product testing.

@@ -121,6 +121,13 @@ DPR transitions with fresh-render pixels and hit geometry. Separate context-loss
 event handling suspends stale targets and restores the scene. Native GPU loss,
 physical devices and deployment remain explicitly separate.
 
+## Implemented in source: portable delivery-impact CSV
+
+[Complete CSV exports](DELIVERY_CSV.md) bridge the headless explainer and browser
+inspector to spreadsheet review without rerunning completed browser results.
+All rows, exact timing differences, explicit missing values and bounded text
+protections remain separate from acceptance or deployment claims.
+
 ## Release-readiness gates
 
 1. Publish a truthful README, live demo link, actual screenshot and model assumptions.

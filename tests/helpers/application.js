@@ -1,3 +1,4 @@
+import { renderJobImpactCsv } from '../../src/job-impact-csv.js';
 import * as experimentHistory from '../../src/experiment-history.js';
 import * as replayBookmark from '../../src/replay-bookmark.js';
 import * as replayEvents from '../../src/replay-events.js';
@@ -14,7 +15,7 @@ import { createTutorialExperiment } from '../../src/tutorial.js';
 
 // Execute only checked-in app source with DOM/Worker stand-ins. This covers
 // handler state and result rendering, never browser layout, file pickers or QA.
-export function application({ workerConstructionError = () => null, mapClass = null, now = () => performance.now(), deferDialogClose = false, reviewBuilder = createBrowserReview, impactBuilder = createBrowserImpact, replayEventsBuilder = replayEvents.createReplayEvents } = {}) {
+export function application({ workerConstructionError = () => null, mapClass = null, now = () => performance.now(), deferDialogClose = false, reviewBuilder = createBrowserReview, impactBuilder = createBrowserImpact, impactCsvBuilder = renderJobImpactCsv, replayEventsBuilder = replayEvents.createReplayEvents } = {}) {
   const created = [];
   const markup = readFileSync(new URL('../../index.html', import.meta.url), 'utf8');
   const closeEvents = [];
@@ -170,7 +171,7 @@ export function application({ workerConstructionError = () => null, mapClass = n
   const windowListeners = new Map();
   const window = { addEventListener(name, handler) { if (!windowListeners.has(name)) windowListeners.set(name, []); windowListeners.get(name).push(handler); } };
   const environment = {
-    ...experimentHistory, ...scenarioSchema, ...experimentSchema, ...fileInput, ...replayBookmark, ...replayEvents, createReplayEvents: replayEventsBuilder, createCutoffExperiment, normalizeCutoffTimes, summarizeCutoffResults, normalizePolicy, createBrowserReview: reviewBuilder, createBrowserImpact: impactBuilder, pageDeliveryImpact, createTutorialExperiment, document, getComputedStyle: computedStyle, NetworkMap: mapClass ? class extends mapClass {
+    ...experimentHistory, ...scenarioSchema, ...experimentSchema, ...fileInput, ...replayBookmark, ...replayEvents, createReplayEvents: replayEventsBuilder, createCutoffExperiment, normalizeCutoffTimes, summarizeCutoffResults, normalizePolicy, createBrowserReview: reviewBuilder, createBrowserImpact: impactBuilder, renderJobImpactCsv: impactCsvBuilder, pageDeliveryImpact, createTutorialExperiment, document, getComputedStyle: computedStyle, NetworkMap: mapClass ? class extends mapClass {
       constructor(...args) { super(...args); maps.push(this); }
     } : NetworkMap, Worker: FakeWorker,
     URL, Blob, TextEncoder, TextDecoder, performance: { now }, structuredClone,

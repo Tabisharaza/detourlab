@@ -77,3 +77,10 @@ npm run check
 ```
 
 Tests cover the tiny cutoff boundary, same-status arrival shifts, skipped-work nulls, input order, baseline lateness, fractional deadline tolerance, immutable inputs, deterministic hashes and output, safe human labels, byte limits, failed budgets and hostile/nonregular files. These are Node API and subprocess checks. They do not close native browser import/export or rendering-profile issues.
+
+## Spreadsheet review
+
+Use `--csv` for the complete [delivery-impact CSV](DELIVERY_CSV.md), including
+unchanged and unreachable jobs. JSON and human output retain their existing
+contracts. CSV applies explicit spreadsheet-oriented text transformations and
+blank missing timings; it is not a lossless machine format.

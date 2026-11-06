@@ -5,6 +5,7 @@ import { createDemoScenario, createPresets, validateScenario, LIMITS } from './s
 import { experimentFromScenario, validateExperiment, parseExperiment, scenarioForVariant, exportExperiment, EXPERIMENT_LIMITS } from './experiment.js';
 import { createBrowserReview } from './browser-review.js';
 import { createBrowserImpact, pageDeliveryImpact } from './browser-impact.js';
+import { renderJobImpactCsv } from './job-impact-csv.js';
 import { createCutoffExperiment, normalizeCutoffTimes } from './cutoff-experiment.js';
 import { summarizeCutoffResults } from './cutoff-comparison.js';
 import { normalizePolicy } from './experiment-report.js';
@@ -767,9 +768,10 @@ function invalidateImpact() {
   inspectedImpact = null; impactPage = 0;
   // Move focus before disabling a control or hiding its scroll region.
   if ($('impact-dialog').open && $('impact-dialog').contains(document.activeElement) && document.activeElement !== $('impact-close')) focusFirst([$('impact-close')]);
-  for (const id of ['impact-variant', 'impact-filter', 'impact-previous', 'impact-next']) $(id).disabled = true;
+  for (const id of ['impact-download-csv', 'impact-variant', 'impact-filter', 'impact-previous', 'impact-next']) $(id).disabled = true;
   $('impact-rows').replaceChildren(); $('impact-table-region').hidden = true;
   $('impact-summary').textContent = ''; $('impact-metrics').textContent = '';
+  $('impact-export-status').textContent = 'CSV unavailable until a completed comparison is open.';
   $('impact-status').textContent = 'Results changed. Close this window and finish a new run before inspecting deliveries.';
   updateImpactAvailability();
 }
@@ -783,6 +785,8 @@ function updateImpactSelection() {
 function renderImpact() {
   if (!$('impact-dialog').open || !impactIsCurrent() || inspectedImpact.report.variant.id !== state.selectedVariantId) { invalidateImpact(); return; }
   const report = inspectedImpact.report, summary = report.summary;
+  $('impact-download-csv').disabled = false;
+  $('impact-export-status').textContent = `CSV includes all ${summary.totalJobs} deliveries for ${report.variant.name}, regardless of the filter or page. Missing timings are blank, not zero. Import identifier and name columns as text in your spreadsheet.`;
   const page = pageDeliveryImpact(report, $('impact-filter').value, impactPage);
   impactPage = page.pageIndex;
   $('impact-summary').textContent = `${summary.changedJobs} of ${summary.totalJobs} delivery outcomes changed; ${summary.unchangedJobs} unchanged. Status changes: ${summary.statusChangedJobs}. Arrival changes: ${summary.arrivalChangedJobs}. Same-status arrival changes: ${report.sameStatusArrivalChanges}.`;
@@ -822,6 +826,22 @@ function inspectDeliveries() {
     setPlaying(false); openDialog($('impact-dialog'), $('impact-button'), $('impact-dialog-title')); renderImpact();
   } catch (error) { invalidateImpact(); toast(`Delivery comparison unavailable. ${formatInputError(error)}`, true); }
 }
+function downloadImpactCsv() {
+  if (!$('impact-dialog').open || !impactIsCurrent() || inspectedImpact.report.variant.id !== state.selectedVariantId) { invalidateImpact(); return; }
+  let url;
+  try {
+    const csv = renderJobImpactCsv(inspectedImpact.report, { experimentId: state.experiment.id });
+    url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    const link = node('a'); link.href = url; link.download = 'detourlab-delivery-impact.csv';
+    link.click();
+    const downloadUrl = url; setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
+    $('impact-export-status').textContent = `CSV download requested: all ${inspectedImpact.report.summary.totalJobs} deliveries for ${inspectedImpact.report.variant.name}. Filters and pagination do not limit the file. Import identifier and name columns as text.`;
+  } catch (error) {
+    if (url) URL.revokeObjectURL(url);
+    $('impact-export-status').textContent = `CSV could not be prepared. ${formatInputError(error)} No complete download was requested; try again or export the experiment for the CLI.`;
+  }
+}
+$('impact-download-csv').addEventListener('click', downloadImpactCsv);
 $('impact-button').addEventListener('click', inspectDeliveries);
 $('impact-variant').addEventListener('change', () => { if (impactIsCurrent() && $('impact-dialog').open) selectVariant($('impact-variant').value); });
 $('impact-filter').addEventListener('change', () => { impactPage = 0; renderImpact(); });

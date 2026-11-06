@@ -1,0 +1,2 @@
+experimentId,variantId,variantName,jobId,vehicleId,nodeId,dueTimeS,baselineStatus,baselineArrivalS,baselineCompletedS,baselineDelayS,variantStatus,variantArrivalS,variantCompletedS,variantDelayS,arrivalDeltaS,completedDeltaS,delayDeltaS,changed,statusChanged
+minimal-cutoff-experiment,close-at-10,Close at 10 s,job-1,van-1,C,22,on-time,20,23,0,late,26,29,4,6,6,4,true,true

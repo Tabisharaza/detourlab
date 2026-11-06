@@ -4,18 +4,22 @@ import { formatInputError } from '../src/file-input.js';
 import { readInput } from './read-input.js';
 import { formatCliLabel } from './cli-display.js';
 import { createJobImpactReport } from './job-impact.js';
+import { renderJobImpactCsv } from '../src/job-impact-csv.js';
 
 const usage = `DetourLab job-impact explainer
 
-Usage: node scripts/explain-experiment.js experiment.json --variant ID [--json]
+Usage: node scripts/explain-experiment.js experiment.json --variant ID [--json | --csv]
 
   --variant ID     Required existing variant ID, supplied once
   --json           Complete versioned job-impact report, at most 4 MiB
+  --csv            Complete display-escaped CSV, at most 4 MiB; excludes --json
   --help           Show this help without reading a file
 
 Compare each job's status, arrival, service completion and lateness against the
 clear-road baseline. Human output shows the first 20 changed jobs in input order;
 JSON includes every job (at most 2000), including unchanged and unreachable work.
+CSV includes those same complete rows with display-escaped text; retain JSON for
+unchanged machine labels. Spreadsheet import behavior varies.
 Version-1 scenarios are upgraded to supplied and clear-roads variants.
 All experiment variants are simulated under the usual work/result budgets.
 Exit 0 means a report was produced, not that a threshold or safety policy passed.
@@ -27,8 +31,10 @@ function argumentsFor(args) {
   let file;
   let variantId;
   let json = false;
+  let csv = false;
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
+    if (arg === '--csv') { csv = true; continue; }
     if (arg === '--json') { json = true; continue; }
     if (arg === '--variant') {
       if (variantId !== undefined) throw new Error('--variant may only be supplied once.');
@@ -43,9 +49,10 @@ function argumentsFor(args) {
     if (file !== undefined) throw new Error('Only one input file is allowed.');
     file = arg;
   }
+  if (json && csv) throw new Error('--json and --csv are mutually exclusive.');
   if (!file) throw new Error('An experiment or scenario JSON file is required. Use --help for usage.');
   if (variantId === undefined) throw new Error('--variant is required. Use --help for usage.');
-  return { help: false, file, variantId, json };
+  return { help: false, file, variantId, json, csv };
 }
 
 const seconds = value => value === null ? 'n/a' : `${value} s`;
@@ -96,7 +103,8 @@ try {
   else {
     const input = parseExperiment(await readInput(options.file));
     const report = createJobImpactReport(input, options.variantId);
-    console.log(options.json ? JSON.stringify(report, null, 2) : humanReport(report));
+    if (options.csv) process.stdout.write(renderJobImpactCsv(report, { experimentId: report.experimentId }));
+    else console.log(options.json ? JSON.stringify(report, null, 2) : humanReport(report));
   }
 } catch (error) {
   console.error(`DetourLab: ${formatInputError(error)}`);

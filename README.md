@@ -305,3 +305,11 @@ The current source keeps comparison cards and closure-editor controls in place w
 paused map pixels and click geometry after resizing, hiding and changing device
 scale. Context-loss event recovery has separate source regression coverage;
 actual GPU loss and hosted deployment are not implied.
+
+### Export delivery comparisons to a spreadsheet
+
+Open **Inspect deliveries → Download all deliveries CSV**, or run
+`node scripts/explain-experiment.js examples/minimal-experiment.json --variant close-at-10 --csv`.
+The file includes every delivery, not just the current filter/page.
+[Format, missing-timing meanings and spreadsheet import precautions](docs/DELIVERY_CSV.md)
+keep the comparison interpretable. Source feature; hosted demo status is unchanged.

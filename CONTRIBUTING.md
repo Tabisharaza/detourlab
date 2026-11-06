@@ -117,3 +117,9 @@ For [Canvas lifecycle reliability](docs/CANVAS_LIFECYCLE.md), run the focused
 map/lifecycle tests and optional Chromium harness. Preserve source-event versus
 native-device distinctions, exact pixel/road/vehicle parity, zero-size targets,
 no-overwrite evidence and browser security defaults.
+
+For [delivery CSV](docs/DELIVERY_CSV.md), preserve all-row input order, exact
+finite numeric/null semantics, bounded complete serialization, documented text
+transformations and byte-identical CLI/browser exports. Test stale result/closed
+dialog downloads, failure-before-output and real downloaded files separately
+from DOM stand-ins. Never claim universal spreadsheet formula safety.
