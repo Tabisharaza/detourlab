@@ -10,6 +10,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { setTimeout as delay } from 'node:timers/promises';
 import { createRequestHandler } from '../../scripts/serve.js';
+import { nativeKeySequence } from '../replay-events-check/run.js';
 import { launchChromium } from '../browser-check/chromium.js';
 import { parseBrowserCheckArguments, finishBrowserEvidence, removeOwnedBrowserDirectory, documentReadyExpression } from '../browser-check/run.js';
 
@@ -58,9 +59,19 @@ const observation = `(() => {
   const nativeUrl = URL.createObjectURL;
   URL.createObjectURL = function(blob) { state.blobs.push({ type: blob.type, size: blob.size }); return nativeUrl.call(this, blob); };
   document.addEventListener('click', e => { if (e.target.id === 'impact-download-csv') state.trusted.push(e.isTrusted); }, true);
+  for (const type of ['keydown', 'keyup', 'click']) document.addEventListener(type, e => {
+    if (e.isTrusted) state.lastTrustedEvent = { type: e.type, key: e.key || null, code: e.code || null, targetId: e.target.id || null, isTrusted: true };
+  }, true);
   window.addEventListener('error', e => state.errors.push(String(e.message)));
   window.addEventListener('unhandledrejection', e => state.errors.push(String(e.reason)));
 })();`;
+
+/** Use the already native-verified CDP character sequence, never DOM keyboard events. */
+export async function dispatchImpactExportKey(send, evaluate, key) {
+  const events = nativeKeySequence(key);
+  await evaluate("document.getElementById('impact-download-csv').focus()");
+  for (const event of events) await send('Input.dispatchKeyEvent', event);
+}
 
 export async function runImpactCsvCheck({ executable, output }) {
   await mkdir(output); // No overwrite, including failure evidence.
@@ -73,7 +84,7 @@ export async function runImpactCsvCheck({ executable, output }) {
   try {
     const files = ['index.html', ...((await readdir(path.join(root, 'src'))).filter(f => /\.(js|css)$/u.test(f)).map(f => `src/${f}`)),
       ...((await readdir(path.join(root, 'scripts'))).filter(f => /\.js$/u.test(f)).map(f => `scripts/${f}`)),
-      'tools/impact-csv-check/run.js', 'tools/browser-check/run.js', 'tools/browser-check/chromium.js'].sort();
+      'tools/impact-csv-check/run.js', 'tools/replay-events-check/run.js', 'tools/browser-check/run.js', 'tools/browser-check/chromium.js'].sort();
     evidence.sourceFiles = await Promise.all(files.map(async file => ({ path: file, sha256: hash(await readFile(path.join(root, file))) })));
     evidence.sourceSha256 = hash(JSON.stringify(evidence.sourceFiles));
     temporary = await mkdtemp(path.join(tmpdir(), 'detourlab-impact-csv-'));
@@ -122,6 +133,23 @@ export async function runImpactCsvCheck({ executable, output }) {
         assert.ok(await evaluate("document.getElementById('impact-export-status').textContent.length > 0"));
         evidence.downloads.push({ label, file: `downloads/${started.guid}`, suggestedFilename: started.suggestedFilename, sha256: hash(bytes), bytes: bytes.length, completed: true });
         return bytes;
+      } catch (error) {
+        evidence.downloadFailure = { label, started: !!started, completed: done };
+        try {
+          evidence.downloadFailure.renderer = await evaluate(`(() => {
+            const button = document.getElementById('impact-download-csv');
+            const dialog = document.getElementById('impact-dialog');
+            const active = document.activeElement;
+            return { activeElement: { id: active?.id || null, tagName: active?.tagName || null },
+              disabled: button?.disabled ?? null, dialogOpen: dialog?.open ?? null,
+              revision: document.documentElement.dataset.revision || null,
+              lastRequestId: window.__csvCheck.requests.at(-1)?.id ?? null,
+              lastTrustedEvent: window.__csvCheck.lastTrustedEvent || null,
+              lastExportClickTrusted: window.__csvCheck.trusted.at(-1) ?? null,
+              exportStatus: document.getElementById('impact-export-status')?.textContent.slice(0, 500) || null };
+          })()`);
+        } catch (diagnosticError) { evidence.downloadFailure.diagnosticError = String(diagnosticError.message || diagnosticError).slice(0, 500); }
+        throw error;
       } finally { offStart(); offProgress(); }
     };
     const verify = async (file, variant, label, trigger) => {
@@ -157,11 +185,9 @@ export async function runImpactCsvCheck({ executable, output }) {
     await capture('impact-csv-desktop.jpg', desktop); await send('Emulation.setDeviceMetricsOverride', narrow); await capture('impact-csv-narrow.jpg', narrow); await send('Emulation.setDeviceMetricsOverride', desktop);
     for (const id of ['all-bridges-05', 'clear-roads', 'market-10']) { await change('impact-variant', id); await verify(meridian, id, `Variant switch exports ${id}`); }
     await change('impact-variant', 'market-05');
-    for (const [key, code, keyCode] of [['Enter', 'Enter', 13], [' ', 'Space', 32]]) {
-      await verify(meridian, 'market-05', `Trusted ${code} activation downloads CSV`, async () => {
-        await evaluate("document.getElementById('impact-download-csv').focus()");
-        await send('Input.dispatchKeyEvent', { type: 'keyDown', key, code, windowsVirtualKeyCode: keyCode });
-        await send('Input.dispatchKeyEvent', { type: 'keyUp', key, code, windowsVirtualKeyCode: keyCode });
+    for (const key of ['Enter', 'Space']) {
+      await verify(meridian, 'market-05', `Trusted ${key} activation downloads CSV`, async () => {
+        await dispatchImpactExportKey(send, evaluate, key);
       });
       assert.equal(await evaluate('window.__csvCheck.trusted.at(-1)'), true);
     }
