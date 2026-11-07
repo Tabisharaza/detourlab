@@ -221,5 +221,27 @@ jobs:
               }'
           fi
 
+      - name: Verify delivery search and ordering in Chromium
+        timeout-minutes: 3
+        run: |
+          browser="$(command -v google-chrome)"
+          test -n "$browser"
+          node tools/impact-query-check/run.js --browser "$browser" --out "$RUNNER_TEMP/detourlab-impact-query-evidence"
+
+      - name: Record delivery query evidence and bounded synthetic snapshots
+        if: always()
+        run: |
+          if test -f "$RUNNER_TEMP/detourlab-impact-query-evidence/evidence.json"; then
+            cat "$RUNNER_TEMP/detourlab-impact-query-evidence/evidence.json"
+            node --input-type=module -e '
+              import { readFile } from "node:fs/promises";
+              for (const name of ["impact-query-desktop.jpg", "impact-query-narrow.jpg"]) {
+                try { const bytes = await readFile(process.env.RUNNER_TEMP + "/detourlab-impact-query-evidence/" + name);
+                  if (bytes.length > 1048576) throw new Error("Snapshot exceeds log bound");
+                  console.log("IMPACT_QUERY_SNAPSHOT " + name + " " + bytes.toString("base64"));
+                } catch (error) { if (error.code !== "ENOENT") throw error; }
+              }'
+          fi
+
       - name: Confirm verification did not change tracked source
         run: git diff --exit-code && git diff --cached --exit-code

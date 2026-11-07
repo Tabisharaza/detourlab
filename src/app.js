@@ -768,7 +768,7 @@ function invalidateImpact() {
   inspectedImpact = null; impactPage = 0;
   // Move focus before disabling a control or hiding its scroll region.
   if ($('impact-dialog').open && $('impact-dialog').contains(document.activeElement) && document.activeElement !== $('impact-close')) focusFirst([$('impact-close')]);
-  for (const id of ['impact-download-csv', 'impact-variant', 'impact-filter', 'impact-previous', 'impact-next']) $(id).disabled = true;
+  for (const id of ['impact-download-csv', 'impact-variant', 'impact-filter', 'impact-search', 'impact-sort', 'impact-previous', 'impact-next']) $(id).disabled = true;
   $('impact-rows').replaceChildren(); $('impact-table-region').hidden = true;
   $('impact-summary').textContent = ''; $('impact-metrics').textContent = '';
   $('impact-export-status').textContent = 'CSV unavailable until a completed comparison is open.';
@@ -786,8 +786,8 @@ function renderImpact() {
   if (!$('impact-dialog').open || !impactIsCurrent() || inspectedImpact.report.variant.id !== state.selectedVariantId) { invalidateImpact(); return; }
   const report = inspectedImpact.report, summary = report.summary;
   $('impact-download-csv').disabled = false;
-  $('impact-export-status').textContent = `CSV includes all ${summary.totalJobs} deliveries for ${report.variant.name}, regardless of the filter or page. Missing timings are blank, not zero. Import identifier and name columns as text in your spreadsheet.`;
-  const page = pageDeliveryImpact(report, $('impact-filter').value, impactPage);
+  $('impact-export-status').textContent = `CSV includes all ${summary.totalJobs} deliveries for ${report.variant.name}, regardless of the filter, search, order or page. Missing timings are blank, not zero. Import identifier and name columns as text in your spreadsheet.`;
+  const page = pageDeliveryImpact(report, $('impact-filter').value, impactPage, { query: $('impact-search').value, sort: $('impact-sort').value });
   impactPage = page.pageIndex;
   $('impact-summary').textContent = `${summary.changedJobs} of ${summary.totalJobs} delivery outcomes changed; ${summary.unchangedJobs} unchanged. Status changes: ${summary.statusChangedJobs}. Arrival changes: ${summary.arrivalChangedJobs}. Same-status arrival changes: ${report.sameStatusArrivalChanges}.`;
   $('impact-metrics').textContent = `Baseline → ${report.variant.name}: ${report.baselineMetrics.completedJobs} → ${report.variantMetrics.completedJobs} completed; ${report.baselineMetrics.unreachableJobs} → ${report.variantMetrics.unreachableJobs} unreachable. Final outcomes, independent of replay time.`;
@@ -810,8 +810,10 @@ function renderImpact() {
   $('impact-table-region').hidden = !page.jobs.length;
   $('impact-previous').disabled = page.pageIndex === 0;
   $('impact-next').disabled = page.pageIndex + 1 >= page.pageCount;
-  const counts = `${page.matchingJobs} matching of ${page.totalJobs} total deliveries. ${page.totalJobs - page.matchingJobs} excluded by this filter. Original input order, not severity ranking.`;
-  const empty = !page.totalJobs ? 'This experiment has no deliveries.' : `No ${names[page.filter].toLowerCase()}. Choose All deliveries to inspect unchanged outcomes too.`;
+  const order = page.sort === 'arrival-desc' ? 'Largest comparable arrival delay first (variant minus baseline); not comparable last. Ties keep input order. Not an overall severity ranking.' : 'Original input order, not severity ranking.';
+  const searchCounts = page.query ? ` ${page.filteredJobs} satisfy the filter; ${page.filteredJobs - page.matchingJobs} excluded by search.` : '';
+  const counts = `${page.matchingJobs} matching of ${page.totalJobs} total deliveries. ${page.totalJobs - page.matchingJobs} excluded by filter or search.${searchCounts} ${order}`;
+  const empty = !page.totalJobs ? 'This experiment has no deliveries.' : page.query ? 'No deliveries match this search and filter. Clear the search or choose All deliveries.' : `No ${names[page.filter].toLowerCase()}. Choose All deliveries to inspect unchanged outcomes too.`;
   $('impact-status').textContent = page.jobs.length ? `Showing ${page.from}–${page.to}; page ${page.pageIndex + 1} of ${page.pageCount}. ${counts}` : `${empty} ${counts}`;
   if ([ $('impact-previous'), $('impact-next') ].includes(active) && active.disabled || active === $('impact-table-region') && !page.jobs.length) focusFirst([$('impact-previous'), $('impact-next'), $('impact-filter'), $('impact-close')]);
 }
@@ -822,7 +824,8 @@ function inspectDeliveries() {
     inspectedImpact = { experiment: state.experiment, results: state.allResults, report }; impactPage = 0;
     $('impact-variant').replaceChildren(...state.experiment.variants.map(variant => { const option = node('option', variant.name); option.value = variant.id; return option; }));
     $('impact-variant').value = state.selectedVariantId; $('impact-filter').value = 'changed';
-    $('impact-variant').disabled = false; $('impact-filter').disabled = false;
+    $('impact-search').value = ''; $('impact-sort').value = 'input';
+    for (const id of ['impact-variant', 'impact-filter', 'impact-search', 'impact-sort']) $(id).disabled = false;
     setPlaying(false); openDialog($('impact-dialog'), $('impact-button'), $('impact-dialog-title')); renderImpact();
   } catch (error) { invalidateImpact(); toast(`Delivery comparison unavailable. ${formatInputError(error)}`, true); }
 }
@@ -835,7 +838,7 @@ function downloadImpactCsv() {
     const link = node('a'); link.href = url; link.download = 'detourlab-delivery-impact.csv';
     link.click();
     const downloadUrl = url; setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
-    $('impact-export-status').textContent = `CSV download requested: all ${inspectedImpact.report.summary.totalJobs} deliveries for ${inspectedImpact.report.variant.name}. Filters and pagination do not limit the file. Import identifier and name columns as text.`;
+    $('impact-export-status').textContent = `CSV download requested: all ${inspectedImpact.report.summary.totalJobs} deliveries for ${inspectedImpact.report.variant.name}. Filters, search, ordering and pagination do not limit the file. Import identifier and name columns as text.`;
   } catch (error) {
     if (url) URL.revokeObjectURL(url);
     $('impact-export-status').textContent = `CSV could not be prepared. ${formatInputError(error)} No complete download was requested; try again or export the experiment for the CLI.`;
@@ -845,6 +848,8 @@ $('impact-download-csv').addEventListener('click', downloadImpactCsv);
 $('impact-button').addEventListener('click', inspectDeliveries);
 $('impact-variant').addEventListener('change', () => { if (impactIsCurrent() && $('impact-dialog').open) selectVariant($('impact-variant').value); });
 $('impact-filter').addEventListener('change', () => { impactPage = 0; renderImpact(); });
+$('impact-search').addEventListener('input', () => { impactPage = 0; renderImpact(); });
+$('impact-sort').addEventListener('change', () => { impactPage = 0; renderImpact(); });
 $('impact-previous').addEventListener('click', () => { impactPage -= 1; renderImpact(); });
 $('impact-next').addEventListener('click', () => { impactPage += 1; renderImpact(); });
 $('impact-close').addEventListener('click', () => { invalidateImpact(); closeDialog($('impact-dialog')); });

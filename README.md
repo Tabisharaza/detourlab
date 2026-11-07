@@ -212,7 +212,7 @@ The two original Draft-07 schemas share definitions, resolve locally and describ
 
 ## Inspect which deliveries changed
 
-The current source adds **Inspect deliveries** after a completed run. Compare the selected variant’s status, arrival, service completion and lateness, with 20-row pages and filters for changed outcomes, status changes, same-status arrival changes or all deliveries. Counts always include the complete input; unreachable differences remain non-comparable. It reuses completed results without rerunning. [Inspector behavior and source-only verification boundary](docs/BROWSER_IMPACT.md). This inspector has not yet been deployed or checked in a native browser; the public demo remains the separately recorded v11 release.
+The current source adds **Inspect deliveries** after a completed run. Compare the selected variant’s status, arrival, service completion and lateness, with 20-row pages and filters for changed outcomes, status changes, same-status arrival changes or all deliveries. Counts always include the complete input; unreachable differences remain non-comparable. It reuses completed results without rerunning. [Inspector behavior and source-only verification boundary](docs/BROWSER_IMPACT.md). This inspector has not yet been deployed; bounded native Chromium checks are recorded separately. The public demo remains the separately recorded v11 release.
 
 For the headless equivalent:
 
@@ -313,3 +313,12 @@ Open **Inspect deliveries → Download all deliveries CSV**, or run
 The file includes every delivery, not just the current filter/page.
 [Format, missing-timing meanings and spreadsheet import precautions](docs/DELIVERY_CSV.md)
 keep the comparison interpretable. Source feature; hosted demo status is unchanged.
+
+## Find a delivery in a large comparison
+
+The source inspector supports case-insensitive search by job, vehicle or node ID
+and optional **Largest arrival delay** ordering. Null comparisons stay last,
+not zero. Search works within the chosen filter and keeps 20-row pages; CSV
+exports still contain every delivery in original input order.
+[Search contract and verification](docs/DELIVERY_SEARCH.md). This is source
+functionality, not a new hosted demo release.

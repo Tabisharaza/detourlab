@@ -106,7 +106,7 @@ test('Escape clears inspection, queued close events cannot disturb a reopened mo
 test('Tab containment follows visible enabled controls and keeps the table keyboard-scrollable', async () => {
   const app = await ready(); await app.element('impact-button').click();
   await app.element('impact-dialog').emit('keydown', { key: 'Tab' }); assert.equal(app.document.activeElement, app.element('impact-close'));
-  await app.element('impact-dialog').emit('keydown', { key: 'Tab', shiftKey: true }); assert.equal(app.document.activeElement, app.element('impact-filter'));
+  await app.element('impact-dialog').emit('keydown', { key: 'Tab', shiftKey: true }); assert.equal(app.document.activeElement, app.element('impact-sort'));
   await app.change('impact-filter', 'all');
   app.element('impact-close').focus(); await app.element('impact-dialog').emit('keydown', { key: 'Tab', shiftKey: true });
   assert.equal(app.document.activeElement, app.element('impact-table-region'));
@@ -224,4 +224,59 @@ test('a rejected imported-limit edit preserves the open valid comparison', async
   assert.match(app.element('toast').textContent, /Change rejected/);
   assert.equal(rowText(app), text); assert.equal(app.state.allResults, results); assert.equal(app.workers.length, workers);
   assert.equal(app.element('impact-filter').disabled, false);
+});
+
+test('search matches identifiers without a rerun, resets pagination, and keeps input focus', async () => {
+  const app = await ready(fixture('meridian-experiment.json')); await app.change('variant-select', 'market-05');
+  await app.element('impact-button').click(); await app.change('impact-filter', 'all'); await app.element('impact-next').click();
+  const report = createBrowserImpact(app.state.experiment, app.state.allResults, 'market-05');
+  const workers = app.workers.length, results = app.state.allResults, time = app.state.time;
+  for (const field of ['id', 'vehicleId', 'nodeId']) {
+    const query = report.jobs[0][field].toUpperCase(); app.element('impact-search').focus();
+    await app.change('impact-search', query, 'input');
+    const matching = report.jobs.filter(job => ['id', 'vehicleId', 'nodeId'].some(key => job[key].toUpperCase().includes(query)));
+    assert.deepEqual(rows(app).map(row => row.children[0].children[0].textContent), matching.slice(0, 20).map(job => job.id));
+    assert.match(app.element('impact-status').textContent, /Showing 1–/);
+    assert.ok(app.element('impact-status').textContent.includes(`${matching.length} matching of 192 total`));
+    assert.match(app.element('impact-status').textContent, /192 satisfy the filter/);
+    assert.equal(app.document.activeElement, app.element('impact-search'));
+  }
+  assert.equal(app.workers.length, workers); assert.equal(app.state.allResults, results); assert.equal(app.state.time, time);
+});
+
+test('arrival sorting is numeric with nulls last and survives variant selection while page resets', async () => {
+  const app = await ready(fixture('meridian-experiment.json')); await app.change('variant-select', 'market-05');
+  await app.element('impact-button').click(); await app.change('impact-filter', 'all');
+  await app.change('impact-search', ' ', 'input'); await app.change('impact-sort', 'arrival-desc');
+  const expected = variant => createBrowserImpact(app.state.experiment, app.state.allResults, variant).jobs.slice().sort((a,b) => a.arrivalDeltaS === null ? (b.arrivalDeltaS === null ? 0 : 1) : b.arrivalDeltaS === null ? -1 : b.arrivalDeltaS - a.arrivalDeltaS);
+  assert.deepEqual(rows(app).map(row => row.children[0].children[0].textContent), expected('market-05').slice(0,20).map(job => job.id));
+  assert.match(app.element('impact-status').textContent, /not comparable last.*Not an overall severity ranking/);
+  await app.element('impact-next').click(); await app.change('impact-variant', 'all-bridges-05');
+  assert.equal(app.element('impact-search').value, ' '); assert.equal(app.element('impact-sort').value, 'arrival-desc');
+  assert.match(app.element('impact-status').textContent, /Showing 1–20/);
+  const collected = [];
+  do { collected.push(...rows(app).map(row => row.children[0].children[0].textContent)); if (app.element('impact-next').disabled) break; await app.element('impact-next').click(); } while (true);
+  assert.deepEqual(collected, expected('all-bridges-05').map(job => job.id));
+  await app.change('impact-sort', 'input'); assert.match(app.element('impact-status').textContent, /Showing 1–20.*Original input order/);
+});
+
+test('empty literal searches are honest, do not create HTML, and controls reset on reopen', async () => {
+  const app = await ready(); await app.element('impact-button').click(); await app.change('impact-filter', 'all');
+  await app.change('impact-search', '<img src=x onerror=alert(1)>.*', 'input');
+  assert.equal(rows(app).length, 0); assert.equal(app.element('impact-table-region').hidden, true);
+  assert.match(app.element('impact-status').textContent, /No deliveries match this search and filter.*1 satisfy the filter; 1 excluded by search/);
+  assert.equal(app.created.filter(node => ['IMG', 'SCRIPT'].includes(node.tagName)).length, 0);
+  await app.change('impact-sort', 'arrival-desc'); await app.element('impact-close').click();
+  for (const id of ['impact-search','impact-sort']) assert.equal(app.element(id).disabled, true);
+  await app.element('impact-button').click(); assert.equal(app.element('impact-search').value, ''); assert.equal(app.element('impact-sort').value, 'input');
+  for (const id of ['impact-search','impact-sort']) assert.equal(app.element(id).disabled, false);
+});
+
+for (const control of ['impact-search','impact-sort']) test(`invalidation disables ${control}, hands off focus and rejects queued search changes`, async () => {
+  const app = await ready(); await app.element('impact-button').click(); await app.change('impact-filter', 'all');
+  app.element(control).focus(); await app.element('run-experiment').click();
+  assert.equal(app.document.activeElement, app.element('impact-close'));
+  for (const id of ['impact-search','impact-sort']) assert.equal(app.element(id).disabled, true);
+  await app.change('impact-search', 'x', 'input'); await app.change('impact-sort','arrival-desc');
+  assert.equal(rows(app).length, 0); app.latestWorker().respond(); assert.equal(rows(app).length, 0);
 });

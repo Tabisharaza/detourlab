@@ -14,7 +14,7 @@ node scripts/explain-experiment.js examples/minimal-experiment.json --variant cl
 In the source workbench, finish a run, open **Inspect deliveries**, choose a
 variant and press **Download all deliveries CSV**. The fixed filename is
 `detourlab-delivery-impact.csv`. The file includes every job in original input
-order, even when the screen shows only changed outcomes or a later page. A
+order, even when the screen shows only changed outcomes, a search, a different ordering or a later page. A
 zero-job experiment exports just the column header.
 
 The browser uses the same serializer as the CLI and reuses completed Worker

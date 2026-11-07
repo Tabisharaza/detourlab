@@ -25,6 +25,9 @@ test('CSV exports every Meridian delivery regardless of filter/page with exact s
   assert.match(app.element('impact-export-status').textContent, /all 192 deliveries/);
   await app.change('impact-filter', 'timing'); assert.equal(app.element('impact-rows').children.length, 7);
   await app.element('impact-download-csv').click(); assert.equal((await downloaded(app)).text, first.text);
+  await app.change('impact-search', 'no matches here', 'input');
+  await app.change('impact-sort', 'arrival-desc'); assert.equal(app.element('impact-rows').children.length, 0);
+  await app.element('impact-download-csv').click(); assert.equal((await downloaded(app)).text, first.text);
   await app.change('impact-variant', 'all-bridges-05');
   await app.element('impact-download-csv').click(); assert.equal((await downloaded(app)).text, expected(app));
   assert.notEqual((await downloaded(app)).text, first.text); assert.equal(app.workers.length, count);

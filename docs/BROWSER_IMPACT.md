@@ -1,6 +1,6 @@
 # Inspect delivery changes in the browser
 
-The source workbench now offers **Inspect deliveries** after a complete run. It compares a selected variant with the same clear-road baseline, without running the simulation again. This is a **source-only milestone**: no deployment, hosted CI, native-browser check or accessibility certification is implied by this document.
+The source workbench now offers **Inspect deliveries** after a complete run. It compares a selected variant with the same clear-road baseline, without running the simulation again. This is a **source-only milestone**: no deployment or accessibility certification is implied. Later bounded native checks are recorded in [CSV verification](DELIVERY_CSV.md) and [search and ordering](DELIVERY_SEARCH.md).
 
 ## Find the difference hidden by a total
 
@@ -8,7 +8,8 @@ The source workbench now offers **Inspect deliveries** after a complete run. It 
 2. Choose a variant inside the dialog. The workbench's selected variant follows that choice; its schedules and results are not edited.
 3. Start with **Changed outcomes**, or choose **Status changes**, **Same-status arrival changes** or **All deliveries**.
 4. Read baseline → variant for status, arrival, service completion and lateness. Every time is in seconds; signed changes are variant minus baseline.
-5. Use **Previous 20** and **Next 20** to inspect the other matching deliveries in original input order. These are pages, not a severity ranking or a top-20-only sample.
+5. Search by job, vehicle or node ID, and optionally order by **Largest arrival delay**. Default order remains the input order.
+6. Use **Previous 20** and **Next 20** to inspect the other matching deliveries. These are pages, not a top-20-only sample. [Exact matching, ordering and limits](DELIVERY_SEARCH.md).
 
 The complete summary always counts every delivery. A live status gives the page range, filtered count, total count and count excluded by the selected filter. The default changed-only view does not imply that unchanged work is absent. **All deliveries** includes it.
 
@@ -29,11 +30,11 @@ This inspector is an outcome comparison. It does not infer per-delivery routes, 
 
 ## Bounded evidence and lifecycle
 
-At most **20 body rows** are rendered per page, up to the existing 2,000-job input limit. Every row remains reachable through pagination. Four filters operate over complete projected evidence and preserve input order. Changing filter or variant returns to the first page. Repeated activation of an already open inspector preserves the current page rather than rebuilding it.
+At most **20 body rows** are rendered per page, up to the existing 2,000-job input limit. Every row remains reachable through pagination. Four filters operate over complete projected evidence. Search narrows the selected filter; optional arrival-delay ordering leaves incomparable deltas last. Changing filter, query, ordering or variant returns to the first page. Repeated activation of an already open inspector preserves the current page rather than rebuilding it.
 
 The app holds references to the completed input and result set. A committed edit, successful import, reset, lesson transition, cancellation or rerun removes the old rows immediately and disables the inspection controls. Completion does not silently refill an already invalidated dialog; close and reopen it to inspect the new run. Stale Worker messages cannot reinstate old rows. A rejected import or mutation leaves the previous valid run intact.
 
-Closing or Escape discards the inspection view. Reopening starts with changed outcomes. Replay time does not change final delivery evidence, and inspection pauses playback. Variant selection reuses the same completed result set and does not start a Worker. No data is uploaded. For complete portable evidence, close the inspector and use **Review results** to download the full JSON bundle.
+Closing or Escape discards the inspection view. Reopening starts with changed outcomes, an empty query and input ordering. Replay time does not change final delivery evidence, and inspection pauses playback. Variant selection reuses the same completed result set and does not start a Worker. No data is uploaded. For complete portable evidence, close the inspector and use **Review results** to download the full JSON bundle.
 
 ## Keyboard and presentation
 
@@ -51,12 +52,12 @@ node scripts/verify-dist.js
 
 Focused tests cover exact CLI/report parity for all tiny and Meridian variants; 125/118/seven distinct counts; every filtered page and all 2,000 supported jobs; unreachable nulls; fractional engine tolerance; no simulation or mutation; stale/edit/import/cancel/reset/lesson/repeated-run flows; forced disabled dispatch; safe imported labels; keyboard focus, Escape and deferred close notifications; and bounded errors.
 
-Before claiming a native-browser release, separately exercise actual keyboard traversal and focus visibility, horizontal table scrolling, last/first page transitions, Escape/reopen, selection and filter announcements with assistive technology, 200% zoom, narrow/mobile layouts, reduced motion and other browsers. Run native import/recompute/cancel paths too. No screenshots or native-browser observations have been produced for this source milestone.
+Before claiming a native-browser release, separately exercise actual keyboard traversal and focus visibility, horizontal table scrolling, last/first page transitions, Escape/reopen, selection and filter announcements with assistive technology, 200% zoom, narrow/mobile layouts, reduced motion and other browsers. Run native import/recompute/cancel paths too. The original source milestone had no native evidence; later bounded Chromium observations and screenshots are linked above. Those do not close the remaining checks.
 
 ## Complete CSV download
 
 The source inspector now offers **Download all deliveries CSV**. It exports the
-selected variant's full completed comparison regardless of filter or page,
+selected variant's full completed comparison regardless of filter, search, ordering or page,
 using the same deterministic serializer as the CLI. [Format, text precautions
 and verification](DELIVERY_CSV.md) distinguish this source feature from hosted
 deployment and spreadsheet-product testing.

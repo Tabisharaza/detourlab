@@ -138,6 +138,8 @@
     <div class="impact-controls">
       <div><label for="impact-variant">Compare variant</label><select id="impact-variant" disabled></select></div>
       <div><label for="impact-filter">Show deliveries</label><select id="impact-filter" disabled><option value="changed">Changed outcomes</option><option value="status">Status changes</option><option value="timing">Same-status arrival changes</option><option value="all">All deliveries</option></select></div>
+      <div><label for="impact-search">Search deliveries (job, vehicle, node)</label><input id="impact-search" type="search" placeholder="Find an identifier…" autocomplete="off" spellcheck="false" disabled></div>
+      <div><label for="impact-sort">Order deliveries</label><select id="impact-sort" disabled><option value="input">Input order</option><option value="arrival-desc">Largest arrival delay</option></select></div>
     </div>
     <p id="impact-summary" class="impact-summary"></p><p id="impact-metrics"></p>
     <p id="impact-status" role="status" aria-live="polite" aria-atomic="true"></p>
