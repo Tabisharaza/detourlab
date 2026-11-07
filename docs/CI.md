@@ -432,3 +432,14 @@ passed all 16 new checkpoints on `cfaec034b2d72ecbe168ae80ec042bd15aca0e44`,
 alongside 1,427 distinct Node tests, 85 existing browser checkpoints, four
 rendering cases and the reproducible 32-file release. Earlier keyboard-driver
 failure is documented rather than counted as a native pass.
+
+## November 7 delivery search gate
+
+The [delivery search harness](DELIVERY_SEARCH.md) verifies literal ID searches,
+filter intersections, stable signed delay ordering, null-last complete pagination,
+variant/reset lifecycle and complete CSV independence in Chromium. Source run
+[42349371221](https://github.com/Tabisharaza/detourlab/actions/runs/42349371221)
+passed 15 new checkpoints on `c0b95052370538cbf658ee57192da875f56854fc`,
+with 1,439 distinct Node tests, 101 earlier browser checkpoints, four rendering
+cases and a reproducible 32-file build. Raw JSON and bounded unaltered screenshots
+are retained in logs; no additional action dependency or deployment was added.

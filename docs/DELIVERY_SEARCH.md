@@ -50,3 +50,50 @@ incomparable values, empty matches and bounded pagination. Application tests
 cover resets, variant changes, invalidation and complete CSV independence.
 Native Chromium evidence is recorded separately below when verified; DOM
 stand-ins alone are not native keyboard, layout or accessibility evidence.
+
+## Product context
+
+The November 7 read of the requested [God’s Eye View reference](https://github.com/bilawalsidhu/gods-eye-view)
+reinforces making an interactive scene inspectable. DetourLab’s distinct need
+here is finding one delivery or a large comparable delay among up to 2,000
+synthetic orders without losing the complete evidence. No reference code, data
+or assets were copied; no popularity or adoption outcome is promised.
+
+## Recorded source verification — November 7, 2026
+
+[Source `c0b9505`](https://github.com/Tabisharaza/detourlab/commit/c0b95052370538cbf658ee57192da875f56854fc)
+passed [CI run 42349371221](https://github.com/Tabisharaza/detourlab/actions/runs/42349371221).
+The [raw query evidence](evidence/delivery-search-2026-11-07.json) is extracted
+without field changes from the job's printed JSON. All recorded source and
+screenshot SHA-256 hashes were checked against the tested bytes.
+
+- **1,439 distinct Node tests** passed: 1,319 core plus 120 optional schema/editor
+  tests. The repeated 211 CLI gates overlap the core tests and are not added.
+- All **15 new native-browser checkpoints** passed. Actual search input covered
+  ID matching, case folding, literal punctuation and empty results; selected
+  filters and variants used DOM events, not human keyboard interaction.
+- Full ranked pagination matched separate CLI outcomes, including **57 null**
+  comparisons and **69 negative** arrival deltas in the all-bridges fixture.
+  Ties retained original order. Native results remained unchanged by queries.
+- **Two actual completed CSV downloads** matched separate CLI processes
+  byte-for-byte, despite empty or searched/ranked views. Both retained all 192
+  jobs in original input order.
+- All **101 earlier browser checkpoints** and **four rendering-profile cases**
+  passed separately, as did the 32-file release allowlist, source/hash/license
+  verification and byte-identical rebuild including its manifest.
+
+The native run used Chromium 156.0.8078.79 on the Ubuntu 24.04 hosted runner,
+image `20261101.360.1`, and Node 24.22.1. The local environment's Chromium socket
+restriction was not bypassed; this is hosted CI evidence, not a local browser
+pass. It does not establish OS chooser, screen-reader, physical mobile device,
+spreadsheet-product or cross-browser behavior. The public demo was not deployed.
+
+The unaltered captures below were visually reviewed. Desktop search, order and
+ranked rows are readable. At 390 CSS pixels the controls stack without horizontal
+clipping; the dialog scrolls vertically and the wide table retains its separate
+scroll region. The screenshot shows only the visible viewport, not the entire
+comparison. These are synthetic source captures, not a hosted release.
+
+![Desktop delivery inspector searching van-01 and ordering comparable arrival delays](images/impact-query-desktop-2026-11-07.jpg)
+
+![390px viewport with stacked delivery search and ordering controls](images/impact-query-narrow-2026-11-07.jpg)
