@@ -123,3 +123,12 @@ finite numeric/null semantics, bounded complete serialization, documented text
 transformations and byte-identical CLI/browser exports. Test stale result/closed
 dialog downloads, failure-before-output and real downloaded files separately
 from DOM stand-ins. Never claim universal spreadsheet formula safety.
+
+## Delivery-to-replay navigation
+
+Run `node --test tests/delivery-replay-ui.test.js` when changing arrival actions.
+Preserve exact finite arrival times including zero, omit null targets, and bind
+each handler to its completed input/result/variant and rendered row revision.
+Navigation changes replay perspective only, never input, history or Worker work.
+Test discarded-row callbacks, newer navigation and delayed native dialog close.
+[Contract and bounded native evidence](docs/DELIVERY_REPLAY.md).

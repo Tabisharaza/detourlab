@@ -61,3 +61,12 @@ selected variant's full completed comparison regardless of filter, search, order
 using the same deterministic serializer as the CLI. [Format, text precautions
 and verification](DELIVERY_CSV.md) distinguish this source feature from hosted
 deployment and spreadsheet-product testing.
+
+## Continue from a row into replay
+
+The arrival cell now provides separate baseline and variant replay actions for
+recorded arrivals. A choice closes the inspector, selects the delivery’s vehicle
+and pauses the synchronized maps at that exact timestamp. Null arrivals have no
+action. [Navigation semantics, safeguards and evidence](DELIVERY_REPLAY.md).
+This selects the existing vehicle replay, not a per-delivery route or a causal
+explanation of the delay.

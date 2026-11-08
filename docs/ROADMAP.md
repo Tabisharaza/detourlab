@@ -16,7 +16,7 @@ The [job-impact explainer](JOB_IMPACT.md) shows which jobs change status, arriva
 
 ## Implemented in source: browser delivery-impact inspection
 
-The [delivery inspector](BROWSER_IMPACT.md) reuses completed results and the shared job projection to compare the selected variant with its baseline. It exposes same-status arrival shifts, original-order 20-row pages, explicit missing timing comparisons, full/filtered counts and keyboard-safe invalidation. No simulation, model or acceptance policy changes. Source tests are separate from native-browser, assistive-technology, mobile and deployment gates, which remain pending for this inspector.
+The [delivery inspector](BROWSER_IMPACT.md) reuses completed results and the shared job projection to compare the selected variant with its baseline. It exposes same-status arrival shifts, original-order 20-row pages, explicit missing timing comparisons, full/filtered counts and keyboard-safe invalidation. No simulation, model or acceptance policy changes. Search, delay ordering and complete CSV download now have bounded Chromium evidence. [Arrival replay actions](DELIVERY_REPLAY.md) connect an identified delivery to its vehicle at an exact recorded time. Assistive-technology, physical mobile and hosted deployment gates remain separate.
 
 ## Implemented: per-job regression gates
 

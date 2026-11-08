@@ -45,3 +45,5 @@
 .impact-export p { margin: 8px 0 0; overflow-wrap: anywhere; }
 
 .impact-controls input{min-width:0}.impact-controls input::placeholder{color:#91a6b4}
+
+.impact-replay-actions{display:flex;flex-direction:column;gap:8px;margin-top:10px}.impact-replay-arrival{white-space:normal;text-align:left;min-height:44px;font-size:11px;padding:8px;line-height:1.4}

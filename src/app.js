@@ -43,6 +43,7 @@ let dialogFocus = null;
 let reviewRevision = 0;
 let preparedReview = null;
 let inspectedImpact = null;
+let impactRenderRevision = 0;
 let impactPage = 0;
 let cutoffSource = null;
 let cutoffWorker = null;
@@ -765,7 +766,7 @@ function impactIsCurrent() {
   return inspectedImpact && !state.pending && inspectedImpact.experiment === state.experiment && inspectedImpact.results === state.allResults;
 }
 function invalidateImpact() {
-  inspectedImpact = null; impactPage = 0;
+  inspectedImpact = null; impactPage = 0; impactRenderRevision += 1;
   // Move focus before disabling a control or hiding its scroll region.
   if ($('impact-dialog').open && $('impact-dialog').contains(document.activeElement) && document.activeElement !== $('impact-close')) focusFirst([$('impact-close')]);
   for (const id of ['impact-download-csv', 'impact-variant', 'impact-filter', 'impact-search', 'impact-sort', 'impact-previous', 'impact-next']) $(id).disabled = true;
@@ -782,9 +783,24 @@ function updateImpactSelection() {
     $('impact-variant').value = state.selectedVariantId; impactPage = 0; renderImpact();
   } catch (error) { invalidateImpact(); $('impact-status').textContent = `Delivery comparison unavailable. ${formatInputError(error)}`; }
 }
+function replayDeliveryArrival(context, report, renderRevision, job, side) {
+  // Bind actions to the visible projection, not mutable DOM attributes or IDs.
+  if (!$('impact-dialog').open || !impactIsCurrent() || inspectedImpact !== context || context.report !== report || impactRenderRevision !== renderRevision || report.variant.id !== state.selectedVariantId) return;
+  const atS = job[side]?.arrivalS;
+  if (!Number.isFinite(atS) || atS < 0 || atS > Number($('timeline').max) || !state.disrupted.vehicles.some(vehicle => vehicle.id === job.vehicleId)) return;
+  abandonReplayNavigation(); setPlaying(false);
+  state.selectedVehicle = job.vehicleId; $('vehicle-select').value = job.vehicleId;
+  setView('split'); updateInspector(); setTime(atS);
+  map.invalidateFrame(); baselineMap?.invalidateFrame();
+  const source = side === 'baseline' ? 'Clear-road baseline' : `Variant · ${report.variant.name}`;
+  $('replay-events-announcement').textContent = `Paused at ${atS} s. ${source}: arrival of ${job.id} by ${job.vehicleId} at ${job.nodeId}. Both map panes use this exact time. This selects the vehicle's replay, not a per-delivery route or closure-causation explanation.`;
+  invalidateImpact(); closeDialog($('impact-dialog'), { target: $('vehicle-select') });
+}
 function renderImpact() {
   if (!$('impact-dialog').open || !impactIsCurrent() || inspectedImpact.report.variant.id !== state.selectedVariantId) { invalidateImpact(); return; }
-  const report = inspectedImpact.report, summary = report.summary;
+  const context = inspectedImpact, report = context.report, summary = report.summary;
+  const renderRevision = ++impactRenderRevision;
+  const lostRowFocus = $('impact-rows').contains(document.activeElement);
   $('impact-download-csv').disabled = false;
   $('impact-export-status').textContent = `CSV includes all ${summary.totalJobs} deliveries for ${report.variant.name}, regardless of the filter, search, order or page. Missing timings are blank, not zero. Import identifier and name columns as text in your spreadsheet.`;
   const page = pageDeliveryImpact(report, $('impact-filter').value, impactPage, { query: $('impact-search').value, sort: $('impact-sort').value });
@@ -803,7 +819,18 @@ function renderImpact() {
   $('impact-rows').replaceChildren(...page.jobs.map(job => {
     const row = node('tr'), identity = node('th'); identity.setAttribute('scope', 'row');
     identity.append(node('strong', job.id), node('small', `${job.vehicleId} · ${job.nodeId}`), node('small', `Arrival deadline ${job.dueTimeS} s`));
-    row.append(identity, node('td', `${statuses[job.baseline.status]} → ${statuses[job.variant.status]}`), timing(job.baseline.arrivalS, job.variant.arrivalS, job.arrivalDeltaS), timing(job.baseline.completedS, job.variant.completedS, job.completedDeltaS), timing(job.baseline.delayS, job.variant.delayS, job.delayDeltaS));
+    const arrival = timing(job.baseline.arrivalS, job.variant.arrivalS, job.arrivalDeltaS);
+    const actions = node('div', undefined, 'impact-replay-actions');
+    for (const side of ['baseline', 'variant']) {
+      if (job[side].arrivalS === null) continue;
+      const button = node('button', `Replay ${side} arrival`, 'button impact-replay-arrival'); button.type = 'button';
+      Object.assign(button.dataset, { impactReplay: side, jobId: job.id, time: String(job[side].arrivalS) });
+      button.setAttribute('aria-label', `Replay ${side} arrival of ${job.id} by ${job.vehicleId} at ${job[side].arrivalS} seconds in split view`);
+      button.addEventListener('click', () => replayDeliveryArrival(context, report, renderRevision, job, side));
+      actions.append(button);
+    }
+    if (actions.children.length) arrival.append(actions);
+    row.append(identity, node('td', `${statuses[job.baseline.status]} → ${statuses[job.variant.status]}`), arrival, timing(job.baseline.completedS, job.variant.completedS, job.completedDeltaS), timing(job.baseline.delayS, job.variant.delayS, job.delayDeltaS));
     return row;
   }));
   const active = document.activeElement;
@@ -815,6 +842,7 @@ function renderImpact() {
   const counts = `${page.matchingJobs} matching of ${page.totalJobs} total deliveries. ${page.totalJobs - page.matchingJobs} excluded by filter or search.${searchCounts} ${order}`;
   const empty = !page.totalJobs ? 'This experiment has no deliveries.' : page.query ? 'No deliveries match this search and filter. Clear the search or choose All deliveries.' : `No ${names[page.filter].toLowerCase()}. Choose All deliveries to inspect unchanged outcomes too.`;
   $('impact-status').textContent = page.jobs.length ? `Showing ${page.from}–${page.to}; page ${page.pageIndex + 1} of ${page.pageCount}. ${counts}` : `${empty} ${counts}`;
+  if (lostRowFocus) focusFirst([$('impact-search'), $('impact-filter'), $('impact-close')]);
   if ([ $('impact-previous'), $('impact-next') ].includes(active) && active.disabled || active === $('impact-table-region') && !page.jobs.length) focusFirst([$('impact-previous'), $('impact-next'), $('impact-filter'), $('impact-close')]);
 }
 function inspectDeliveries() {

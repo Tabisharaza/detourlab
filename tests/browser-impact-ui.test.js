@@ -109,7 +109,8 @@ test('Tab containment follows visible enabled controls and keeps the table keybo
   await app.element('impact-dialog').emit('keydown', { key: 'Tab', shiftKey: true }); assert.equal(app.document.activeElement, app.element('impact-sort'));
   await app.change('impact-filter', 'all');
   app.element('impact-close').focus(); await app.element('impact-dialog').emit('keydown', { key: 'Tab', shiftKey: true });
-  assert.equal(app.document.activeElement, app.element('impact-table-region'));
+  assert.equal(app.document.activeElement.dataset.impactReplay, 'variant');
+  assert.equal(app.document.activeElement.dataset.jobId, 'job-1');
   await app.element('impact-dialog').emit('keydown', { key: 'Tab' }); assert.equal(app.document.activeElement, app.element('impact-close'));
   assert.equal(app.element('impact-table-region').tabIndex, 0);
 });

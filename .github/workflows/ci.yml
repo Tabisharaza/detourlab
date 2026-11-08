@@ -243,5 +243,26 @@ jobs:
               }'
           fi
 
+      - name: Verify delivery-to-replay navigation in Chromium
+        run: |
+          browser="$(command -v google-chrome)"
+          test -n "$browser"
+          node tools/delivery-replay-check/run.js --browser "$browser" --out "$RUNNER_TEMP/detourlab-delivery-replay-evidence"
+
+      - name: Record delivery replay evidence and bounded synthetic snapshots
+        if: always()
+        run: |
+          if test -f "$RUNNER_TEMP/detourlab-delivery-replay-evidence/evidence.json"; then
+            cat "$RUNNER_TEMP/detourlab-delivery-replay-evidence/evidence.json"
+            node --input-type=module -e '
+              import { readFile } from "node:fs/promises";
+              for (const name of ["delivery-replay-desktop.jpg", "delivery-replay-narrow.jpg"]) {
+                try { const bytes = await readFile(process.env.RUNNER_TEMP + "/detourlab-delivery-replay-evidence/" + name);
+                  if (bytes.length > 1048576) throw new Error("Snapshot exceeds log bound");
+                  console.log("DELIVERY_REPLAY_SNAPSHOT " + name + " " + bytes.toString("base64"));
+                } catch (error) { if (error.code !== "ENOENT") throw error; }
+              }'
+          fi
+
       - name: Confirm verification did not change tracked source
         run: git diff --exit-code && git diff --cached --exit-code

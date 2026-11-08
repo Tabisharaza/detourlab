@@ -322,3 +322,11 @@ not zero. Search works within the chosen filter and keeps 20-row pages; CSV
 exports still contain every delivery in original input order.
 [Search contract and verification](docs/DELIVERY_SEARCH.md). This is source
 functionality, not a new hosted demo release.
+
+## Inspect a delivery on the maps
+
+In the source inspector, **Replay baseline arrival** and **Replay variant arrival**
+select that delivery’s vehicle and pause both maps at the exact chosen arrival.
+Missing arrivals do not become zero-time events.
+[Try the hand-checkable 20 s / 26 s example](docs/DELIVERY_REPLAY.md).
+This reuses completed results and does not change the hosted v11 demo.
