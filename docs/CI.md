@@ -443,3 +443,15 @@ passed 15 new checkpoints on `c0b95052370538cbf658ee57192da875f56854fc`,
 with 1,439 distinct Node tests, 101 earlier browser checkpoints, four rendering
 cases and a reproducible 32-file build. Raw JSON and bounded unaltered screenshots
 are retained in logs; no additional action dependency or deployment was added.
+
+## November 8 delivery-to-replay gate
+
+The [delivery-to-replay harness](DELIVERY_REPLAY.md) connects completed delivery
+rows to native synchronized-map state. It checks exact/fractional/zero arrival
+times, unavailable nulls, stale row callbacks, trusted Enter activation, selected
+vehicle and unchanged Worker requests. Source run
+[42456661120](https://github.com/Tabisharaza/detourlab/actions/runs/42456661120)
+passed 13 new checkpoints on `da1bbb2e7de636ec93bf6a98c770a0d756931b9c`,
+alongside 1,459 distinct Node tests, 116 earlier browser checkpoints, four render
+cases and the reproducible 32-file build. Raw JSON and bounded captures remain
+in job logs. No action dependency, privilege, installation or deployment added.

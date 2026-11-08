@@ -1,0 +1,350 @@
+{
+  "format": "detourlab-delivery-replay-check",
+  "version": 1,
+  "status": "passed",
+  "startedAt": "2026-11-08T06:57:10.432Z",
+  "runtime": {
+    "node": "v24.22.1",
+    "os": "linux",
+    "release": "7.0.0-1017-azure",
+    "arch": "x64"
+  },
+  "checks": [
+    {
+      "name": "Baseline arrival selects the correct vehicle and shares exact 20-second replay without computation",
+      "status": "passed"
+    },
+    {
+      "name": "Native Enter activates variant arrival at 26 seconds, closes inspector and restores useful focus",
+      "status": "passed"
+    },
+    {
+      "name": "Fractional arrival survives exact split replay without timeline rounding",
+      "status": "passed",
+      "atS": 26.25
+    },
+    {
+      "name": "A genuine zero arrival remains actionable and selects a different vehicle",
+      "status": "passed"
+    },
+    {
+      "name": "Unreachable null arrivals have no actionable replay and are never fabricated as zero",
+      "status": "passed"
+    },
+    {
+      "name": "Retained row callback is inert after search removes its row",
+      "status": "passed"
+    },
+    {
+      "name": "Retained row callback is inert after ordering replaces rows",
+      "status": "passed"
+    },
+    {
+      "name": "Retained row callback is inert after variant selection changes evidence",
+      "status": "passed"
+    },
+    {
+      "name": "Closed inspector callbacks cannot navigate after reopening",
+      "status": "passed"
+    },
+    {
+      "name": "Old delivery callbacks remain inert after real Worker recomputation",
+      "status": "passed"
+    },
+    {
+      "name": "Retained row callback is inert after page navigation",
+      "status": "passed"
+    },
+    {
+      "name": "Searched and ranked Meridian delivery navigates to its exact completed outcome",
+      "status": "passed",
+      "jobId": "job-01-4",
+      "vehicleId": "van-01",
+      "atS": 741
+    },
+    {
+      "name": "Desktop and 390px CSS viewport split maps remain contained after delivery navigation; raw captures retained",
+      "status": "passed"
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "delivery-replay-desktop.jpg",
+      "sha256": "281e2d9f141c26b06c5f093f46eaaa0629a3803a164719460f7e6c49a0bff597",
+      "bytes": 116715,
+      "viewport": {
+        "width": 1600,
+        "height": 1100,
+        "deviceScaleFactor": 1,
+        "mobile": false
+      },
+      "geometry": {
+        "left": 321,
+        "right": 1264,
+        "width": 943,
+        "height": 420,
+        "overflow": false
+      },
+      "meaning": "Unaltered source replay after delivery navigation; visual inspection is separate."
+    },
+    {
+      "file": "delivery-replay-narrow.jpg",
+      "sha256": "087c800ab4c786e768f28be0f8d9df82c21cc45e3a134a9fc6e6cd42fac90ca8",
+      "bytes": 36751,
+      "viewport": {
+        "width": 390,
+        "height": 1100,
+        "deviceScaleFactor": 1,
+        "mobile": false
+      },
+      "geometry": {
+        "left": 14,
+        "right": 361,
+        "width": 347,
+        "height": 760,
+        "overflow": false
+      },
+      "meaning": "Unaltered source replay after delivery navigation; visual inspection is separate."
+    }
+  ],
+  "fixtures": [
+    {
+      "file": "boundary-experiment.json",
+      "sha256": "c94607708cb02f7e26fdacf01731950cca5bec59848deec6fc8d83db91f97c3c",
+      "bytes": 1501
+    }
+  ],
+  "limitations": [
+    "Headless Chromium and synthetic data only; not a deployment, native file chooser, screen-reader, physical mobile-device or cross-browser pass.",
+    "Worker and renderer observers forward unchanged behavior. Retained callbacks are invoked only in explicit stale-state negative tests.",
+    "Import uses CDP file injection. Ordinary control changes use DOM events; one Enter activation uses native CDP input and requires a trusted click.",
+    "Raw screenshots and hashes are not by themselves visual review or signed provenance."
+  ],
+  "sourceFiles": [
+    {
+      "path": "examples/meridian-experiment.json",
+      "sha256": "d768c04057064988d70e59d39b1c175113229bfb11165452b91e86e3bd3209aa"
+    },
+    {
+      "path": "examples/minimal-experiment.json",
+      "sha256": "b2572f0edd0c6af55625ef19792719bdcc2ed5dd2c84a93b13292ef9565f6cd9"
+    },
+    {
+      "path": "index.html",
+      "sha256": "2fb25cda398bb160f5ce8ac30e79066e3f71366c278133a46b61dd206bcae073"
+    },
+    {
+      "path": "scripts/benchmark.js",
+      "sha256": "84d75732593e415e98dec42609b0c98baf2155de08bbcf2241462409afb406bd"
+    },
+    {
+      "path": "scripts/build.js",
+      "sha256": "4d555752e8eb751f1860e76356e227e726ff29ecf321650fe68db447d8dddafe"
+    },
+    {
+      "path": "scripts/check.js",
+      "sha256": "2e9c6e9467082c795c9ace946c06dae43e9c6cfb88fe88291225bebafa70f4b5"
+    },
+    {
+      "path": "scripts/cli-arguments.js",
+      "sha256": "af34a4d974e897f04702f7abc449afba6914ce6407bdf32aa4dc4afed8be62d2"
+    },
+    {
+      "path": "scripts/cli-display.js",
+      "sha256": "d2d94269e98efd142a5f154fca75a57d7b5a7955330ee33f9606fa737c5cb135"
+    },
+    {
+      "path": "scripts/compare-cutoffs.js",
+      "sha256": "98205943f7085bf8de7c33e22933f458df055988b727700a874f40effb5f195d"
+    },
+    {
+      "path": "scripts/compare-seeds.js",
+      "sha256": "b7b51aaafd3f559b5a16a5e793163d22ad9a8f3ec6ef3414bf2356013a2e9eca"
+    },
+    {
+      "path": "scripts/cutoff-comparison.js",
+      "sha256": "cd0f1d63ad234e182b05f74b4eeb71bb3d22e2b1aa70077e0ba4ac3a08cc9fae"
+    },
+    {
+      "path": "scripts/cutoff-experiment.js",
+      "sha256": "ce55391220cb9ff63bcf02591685ad04d73c8976ae134bd4f4def8c585651c54"
+    },
+    {
+      "path": "scripts/experiment-report.js",
+      "sha256": "3ad938a90615f20ad92b4ca9962caa8ee87eff650158fa70e906b27fb5aac622"
+    },
+    {
+      "path": "scripts/explain-experiment.js",
+      "sha256": "a10ec078c7edc81aa507bb7eb898f02b586c8f8751a20c960ac721d8f96619b3"
+    },
+    {
+      "path": "scripts/job-gates.js",
+      "sha256": "2fcd8eda96e61e9f6434a8567a3aabd2d3bf48aa080e237a8de90a6364cf7039"
+    },
+    {
+      "path": "scripts/job-impact.js",
+      "sha256": "31f3fa400cfe49dab36ffdf369604fa0ac523b1e72b966678a4e50c725f8c8e8"
+    },
+    {
+      "path": "scripts/measure-render-counts.js",
+      "sha256": "3ded58b276d50248a0e08c03351c9f1d4ace7272f9d52c0f0bae06556ce350a2"
+    },
+    {
+      "path": "scripts/meridian-study.js",
+      "sha256": "689dfb55e90fb828ab0cbda2a7b6f58a9827ed6e7a75cb60f3cf1acbfc814627"
+    },
+    {
+      "path": "scripts/read-input.js",
+      "sha256": "fbc500cb2a0e2b14e07ff2274b4e8bd50d4059a43cbd6aec97985aaabd01b941"
+    },
+    {
+      "path": "scripts/report-experiment.js",
+      "sha256": "8da01aca86416215dd2c612ea4617aadc822c2aff9ebb68a8043c0a01e6e62a0"
+    },
+    {
+      "path": "scripts/report-identity.js",
+      "sha256": "4c7815d05c78089a65f3d5950b5b19db05635c4979011228b38c1c3ddcf27b5c"
+    },
+    {
+      "path": "scripts/review-verification.js",
+      "sha256": "298876691aa6d2a91ba1ed12b9adfe8af59cdd9733a778293a54851feb35dab9"
+    },
+    {
+      "path": "scripts/run-experiment.js",
+      "sha256": "60ed2e894c511f76d08900c0d18ac958509708041eb3a614de60706eab1d9630"
+    },
+    {
+      "path": "scripts/run-scenario.js",
+      "sha256": "18b7f2e922727bf6c7560855dc48750bbe1f83e097cfdff454e3c173de439d27"
+    },
+    {
+      "path": "scripts/serve-options.js",
+      "sha256": "c8aecec23dab0b9a6278d4d5c53940117747c882b359c2d2522c3264867ed08d"
+    },
+    {
+      "path": "scripts/serve.js",
+      "sha256": "86eb68f3acc9ffbf0bfa81dd3d41a6d84114c6f6f80c16e0ef577fb05723c06a"
+    },
+    {
+      "path": "scripts/verify-dist.js",
+      "sha256": "6e3903f1a8cac9c5452f77c907656c68c27452d217bf088f65d192c086c0112b"
+    },
+    {
+      "path": "scripts/verify-review.js",
+      "sha256": "f17aca9d1e8171ccdb3442950f5373ceda1c3a0df3c4ff0da2472f703edf5b27"
+    },
+    {
+      "path": "scripts/write-review-packet.js",
+      "sha256": "f2c3ac0b61e299aca160143838d77bb093f2e02d0e8314b6253e394c0e131321"
+    },
+    {
+      "path": "src/app.js",
+      "sha256": "5f42aba224c184392c6423fbbd5d07cefdc4a2b7c03a6c4835dd094c94ae1024"
+    },
+    {
+      "path": "src/browser-impact.js",
+      "sha256": "5360f9701fb69f6c7c221a9b45dd6fd1ba192f2dee5175ac4ef5428773e2f82d"
+    },
+    {
+      "path": "src/browser-review.js",
+      "sha256": "e3cf75b29aa5234f1dad3115d35fb37eb4c27f50157d4e82b0177c4e90f31dfb"
+    },
+    {
+      "path": "src/cutoff-comparison.js",
+      "sha256": "12339235403d492fb0b483ca4ebe5c52965735129eb3727bc07ff6c3719eaebe"
+    },
+    {
+      "path": "src/cutoff-experiment.js",
+      "sha256": "0c2daf9a919bc6cbe85a27d53004de5b6eed296ad0d93b870aa3802c5b99ab9b"
+    },
+    {
+      "path": "src/engine.js",
+      "sha256": "a3fa06223fdf95b7cc1bb0b15b05da924c6d835ac13e688327262bfc080a3016"
+    },
+    {
+      "path": "src/experiment-history.js",
+      "sha256": "44f8c674b01384694a2a1d5b61889c7b310a97d9034e36a265af10f08098a24e"
+    },
+    {
+      "path": "src/experiment-report.js",
+      "sha256": "656062cf1fac1d8db80dae9b075de23ff8c505d35bf941f0c420e05d8663258d"
+    },
+    {
+      "path": "src/experiment.js",
+      "sha256": "efb77801be428839dd677df9a8c5fc62812709062b20eacb0d93a39576f1eff3"
+    },
+    {
+      "path": "src/file-input.js",
+      "sha256": "9d34d0b01eff790e25d4e2f2edef56d8b4bfc6c608b266f471f932ea0bfc048a"
+    },
+    {
+      "path": "src/job-gates.js",
+      "sha256": "bd5d905cb85a3265167d58c12e67f24ab18e67e66e726631f88b805fad24e732"
+    },
+    {
+      "path": "src/job-impact-csv.js",
+      "sha256": "f0c4836c88b428c5b1ca6c6baa0e2dd4ef4febe95b0e2086a65bec88ec7a5a90"
+    },
+    {
+      "path": "src/job-impact.js",
+      "sha256": "537d07bd5f89114cbaca0939d563aaa9cfbebf1ddc371fdfec1fe06b78a91948"
+    },
+    {
+      "path": "src/map.js",
+      "sha256": "bb58f3fd055a752d98769ef867a515191546ce1a2a9feea0f3a9bd8de7f90567"
+    },
+    {
+      "path": "src/replay-bookmark.js",
+      "sha256": "621a22f480f407d5f6ce2e809c820cd290a410e814ea2cb1deb294d74553dd8b"
+    },
+    {
+      "path": "src/replay-events.js",
+      "sha256": "d66879fc9c6095f9667be89256d1e6ca96ddd55fefe944e002cb3736fbb5936e"
+    },
+    {
+      "path": "src/report-results.js",
+      "sha256": "1d5877f77381a63ba68b54f809a07cb879d6357954a5a2a9d8f48c733934ca43"
+    },
+    {
+      "path": "src/scenario.js",
+      "sha256": "fd7e71c7219bf738547d129499496c77d0213dababfa686f171e8b6c6eb6e5b4"
+    },
+    {
+      "path": "src/simulation-worker.js",
+      "sha256": "3f6e4f882485a0f59d8c80af496dc6ae9acb2667ddaebe33e4db10b43276052c"
+    },
+    {
+      "path": "src/style.css",
+      "sha256": "61ba5d73aac1b2cd2995c2f6c255aca152209d9c57ad754e17e3354b862f0ec9"
+    },
+    {
+      "path": "src/tutorial.js",
+      "sha256": "a2b310e8a476ab245c9c4a7c2814c73c8407fce92d20b7b35be5765919f2ccea"
+    },
+    {
+      "path": "tools/browser-check/chromium.js",
+      "sha256": "a34c7eb7c4f52cb4f4c19b3a0b215b96722ac6233a5252fecfc890b9fe5de055"
+    },
+    {
+      "path": "tools/browser-check/run.js",
+      "sha256": "71477ddd31df21055a2c14aaa876633c1d9e10489ad3b8922dd46ec2c90daa4f"
+    },
+    {
+      "path": "tools/delivery-replay-check/run.js",
+      "sha256": "e4ee36f5acdc542d391a2f5f017cfcacd08b6f952b37686b5e1da0f83c735d33"
+    },
+    {
+      "path": "tools/replay-events-check/run.js",
+      "sha256": "ae375e0505e115073f4f0dd8d782cba340f52fc9caa94ebfde8944a14bf41a0e"
+    }
+  ],
+  "sourceSha256": "4bd9b7bc9e4c655f3583cc22d706fc47f8bb51df7d2200a4508658f6fbb39567",
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/156.0.8078.79",
+    "revision": "@a21ce95c24ce3964416f09ae1862f53f319eb4d0",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "jsVersion": "15.6.75.27"
+  },
+  "completedAt": "2026-11-08T06:57:12.576Z"
+}

@@ -61,3 +61,48 @@ Native Chromium evidence and reviewed screenshots are recorded separately when
 verified. These checks do not establish OS chooser, screen-reader, physical
 mobile-device or cross-browser behavior. The public demo remains the separately
 recorded v11 release; this milestone is source publication, not a deployment.
+
+## Recorded source verification — November 8, 2026
+
+[Source `da1bbb2`](https://github.com/Tabisharaza/detourlab/commit/da1bbb2e7de636ec93bf6a98c770a0d756931b9c)
+passed [CI run 42456661120](https://github.com/Tabisharaza/detourlab/actions/runs/42456661120).
+The [raw delivery-replay evidence](evidence/delivery-replay-2026-11-08.json) was
+extracted without field changes from the job's printed JSON. Every recorded
+source and screenshot hash matched the tested bytes.
+
+- **1,459 distinct Node tests** passed: 1,339 core and 120 optional schema/editor
+  tests. The repeated 211 CLI gates overlap the core suite.
+- All **13 new Chromium checkpoints** passed. The tiny baseline/variant replay
+  reached 20/26 seconds; the synthetic boundary fixture retained 26.25 seconds,
+  genuine zero and absent arrival times. A native CDP Enter activation required
+  a trusted browser click. Other selections/clicks used disclosed DOM events.
+- Stale callbacks were explicitly invoked after search, ordering, variant
+  changes, close/reopen, pagination and real Worker recomputation. They did not
+  navigate. All successful jumps left Worker request counts unchanged.
+- A searched/ranked `job-01-4` selected `van-01` and paused both native map states
+  at 741 seconds. This is an outcome from synthetic fixed-order simulation,
+  not a measured delivery or a causal routing explanation.
+- All **116 earlier browser checkpoints** and **four rendering-profile cases**
+  passed separately. The 32-file release passed exact allowlist, source-byte,
+  SHA-256 and license checks; a second build reproduced every byte and manifest.
+
+Review corrected two test-only issues before publication: a missing required
+closure ID in an unreachable fixture and the pre-feature Tab-edge expectation.
+The final fixtures assert successful import; focus checks include the added
+arrival buttons. The production routing and simulation code did not change.
+
+Native evidence used Chromium 156.0.8078.79, Node 24.22.1, Ubuntu 24.04 image
+`20261101.360.1`. The local browser's socket restriction was not bypassed. This
+is hosted CI evidence, not a local browser pass or hosted demo deployment.
+Screen readers, OS choosers, physical mobile devices and other browsers remain
+separate verification gaps.
+
+The unaltered captures below were visually reviewed. Both maps show `van-01`
+at the same 741-second time; the narrow layout stacks the maps without horizontal
+page overflow. Captures include the transient import toast and only the visible
+viewport, not the whole workbench. They do not certify every control at mobile
+sizes or establish pixel equivalence of a historical release.
+
+![Desktop synchronized maps after navigating to job-01-4 variant arrival](images/delivery-replay-desktop-2026-11-08.jpg)
+
+![390px CSS viewport with stacked synchronized maps after delivery navigation](images/delivery-replay-narrow-2026-11-08.jpg)
