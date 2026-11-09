@@ -264,5 +264,26 @@ jobs:
               }'
           fi
 
+      - name: Verify return to delivery comparison in Chromium
+        run: |
+          browser="$(command -v google-chrome)"
+          test -n "$browser"
+          node tools/delivery-return-check/run.js --browser "$browser" --out "$RUNNER_TEMP/detourlab-delivery-return-evidence"
+
+      - name: Record delivery return evidence and bounded synthetic snapshots
+        if: always()
+        run: |
+          if test -f "$RUNNER_TEMP/detourlab-delivery-return-evidence/evidence.json"; then
+            cat "$RUNNER_TEMP/detourlab-delivery-return-evidence/evidence.json"
+            node --input-type=module -e '
+              import { readFile } from "node:fs/promises";
+              for (const name of ["delivery-return-desktop.jpg", "delivery-return-narrow.jpg"]) {
+                try { const bytes = await readFile(process.env.RUNNER_TEMP + "/detourlab-delivery-return-evidence/" + name);
+                  if (bytes.length > 1048576) throw new Error("Snapshot exceeds log bound");
+                  console.log("DELIVERY_RETURN_SNAPSHOT " + name + " " + bytes.toString("base64"));
+                } catch (error) { if (error.code !== "ENOENT") throw error; }
+              }'
+          fi
+
       - name: Confirm verification did not change tracked source
         run: git diff --exit-code && git diff --cached --exit-code

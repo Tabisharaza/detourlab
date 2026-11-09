@@ -329,4 +329,7 @@ In the source inspector, **Replay baseline arrival** and **Replay variant arriva
 select that delivery’s vehicle and pause both maps at the exact chosen arrival.
 Missing arrivals do not become zero-time events.
 [Try the hand-checkable 20 s / 26 s example](docs/DELIVERY_REPLAY.md).
-This reuses completed results and does not change the hosted v11 demo.
+**Return to delivery comparison** restores the same search, order, page and
+focused arrival action after exploring replay. [Round-trip behavior and
+verification](docs/DELIVERY_RETURN.md). This reuses completed results and does
+not change the hosted v11 demo.

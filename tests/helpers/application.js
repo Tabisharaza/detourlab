@@ -46,6 +46,7 @@ export function application({ workerConstructionError = () => null, mapClass = n
     set textContent(value) { this.replaceChildren(); this._text = String(value); }
     set innerHTML(_value) { throw new Error('Application must render supplied labels as text, never HTML.'); }
     addEventListener(name, callback) { (this.listeners[name] ??= []).push(callback); }
+    removeEventListener(name, callback) { this.listeners[name] = (this.listeners[name] ?? []).filter(listener => listener !== callback); }
     setAttribute(name, value) {
       this.attributes.set(name, String(value));
       if (name === 'class') this.className = value;

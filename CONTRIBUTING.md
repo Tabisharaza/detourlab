@@ -132,3 +132,10 @@ each handler to its completed input/result/variant and rendered row revision.
 Navigation changes replay perspective only, never input, history or Worker work.
 Test discarded-row callbacks, newer navigation and delayed native dialog close.
 [Contract and bounded native evidence](docs/DELIVERY_REPLAY.md).
+
+For [delivery comparison return points](docs/DELIVERY_RETURN.md), run
+`node --test tests/delivery-return-ui.test.js`. Keep only one bounded in-memory
+return context, bind it to completed input/results/variant identity, consume it
+on return and invalidate on variant or workspace replacement. Test exact page
+and row-focus restoration, current replay preservation, stale callbacks and
+newer navigation. Ordinary Inspect deliveries must remain a fresh start.

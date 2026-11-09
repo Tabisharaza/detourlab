@@ -47,3 +47,5 @@
 .impact-controls input{min-width:0}.impact-controls input::placeholder{color:#91a6b4}
 
 .impact-replay-actions{display:flex;flex-direction:column;gap:8px;margin-top:10px}.impact-replay-arrival{white-space:normal;text-align:left;min-height:44px;font-size:11px;padding:8px;line-height:1.4}
+
+#impact-return{white-space:normal;min-height:44px}#impact-return-help{font-size:12px;line-height:1.6;color:#c9d9e0;margin:10px 0;overflow-wrap:anywhere}

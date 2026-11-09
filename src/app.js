@@ -43,6 +43,7 @@ let dialogFocus = null;
 let reviewRevision = 0;
 let preparedReview = null;
 let inspectedImpact = null;
+let impactReturn = null, impactReturnListener = null;
 let impactRenderRevision = 0;
 let impactPage = 0;
 let cutoffSource = null;
@@ -178,6 +179,7 @@ function toggleRoad(id, forceReopen = false) {
 }
 function selectVariant(id) {
   if (!state.experiment.variants.some(variant => variant.id === id)) return;
+  if (id !== state.selectedVariantId) clearImpactReturn();
   abandonReplayNavigation();
   importRevision += 1;
   if (!state.lessonActive) editHistory = selectExperimentHistory(editHistory, id);
@@ -766,6 +768,7 @@ function impactIsCurrent() {
   return inspectedImpact && !state.pending && inspectedImpact.experiment === state.experiment && inspectedImpact.results === state.allResults;
 }
 function invalidateImpact() {
+  clearImpactReturn();
   inspectedImpact = null; impactPage = 0; impactRenderRevision += 1;
   // Move focus before disabling a control or hiding its scroll region.
   if ($('impact-dialog').open && $('impact-dialog').contains(document.activeElement) && document.activeElement !== $('impact-close')) focusFirst([$('impact-close')]);
@@ -783,11 +786,40 @@ function updateImpactSelection() {
     $('impact-variant').value = state.selectedVariantId; impactPage = 0; renderImpact();
   } catch (error) { invalidateImpact(); $('impact-status').textContent = `Delivery comparison unavailable. ${formatInputError(error)}`; }
 }
+function clearImpactReturn() {
+  const button = $('impact-return');
+  if (document.activeElement === button) focusFirst([$('impact-button'), $('vehicle-select'), $('run-experiment')]);
+  if (impactReturnListener) button.removeEventListener('click', impactReturnListener);
+  impactReturnListener = null; impactReturn = null;
+  button.hidden = true; button.disabled = true; $('impact-return-help').hidden = true;
+}
+function offerImpactReturn(context) {
+  clearImpactReturn(); impactReturn = context;
+  const button = $('impact-return');
+  impactReturnListener = () => returnToImpact(context);
+  button.addEventListener('click', impactReturnListener);
+  button.hidden = false; button.disabled = false; $('impact-return-help').hidden = false;
+}
+function returnToImpact(context) {
+  if (impactReturn !== context || $('impact-dialog').open) return;
+  if (state.pending || context.experiment !== state.experiment || context.results !== state.allResults || context.variantId !== state.selectedVariantId) { clearImpactReturn(); return; }
+  // Consume this one-use journey before opening; retained callbacks cannot
+  // hijack a later journey, even when it uses the same input and job.
+  clearImpactReturn(); abandonReplayNavigation(); inspectDeliveries();
+  if (!impactIsCurrent() || !$('impact-dialog').open) return;
+  $('impact-filter').value = context.filter; $('impact-search').value = context.query; $('impact-sort').value = context.sort;
+  impactPage = context.page; renderImpact();
+  const target = [...$('impact-rows').querySelectorAll('button')].find(button => button.dataset.jobId === context.jobId && button.dataset.impactReplay === context.side);
+  focusFirst([target, $('impact-search'), $('impact-dialog-title')]);
+  target?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+}
 function replayDeliveryArrival(context, report, renderRevision, job, side) {
   // Bind actions to the visible projection, not mutable DOM attributes or IDs.
   if (!$('impact-dialog').open || !impactIsCurrent() || inspectedImpact !== context || context.report !== report || impactRenderRevision !== renderRevision || report.variant.id !== state.selectedVariantId) return;
   const atS = job[side]?.arrivalS;
   if (!Number.isFinite(atS) || atS < 0 || atS > Number($('timeline').max) || !state.disrupted.vehicles.some(vehicle => vehicle.id === job.vehicleId)) return;
+  const returnContext = { experiment: state.experiment, results: state.allResults, variantId: state.selectedVariantId,
+    filter: $('impact-filter').value, query: $('impact-search').value, sort: $('impact-sort').value, page: impactPage, jobId: job.id, side };
   abandonReplayNavigation(); setPlaying(false);
   state.selectedVehicle = job.vehicleId; $('vehicle-select').value = job.vehicleId;
   setView('split'); updateInspector(); setTime(atS);
@@ -795,6 +827,7 @@ function replayDeliveryArrival(context, report, renderRevision, job, side) {
   const source = side === 'baseline' ? 'Clear-road baseline' : `Variant · ${report.variant.name}`;
   $('replay-events-announcement').textContent = `Paused at ${atS} s. ${source}: arrival of ${job.id} by ${job.vehicleId} at ${job.nodeId}. Both map panes use this exact time. This selects the vehicle's replay, not a per-delivery route or closure-causation explanation.`;
   invalidateImpact(); closeDialog($('impact-dialog'), { target: $('vehicle-select') });
+  offerImpactReturn(returnContext);
 }
 function renderImpact() {
   if (!$('impact-dialog').open || !impactIsCurrent() || inspectedImpact.report.variant.id !== state.selectedVariantId) { invalidateImpact(); return; }
@@ -847,6 +880,7 @@ function renderImpact() {
 }
 function inspectDeliveries() {
   if (state.pending || !state.allResults || $('impact-dialog').open) return;
+  clearImpactReturn();
   try {
     const report = createBrowserImpact(state.experiment, state.allResults, state.selectedVariantId);
     inspectedImpact = { experiment: state.experiment, results: state.allResults, report }; impactPage = 0;

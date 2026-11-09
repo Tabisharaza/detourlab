@@ -106,3 +106,10 @@ sizes or establish pixel equivalence of a historical release.
 ![Desktop synchronized maps after navigating to job-01-4 variant arrival](images/delivery-replay-desktop-2026-11-08.jpg)
 
 ![390px CSS viewport with stacked synchronized maps after delivery navigation](images/delivery-replay-narrow-2026-11-08.jpg)
+
+## Return without losing your comparison
+
+After an arrival jump, **Return to delivery comparison** restores your prior
+query, filter, order, page and focused arrival action. It does not rewind replay
+or rerun results. [Temporary-state rules and verification](DELIVERY_RETURN.md)
+explain consumption and invalidation; ordinary inspection still opens fresh.
