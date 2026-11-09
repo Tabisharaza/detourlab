@@ -455,3 +455,15 @@ passed 13 new checkpoints on `da1bbb2e7de636ec93bf6a98c770a0d756931b9c`,
 alongside 1,459 distinct Node tests, 116 earlier browser checkpoints, four render
 cases and the reproducible 32-file build. Raw JSON and bounded captures remain
 in job logs. No action dependency, privilege, installation or deployment added.
+
+## November 9 delivery-comparison return gate
+
+The [return harness](DELIVERY_RETURN.md) checks saved comparison page, query,
+order and originating-row focus while preserving newer replay perspective.
+Source run [42573712595](https://github.com/Tabisharaza/detourlab/actions/runs/42573712595)
+passed 10 new checkpoints on `d85abe592a93e4e0e8ff5f50225e2937eb3b24f1`,
+with 1,477 distinct Node tests, 129 earlier browser checkpoints, four rendering
+cases and a reproducible 32-file build. Desktop focus visibility is checked
+without harness scrolling. Narrow resize recentering is explicitly disclosed.
+Raw JSON and bounded screenshots are retained in logs; no action dependency,
+privilege, installation or deployment was added.
