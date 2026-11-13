@@ -128,6 +128,13 @@ inspector to spreadsheet review without rerunning completed browser results.
 All rows, exact timing differences, explicit missing values and bounded text
 protections remain separate from acceptance or deployment claims.
 
+## Implemented: compare two named plans directly
+
+The [headless variant comparison](VARIANT_COMPARISON.md) reports per-delivery
+changes and aggregate trade-offs between any two saved schedules in one run.
+It keeps missing arrival evidence separate from zero and leaves existing
+baseline reports, gates and the browser workbench unchanged.
+
 ## Release-readiness gates
 
 1. Publish a truthful README, live demo link, actual screenshot and model assumptions.

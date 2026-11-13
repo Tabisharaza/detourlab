@@ -1,0 +1,100 @@
+{
+  "format": "detourlab-variant-comparison",
+  "version": 1,
+  "engineVersion": "0.1.0",
+  "experimentId": "minimal-cutoff-experiment",
+  "experimentSha256": "7a757f1b53531826e98f44a706d3c6d235986682e6517c3c542f116fa8bf7395",
+  "reference": {
+    "id": "close-at-10",
+    "name": "Close at 10 s",
+    "metrics": {
+      "distanceM": 260,
+      "lateJobs": 1,
+      "unreachableJobs": 0,
+      "completedJobs": 1,
+      "totalJobs": 1,
+      "totalDelayS": 4,
+      "onTimeJobs": 0,
+      "reroutes": 1,
+      "affectedVehicles": 1,
+      "totalTravelTimeS": 26
+    }
+  },
+  "candidate": {
+    "id": "close-at-11",
+    "name": "Close at 11 s",
+    "metrics": {
+      "distanceM": 200,
+      "lateJobs": 0,
+      "unreachableJobs": 0,
+      "completedJobs": 1,
+      "totalJobs": 1,
+      "totalDelayS": 0,
+      "onTimeJobs": 1,
+      "reroutes": 0,
+      "affectedVehicles": 0,
+      "totalTravelTimeS": 20
+    }
+  },
+  "delta": {
+    "distanceM": -60,
+    "lateJobs": -1,
+    "unreachableJobs": 0,
+    "completedJobs": 0
+  },
+  "summary": {
+    "totalJobs": 1,
+    "changedJobs": 1,
+    "unchangedJobs": 0,
+    "statusChangedJobs": 1,
+    "arrivalChangedJobs": 1,
+    "transitions": {
+      "on-time": {
+        "on-time": 0,
+        "late": 0,
+        "unreachable": 0
+      },
+      "late": {
+        "on-time": 1,
+        "late": 0,
+        "unreachable": 0
+      },
+      "unreachable": {
+        "on-time": 0,
+        "late": 0,
+        "unreachable": 0
+      }
+    },
+    "arrivals": {
+      "earlier": 1,
+      "unchanged": 0,
+      "later": 0,
+      "notComparable": 0
+    }
+  },
+  "jobs": [
+    {
+      "id": "job-1",
+      "vehicleId": "van-1",
+      "nodeId": "C",
+      "dueTimeS": 22,
+      "changed": true,
+      "statusChanged": true,
+      "arrivalDeltaS": -6,
+      "completedDeltaS": -6,
+      "reference": {
+        "status": "late",
+        "arrivalS": 26,
+        "completedS": 29,
+        "latenessS": 4
+      },
+      "candidate": {
+        "status": "on-time",
+        "arrivalS": 20,
+        "completedS": 23,
+        "latenessS": 0
+      },
+      "latenessDeltaS": -4
+    }
+  ]
+}

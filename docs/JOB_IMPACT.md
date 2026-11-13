@@ -9,6 +9,9 @@ node scripts/explain-experiment.js examples/meridian-experiment.json --variant m
 
 No installation, browser, network, account or API key is needed. The input must be a local synthetic experiment or legacy scenario. The existing threshold runners and their output formats are unchanged.
 
+To compare two named schedules with each other rather than with clear roads,
+use the separate [variant comparison command](VARIANT_COMPARISON.md).
+
 ## Trace the tiny example
 
 The bundled `close-at-10` variant produces this job comparison:

@@ -124,6 +124,21 @@ selected variant right. [Checks, raw narrow capture and provenance](docs/SPLIT_V
 
 This source milestone does not imply that the hosted demo has been redeployed.
 
+## Compare two named plans directly
+
+The 10-minute Market Bridge closure produces 12 fewer late deliveries than
+the 5-minute closure in Meridian. It still makes 65 individual deliveries
+arrive later, while 46 arrive earlier and 81 are unchanged. See both outcomes
+side by side without joining separate baseline reports:
+
+```sh
+node scripts/compare-variants.js examples/meridian-experiment.json \
+  --reference market-05 --candidate market-10
+```
+
+Add `--json` for all 192 delivery rows. The [comparison guide](docs/VARIANT_COMPARISON.md)
+explains signed differences, skipped work and the checked-in tiny example.
+
 ## Reproduce all variants
 
 The bundled [Meridian experiment](examples/meridian-experiment.json) contains four plans:
