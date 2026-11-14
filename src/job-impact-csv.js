@@ -6,6 +6,12 @@ export const JOB_IMPACT_CSV_COLUMNS = Object.freeze([
   'variantStatus', 'variantArrivalS', 'variantCompletedS', 'variantDelayS',
   'arrivalDeltaS', 'completedDeltaS', 'delayDeltaS', 'changed', 'statusChanged',
 ]);
+export const NAMED_IMPACT_CSV_COLUMNS = Object.freeze([
+  'experimentId', 'referenceId', 'referenceName', 'candidateId', 'candidateName', 'jobId', 'vehicleId', 'nodeId', 'dueTimeS',
+  'referenceStatus', 'referenceArrivalS', 'referenceCompletedS', 'referenceLatenessS',
+  'candidateStatus', 'candidateArrivalS', 'candidateCompletedS', 'candidateLatenessS',
+  'arrivalDeltaS', 'completedDeltaS', 'latenessDeltaS', 'changed', 'statusChanged',
+]);
 const statuses = new Set(['on-time', 'late', 'unreachable']);
 const encoder = new TextEncoder();
 function requireValue(condition, message) {
@@ -49,10 +55,15 @@ const quote = value => /[",\r\n]/u.test(value) ? `"${value.replace(/"/gu, '""')}
  */
 export function renderJobImpactCsv(impact, { experimentId } = {}) {
   requireValue(impact && typeof impact === 'object', 'a complete impact report is required.');
-  const identity = [text(experimentId), text(impact.variant?.id), text(impact.variant?.name)];
+  const named = Object.hasOwn(impact, 'reference');
+  const candidate = [text(impact.variant?.id), text(impact.variant?.name)];
+  const reference = named ? [text(impact.reference?.id), text(impact.reference?.name)] : [];
+  requireValue(!named || impact.reference.id !== impact.variant.id, 'reference and candidate must be distinct.');
+  const identity = [text(experimentId), ...reference, ...candidate];
   requireValue(Array.isArray(impact.jobs) && impact.jobs.length <= JOB_IMPACT_CSV_LIMITS.maxJobs, 'jobs must be an array of at most 2000 rows.');
   requireValue(Number.isInteger(impact.summary?.totalJobs) && impact.summary.totalJobs === impact.jobs.length, 'summary totalJobs must equal the complete row count.');
-  const lines = [JOB_IMPACT_CSV_COLUMNS.join(',') + '\r\n'];
+  const columns = named ? NAMED_IMPACT_CSV_COLUMNS : JOB_IMPACT_CSV_COLUMNS;
+  const lines = [columns.join(',') + '\r\n'];
   let bytes = encoder.encode(lines[0]).byteLength;
   const ids = new Set();
   for (const job of impact.jobs) {

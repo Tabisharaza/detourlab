@@ -1,6 +1,6 @@
 # Inspect delivery changes in the browser
 
-The source workbench now offers **Inspect deliveries** after a complete run. It compares a selected variant with the same clear-road baseline, without running the simulation again. This is a **source-only milestone**: no deployment or accessibility certification is implied. Later bounded native checks are recorded in [CSV verification](DELIVERY_CSV.md) and [search and ordering](DELIVERY_SEARCH.md).
+The source workbench now offers **Inspect deliveries** after a complete run. It compares a selected variant with the clear-road baseline by default, or compares two saved plans directly, without running the simulation again. This is a **source-only milestone**: no deployment or accessibility certification is implied. Later bounded native checks are recorded in [CSV verification](DELIVERY_CSV.md) and [search and ordering](DELIVERY_SEARCH.md).
 
 ## Find the difference hidden by a total
 
@@ -16,6 +16,44 @@ The complete summary always counts every delivery. A live status gives the page 
 For the bundled `meridian-experiment.json`, `market-05` has 125 changed outcomes among 192 jobs: 118 status changes and seven same-status arrival changes. The timing-only filter exposes those seven directly. For `job-01-4`, arrival changes from 690 s to 741 s (+51 s) while both outcomes remain on time. Service completion changes from 710 s to 761 s. These values come from the completed simulation, not an estimate from the map.
 
 For the tiny example, `close-at-10` shows on-time → late, arrival 20 s → 26 s, service completion 23 s → 29 s, and lateness 0 s → 4 s. `close-at-11` has no changed outcomes; select **All deliveries** to see its unchanged job.
+
+## Compare two saved plans
+
+In the source workbench, import the bundled [Meridian experiment](../examples/meridian-experiment.json)
+and finish the run. Open **Inspect deliveries**. For **Candidate plan**, choose
+**Market Bridge at 10:00**. For **Reference plan**, choose **Market Bridge at 05:00**.
+The resulting candidate has 12 fewer late deliveries but 65 later arrivals;
+46 are earlier and 81 unchanged. The metrics show distance, late, unreachable
+and completed work for both sides with signed differences. Missing arrivals
+are counted separately from unchanged arrivals. A reduction in completed
+deliveries adds a coverage note even when late counts go down.
+
+- The reference can be clear roads or any saved plan other than the candidate.
+  Choosing the current named reference as candidate swaps the two plans.
+  A different candidate keeps the existing reference. A reference change alone
+  does not change the workbench's selected variant or replay time.
+- Rows read **reference → candidate**, with signed change **candidate minus
+  reference**. Search and order still apply to all matching evidence before
+  paging. Changes to either plan reset to the first page, retaining the query,
+  filter and ordering.
+- The split maps still show the clear-road baseline and the active candidate.
+  In a named pair, **Replay candidate arrival** is shown only when the candidate
+  has a recorded arrival. To inspect the other plan on the map, make it the
+  candidate to swap the plans. **Return to delivery comparison** restores both
+  selected plans, the search, order, page and row focus without rewinding replay.
+  A fresh **Inspect deliveries** always starts with the clear-road baseline.
+- **Download all deliveries CSV** writes `detourlab-variant-comparison.csv`
+  with both plan identities and all job rows in original input order. For
+  machine-readable JSON and the same exact comparison values, use the
+  [named-plan CLI](VARIANT_COMPARISON.md). The legacy baseline CSV is unchanged.
+
+Focused source checks cover both directions, an unreachable side, tied names,
+complete CSV, result invalidation, stale row actions and replay restoration.
+The existing [CSV](DELIVERY_CSV.md) and [return](DELIVERY_RETURN.md) Chromium
+harnesses now include a trusted keyboard path, actual named downloads checked
+row-by-row against the CLI JSON, and named-pair replay/return. Those harnesses
+do not certify OS file dialogs, assistive technology, physical devices, other
+browser engines, or hosted deployment.
 
 ## What the numbers mean
 
@@ -45,7 +83,7 @@ Escape and Close return to **Inspect deliveries**, or **Run all variants** if th
 ## Reproduce source checks
 
 ```sh
-node --test tests/browser-impact.test.js tests/browser-impact-ui.test.js
+node --test tests/browser-impact.test.js tests/browser-impact-ui.test.js tests/named-impact-ui.test.js
 npm run check
 node scripts/verify-dist.js
 ```
@@ -64,7 +102,7 @@ deployment and spreadsheet-product testing.
 
 ## Continue from a row into replay
 
-The arrival cell now provides separate baseline and variant replay actions for
+In the default comparison, the arrival cell provides separate baseline and variant replay actions for
 recorded arrivals. A choice closes the inspector, selects the delivery’s vehicle
 and pauses the synchronized maps at that exact timestamp. Null arrivals have no
 action. [Navigation semantics, safeguards and evidence](DELIVERY_REPLAY.md).

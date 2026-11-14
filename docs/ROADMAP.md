@@ -128,12 +128,15 @@ inspector to spreadsheet review without rerunning completed browser results.
 All rows, exact timing differences, explicit missing values and bounded text
 protections remain separate from acceptance or deployment claims.
 
-## Implemented: compare two named plans directly
+## Implemented in source: compare two named plans directly
 
 The [headless variant comparison](VARIANT_COMPARISON.md) reports per-delivery
 changes and aggregate trade-offs between any two saved schedules in one run.
-It keeps missing arrival evidence separate from zero and leaves existing
-baseline reports, gates and the browser workbench unchanged.
+The [browser delivery inspector](BROWSER_IMPACT.md#compare-two-saved-plans)
+uses the same outcome projection over the completed run, with paging, complete
+CSV and candidate replay/return. It keeps missing arrival evidence separate
+from zero and preserves baseline reports, gates and the default comparison.
+Source verification and hosted deployment remain separate.
 
 ## Release-readiness gates
 

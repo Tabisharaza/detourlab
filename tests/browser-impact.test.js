@@ -186,3 +186,35 @@ test('invalid search options fail clearly without coercion or executing input', 
   }
   assert.deepEqual(pageDeliveryImpact(impact, 'all', 0, { query: undefined, sort: undefined }), pageDeliveryImpact(impact, 'all'));
 });
+
+test('named pairs project from completed ledgers with exact headless metrics, arrival buckets and complete rows', async () => {
+  const { compareVariants } = await import('../scripts/variant-comparison.js');
+  for (const name of ['minimal-experiment.json', 'meridian-experiment.json']) {
+    const experiment = fixture(name), completed = freeze(simulateExperiment(experiment));
+    // Include every tiny direction and the mixed and unreachable Meridian contrasts.
+    const pairs = name === 'minimal-experiment.json'
+      ? experiment.variants.flatMap(v => experiment.variants.filter(w => w.id !== v.id).map(w => [v.id, w.id]))
+      : [['market-05', 'market-10'], ['market-10', 'market-05'], ['market-05', 'all-bridges-05']];
+    for (const [referenceId, candidateId] of pairs) {
+      const actual = createBrowserImpact(experiment, completed, candidateId, referenceId);
+      const expected = compareVariants(experiment, referenceId, candidateId);
+      const { metrics: referenceMetrics, ...reference } = expected.reference;
+      const { metrics: candidateMetrics, ...candidate } = expected.candidate;
+      assert.deepEqual(actual.reference, reference); assert.deepEqual(actual.variant, candidate);
+      assert.deepEqual(actual.referenceMetrics, referenceMetrics); assert.deepEqual(actual.variantMetrics, candidateMetrics);
+      assert.deepEqual(actual.delta, expected.delta); assert.deepEqual(actual.summary, expected.summary);
+      const side = ({ delayS, ...rest }) => ({ ...rest, latenessS: delayS });
+      assert.deepEqual(actual.jobs.map(({ baseline, variant, delayDeltaS, ...rest }) => ({
+        ...rest, reference: side(baseline), candidate: side(variant), latenessDeltaS: delayDeltaS,
+      })), expected.jobs);
+    }
+  }
+});
+
+test('named comparison rejects a missing, malformed or identical reference without falling back to baseline', () => {
+  const input = fixture(), completed = simulateExperiment(input);
+  for (const reference of ['missing', '', 'close-at-10', 0, { id: 'clear' }]) {
+    assert.throws(() => createBrowserImpact(input, completed, 'close-at-10', reference), /distinct reference/);
+  }
+  assert.doesNotThrow(() => createBrowserImpact(input, completed, 'close-at-10', null));
+});

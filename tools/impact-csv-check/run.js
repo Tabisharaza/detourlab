@@ -115,7 +115,7 @@ export async function runImpactCsvCheck({ executable, output }) {
       await until(`window.__csvCheck.requests.length > ${previous}`, 'import Worker request'); await ready(); await frames();
       await click('impact-button'); await until("document.getElementById('impact-dialog').open", 'impact dialog');
     };
-    const download = async (label, trigger = () => click('impact-download-csv')) => {
+    const download = async (label, trigger = () => click('impact-download-csv'), filename = 'detourlab-delivery-impact.csv') => {
       let started, done = false, failure;
       const before = await workers();
       const offStart = browser.on('Browser.downloadWillBegin', e => { assert.equal(started, undefined, 'one activation creates one download'); started = e; });
@@ -125,7 +125,7 @@ export async function runImpactCsvCheck({ executable, output }) {
         while (!done && !failure && Date.now() < end) await delay(25);
         if (failure) throw failure;
         assert.ok(done && started, 'real completed browser download required');
-        assert.equal(started.suggestedFilename, 'detourlab-delivery-impact.csv');
+        assert.equal(started.suggestedFilename, filename);
         assert.match(started.guid, /^[a-zA-Z0-9-]+$/u);
         const bytes = await readFile(path.join(downloads, started.guid));
         assert.deepEqual(await workers(), before, 'export must not create or request a Worker');
@@ -161,13 +161,25 @@ export async function runImpactCsvCheck({ executable, output }) {
       verifyRows(rows, report);
       check(label, { rowCount: report.jobs.length, cliSha256: hash(expected) }); return bytes;
     };
+    const verifyNamed = async (file, reference, candidate, label) => {
+      const result = spawnSync(process.execPath, ['scripts/compare-variants.js', file, '--reference', reference, '--candidate', candidate, '--json'], { cwd: root, maxBuffer: 8 * 1024 * 1024 });
+      assert.equal(result.status, 0, String(result.stderr));
+      const bytes = await download(label, () => dispatchImpactExportKey(send, evaluate, 'Enter'), 'detourlab-variant-comparison.csv');
+      const report = JSON.parse(result.stdout);
+      verifyNamedRows(parseCsv(bytes.toString('utf8')), report);
+      assert.equal(await evaluate('window.__csvCheck.trusted.at(-1)'), true);
+      check(label, { rowCount: report.jobs.length, referenceId: reference, candidateId: candidate, cliJsonSha256: hash(result.stdout) });
+    };
     const capture = async (name, viewport) => {
       await frames();
-      const geometry = await evaluate(`(() => { const rect=id=>{const r=document.getElementById(id).getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom}};return {button:rect('impact-download-csv'),status:rect('impact-export-status'),dialog:rect('impact-dialog'),viewport:{width:innerWidth,height:innerHeight},overflow:document.documentElement.scrollWidth>innerWidth};})()`);
+      const geometry = await evaluate(`(() => { const rect=id=>{const r=document.getElementById(id).getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom}};return {button:rect('impact-download-csv'),status:rect('impact-export-status'),reference:rect('impact-reference'),candidate:rect('impact-variant'),dialog:rect('impact-dialog'),viewport:{width:innerWidth,height:innerHeight},overflow:document.documentElement.scrollWidth>innerWidth};})()`);
       assert.equal(geometry.overflow, false); assert.ok(geometry.button.x >= 0 && geometry.button.right <= viewport.width && geometry.button.width > 0 && geometry.button.y >= 0 && geometry.button.bottom <= viewport.height);
+      for (const control of [geometry.reference, geometry.candidate]) {
+        assert.ok(control.width > 0 && control.height > 0 && control.x >= 0 && control.right <= viewport.width && control.y >= 0 && control.bottom <= viewport.height);
+      }
       const { data } = await send('Page.captureScreenshot', { format: 'jpeg', quality: 65, captureBeyondViewport: false }); const bytes = Buffer.from(data, 'base64');
       assert.ok(bytes.length <= 1024 * 1024); await writeFile(path.join(output, name), bytes, { flag: 'wx' });
-      evidence.screenshots.push({ file: name, sha256: hash(bytes), bytes: bytes.length, viewport, geometry, meaning: 'Raw export controls capture. Visual review remains separate.' });
+      evidence.screenshots.push({ file: name, sha256: hash(bytes), bytes: bytes.length, viewport, geometry, meaning: 'Raw named-pair comparison and export controls capture. Visual review remains separate.' });
     };
     await send('Page.enable'); await send('Runtime.enable');
     const desktop = { width: 1600, height: 1100, deviceScaleFactor: 1, mobile: false }, narrow = { ...desktop, width: 390 };
@@ -182,8 +194,25 @@ export async function runImpactCsvCheck({ executable, output }) {
     await change('impact-filter', 'timing'); assert.equal(await evaluate("document.getElementById('impact-rows').children.length"), 7);
     assert.deepEqual(await verify(meridian, 'market-05', 'Seven same-status timing changes still export all 192 deliveries'), full);
     assert.deepEqual(await verify(meridian, 'market-05', 'Repeated download is byte-identical'), full);
-    await capture('impact-csv-desktop.jpg', desktop); await send('Emulation.setDeviceMetricsOverride', narrow); await capture('impact-csv-narrow.jpg', narrow); await send('Emulation.setDeviceMetricsOverride', desktop);
     for (const id of ['all-bridges-05', 'clear-roads', 'market-10']) { await change('impact-variant', id); await verify(meridian, id, `Variant switch exports ${id}`); }
+    const beforePair = await workers();
+    // Verify the native reference control is in the modal's keyboard path
+    // before setting a named reference through a bounded DOM change.
+    await evaluate("document.getElementById('impact-download-csv').focus()");
+    for (const event of nativeKeySequence('Tab')) await send('Input.dispatchKeyEvent', event);
+    assert.equal(await evaluate('document.activeElement.id'), 'impact-reference');
+    await change('impact-reference', 'market-05'); await change('impact-filter', 'all'); await click('impact-next');
+    assert.match(await evaluate("document.getElementById('impact-status').textContent"), /page 2 of/);
+    assert.match(await evaluate("document.getElementById('impact-summary').textContent"), /46 earlier, 81 unchanged, 65 later, 0 not comparable/);
+    await verifyNamed(meridian, 'market-05', 'market-10', 'Named reference is keyboard reachable and exports all 192 exact pair rows from page two');
+    await until("document.getElementById('toast').hidden", 'transient toast clears without changing the comparison');
+    await capture('impact-csv-desktop.jpg', desktop); await send('Emulation.setDeviceMetricsOverride', narrow); await capture('impact-csv-narrow.jpg', narrow); await send('Emulation.setDeviceMetricsOverride', desktop);
+    await change('impact-variant', 'market-05');
+    assert.equal(await evaluate("document.getElementById('impact-reference').value"), 'market-10');
+    assert.match(await evaluate("document.getElementById('impact-summary').textContent"), /65 earlier, 81 unchanged, 46 later, 0 not comparable/);
+    await verifyNamed(meridian, 'market-10', 'market-05', 'Reversing named plans reverses the complete direct comparison');
+    assert.deepEqual(await workers(), beforePair, 'reference or candidate changes must not request a Worker');
+    await change('impact-reference', '');
     await change('impact-variant', 'market-05');
     for (const key of ['Enter', 'Space']) {
       await verify(meridian, 'market-05', `Trusted ${key} activation downloads CSV`, async () => {
@@ -214,6 +243,9 @@ export async function runImpactCsvCheck({ executable, output }) {
     const fixture = async (name, value) => { const file = path.join(output, name); await writeFile(file, JSON.stringify(value), { flag: 'wx' }); return file; };
     const tinyFile = await fixture('hostile-tiny.json', tiny); await load(tinyFile);
     for (const id of ['close-at-10', 'unreachable']) { await change('impact-variant', id); await verify(tinyFile, id, `Tiny literal labels and nullable timing: ${id}`); }
+    await change('impact-reference', 'close-at-10');
+    assert.match(await evaluate("document.getElementById('impact-summary').textContent"), /1 not comparable/);
+    await verifyNamed(tinyFile, 'close-at-10', 'unreachable', 'Named comparison preserves label quoting and null unreachable timings in downloaded file');
     assert.equal(await evaluate('document.querySelectorAll("img[onerror]").length'), 0); await click('impact-close');
     tiny.baseScenario.jobs = []; const empty = await fixture('zero-jobs.json', tiny); await load(empty); await change('impact-variant', 'close-at-10');
     await verify(empty, 'close-at-10', 'Zero-job experiment exports header only');
@@ -241,6 +273,25 @@ export function verifyRows(rows, report) {
     assert.deepEqual(rows[i + 1], [report.experimentId, report.variant.id, expectedName, job.id, job.vehicleId, job.nodeId,
       numeric(job.dueTimeS), ...outcome(job.baseline), ...outcome(job.variant),
       numeric(job.arrivalDeltaS), numeric(job.completedDeltaS), numeric(job.delayDeltaS), String(job.changed), String(job.statusChanged)]);
+  }
+}
+
+// Independently assert named comparison CSV roles, row order and fields
+// against the direct CLI's JSON, not the production CSV encoder.
+function verifyNamedRows(rows, report) {
+  const columns = ['experimentId', 'referenceId', 'referenceName', 'candidateId', 'candidateName', 'jobId', 'vehicleId', 'nodeId', 'dueTimeS',
+    'referenceStatus', 'referenceArrivalS', 'referenceCompletedS', 'referenceLatenessS',
+    'candidateStatus', 'candidateArrivalS', 'candidateCompletedS', 'candidateLatenessS',
+    'arrivalDeltaS', 'completedDeltaS', 'latenessDeltaS', 'changed', 'statusChanged'];
+  assert.deepEqual(rows[0], columns);
+  assert.equal(rows.length, report.jobs.length + 1);
+  const name = value => /^[=@]/u.test(value) ? "'" + value : value;
+  const numeric = value => value === null ? '' : Object.is(value, -0) ? '-0' : String(value);
+  const outcome = value => [value.status, numeric(value.arrivalS), numeric(value.completedS), numeric(value.latenessS)];
+  for (const [i, job] of report.jobs.entries()) {
+    assert.deepEqual(rows[i + 1], [report.experimentId, report.reference.id, name(report.reference.name), report.candidate.id, name(report.candidate.name),
+      job.id, job.vehicleId, job.nodeId, numeric(job.dueTimeS), ...outcome(job.reference), ...outcome(job.candidate),
+      numeric(job.arrivalDeltaS), numeric(job.completedDeltaS), numeric(job.latenessDeltaS), String(job.changed), String(job.statusChanged)]);
   }
 }
 

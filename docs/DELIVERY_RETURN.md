@@ -27,7 +27,11 @@ consumes it; another arrival action creates a new one. The ordinary **Inspect
 deliveries** button still starts a fresh comparison with its documented defaults
 and discards the old return point.
 
-The return point belongs to the exact completed input, results and variant.
+For a [named pair](BROWSER_IMPACT.md#compare-two-saved-plans), use **Replay
+candidate arrival** and return to the same reference and candidate. The maps
+still pair the candidate with the clear-road baseline.
+
+The return point belongs to the exact completed input, results and selected plans.
 Switching variants, changing input, importing a workspace, starting a new run,
 resetting or entering/leaving a lesson invalidates it. Switching back does not
 resurrect it. Old retained callbacks cannot reopen a newer or invalid comparison.
@@ -41,7 +45,7 @@ replay, not a per-delivery route or a closure-causation explanation. See
 ## Reproduce verification
 
 ```sh
-node --test tests/delivery-return-ui.test.js tests/delivery-replay-ui.test.js
+node --test tests/delivery-return-ui.test.js tests/delivery-replay-ui.test.js tests/named-impact-ui.test.js
 npm run check
 node scripts/verify-dist.js
 ```

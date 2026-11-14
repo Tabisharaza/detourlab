@@ -82,9 +82,11 @@ against clear roads and [job impact](JOB_IMPACT.md) for a one-plan comparison
 with CSV. Neither output format has changed.
 
 This is deterministic synthetic fixed-order analysis. It does not explain
-individual closure causality, find an optimum, or predict real traffic. It adds
-a local CLI workflow without changing the model, browser workbench, dependencies
-or hosted demo.
+individual closure causality, find an optimum, or predict real traffic.
+The shared comparison also powers [Inspect deliveries in the source
+workbench](BROWSER_IMPACT.md#compare-two-saved-plans), where it uses completed
+Worker results and exports an all-row CSV. The CLI output format, model,
+dependencies and hosted demo are unchanged by the browser integration.
 
 ## Verify
 

@@ -772,18 +772,44 @@ function invalidateImpact() {
   inspectedImpact = null; impactPage = 0; impactRenderRevision += 1;
   // Move focus before disabling a control or hiding its scroll region.
   if ($('impact-dialog').open && $('impact-dialog').contains(document.activeElement) && document.activeElement !== $('impact-close')) focusFirst([$('impact-close')]);
-  for (const id of ['impact-download-csv', 'impact-variant', 'impact-filter', 'impact-search', 'impact-sort', 'impact-previous', 'impact-next']) $(id).disabled = true;
+  for (const id of ['impact-download-csv', 'impact-reference', 'impact-variant', 'impact-filter', 'impact-search', 'impact-sort', 'impact-previous', 'impact-next']) $(id).disabled = true;
   $('impact-rows').replaceChildren(); $('impact-table-region').hidden = true;
   $('impact-summary').textContent = ''; $('impact-metrics').textContent = '';
+  $('impact-replay-note').hidden = true; $('impact-replay-note').textContent = '';
   $('impact-export-status').textContent = 'CSV unavailable until a completed comparison is open.';
   $('impact-status').textContent = 'Results changed. Close this window and finish a new run before inspecting deliveries.';
   updateImpactAvailability();
 }
-function updateImpactSelection() {
+function impactPlanLabel(variant) {
+  const ambiguous = variant.name === 'Clear-road baseline' || state.experiment.variants.some(plan => plan.id !== variant.id && plan.name === variant.name);
+  return ambiguous ? `${variant.name} (${variant.id})` : variant.name;
+}
+function impactOption(id, label) {
+  const option = node('option', label);
+  option.value = id;
+  return option;
+}
+function setImpactReferenceOptions(report) {
+  const options = state.experiment.variants.filter(plan => plan.id !== report.variant.id)
+    .map(plan => impactOption(plan.id, impactPlanLabel(plan)));
+  $('impact-reference').replaceChildren(impactOption('', 'Clear-road baseline'), ...options);
+  $('impact-reference').value = report.reference?.id ?? '';
+}
+function updateImpactSelection(referenceId = inspectedImpact?.report.reference?.id ?? null) {
   if (!$('impact-dialog').open || !impactIsCurrent()) return;
+  const previous = inspectedImpact.report;
+  const candidateId = state.selectedVariantId;
+  if (referenceId === candidateId) {
+    // Choosing the current reference as candidate reverses the named pair.
+    if (previous.variant.id === candidateId) { $('impact-reference').value = previous.reference?.id ?? ''; return; }
+    referenceId = previous.variant.id;
+  }
+  if (previous.variant.id === candidateId && (previous.reference?.id ?? null) === referenceId) return;
   try {
-    inspectedImpact.report = createBrowserImpact(state.experiment, state.allResults, state.selectedVariantId);
-    $('impact-variant').value = state.selectedVariantId; impactPage = 0; renderImpact();
+    const report = createBrowserImpact(state.experiment, state.allResults, candidateId, referenceId);
+    inspectedImpact.report = report;
+    if (previous.variant.id !== candidateId) setImpactReferenceOptions(report);
+    $('impact-variant').value = candidateId; impactPage = 0; renderImpact();
   } catch (error) { invalidateImpact(); $('impact-status').textContent = `Delivery comparison unavailable. ${formatInputError(error)}`; }
 }
 function clearImpactReturn() {
@@ -805,7 +831,7 @@ function returnToImpact(context) {
   if (state.pending || context.experiment !== state.experiment || context.results !== state.allResults || context.variantId !== state.selectedVariantId) { clearImpactReturn(); return; }
   // Consume this one-use journey before opening; retained callbacks cannot
   // hijack a later journey, even when it uses the same input and job.
-  clearImpactReturn(); abandonReplayNavigation(); inspectDeliveries();
+  clearImpactReturn(); abandonReplayNavigation(); inspectDeliveries(context.referenceId);
   if (!impactIsCurrent() || !$('impact-dialog').open) return;
   $('impact-filter').value = context.filter; $('impact-search').value = context.query; $('impact-sort').value = context.sort;
   impactPage = context.page; renderImpact();
@@ -817,14 +843,15 @@ function replayDeliveryArrival(context, report, renderRevision, job, side) {
   // Bind actions to the visible projection, not mutable DOM attributes or IDs.
   if (!$('impact-dialog').open || !impactIsCurrent() || inspectedImpact !== context || context.report !== report || impactRenderRevision !== renderRevision || report.variant.id !== state.selectedVariantId) return;
   const atS = job[side]?.arrivalS;
+  if (report.reference && side === 'baseline') return;
   if (!Number.isFinite(atS) || atS < 0 || atS > Number($('timeline').max) || !state.disrupted.vehicles.some(vehicle => vehicle.id === job.vehicleId)) return;
   const returnContext = { experiment: state.experiment, results: state.allResults, variantId: state.selectedVariantId,
-    filter: $('impact-filter').value, query: $('impact-search').value, sort: $('impact-sort').value, page: impactPage, jobId: job.id, side };
+    referenceId: report.reference?.id ?? null, filter: $('impact-filter').value, query: $('impact-search').value, sort: $('impact-sort').value, page: impactPage, jobId: job.id, side };
   abandonReplayNavigation(); setPlaying(false);
   state.selectedVehicle = job.vehicleId; $('vehicle-select').value = job.vehicleId;
   setView('split'); updateInspector(); setTime(atS);
   map.invalidateFrame(); baselineMap?.invalidateFrame();
-  const source = side === 'baseline' ? 'Clear-road baseline' : `Variant · ${report.variant.name}`;
+  const source = side === 'baseline' ? 'Clear-road baseline' : `${report.reference ? 'Candidate' : 'Variant'} · ${impactPlanLabel(report.variant)}`;
   $('replay-events-announcement').textContent = `Paused at ${atS} s. ${source}: arrival of ${job.id} by ${job.vehicleId} at ${job.nodeId}. Both map panes use this exact time. This selects the vehicle's replay, not a per-delivery route or closure-causation explanation.`;
   invalidateImpact(); closeDialog($('impact-dialog'), { target: $('vehicle-select') });
   offerImpactReturn(returnContext);
@@ -835,13 +862,29 @@ function renderImpact() {
   const renderRevision = ++impactRenderRevision;
   const lostRowFocus = $('impact-rows').contains(document.activeElement);
   $('impact-download-csv').disabled = false;
-  $('impact-export-status').textContent = `CSV includes all ${summary.totalJobs} deliveries for ${report.variant.name}, regardless of the filter, search, order or page. Missing timings are blank, not zero. Import identifier and name columns as text in your spreadsheet.`;
+  const candidateLabel = impactPlanLabel(report.variant), referenceLabel = report.reference ? impactPlanLabel(report.reference) : '';
+  const exportSubject = report.reference ? `${referenceLabel} → ${candidateLabel}` : candidateLabel;
+  $('impact-export-status').textContent = `CSV includes all ${summary.totalJobs} deliveries for ${exportSubject}, regardless of the filter, search, order or page. Missing timings are blank, not zero. Import identifier and name columns as text in your spreadsheet.`;
   const page = pageDeliveryImpact(report, $('impact-filter').value, impactPage, { query: $('impact-search').value, sort: $('impact-sort').value });
   impactPage = page.pageIndex;
   $('impact-summary').textContent = `${summary.changedJobs} of ${summary.totalJobs} delivery outcomes changed; ${summary.unchangedJobs} unchanged. Status changes: ${summary.statusChangedJobs}. Arrival changes: ${summary.arrivalChangedJobs}. Same-status arrival changes: ${report.sameStatusArrivalChanges}.`;
-  $('impact-metrics').textContent = `Baseline → ${report.variant.name}: ${report.baselineMetrics.completedJobs} → ${report.variantMetrics.completedJobs} completed; ${report.baselineMetrics.unreachableJobs} → ${report.variantMetrics.unreachableJobs} unreachable. Final outcomes, independent of replay time.`;
   const names = { changed: 'Changed outcomes', status: 'Status changes', timing: 'Same-status arrival changes', all: 'All deliveries' };
-  $('impact-table-caption').textContent = `${report.variant.name} compared with the clear-road baseline. ${names[page.filter]}.`;
+  const replayNote = $('impact-replay-note');
+  replayNote.hidden = !report.reference;
+  if (report.reference) {
+    const before = report.referenceMetrics, after = report.variantMetrics, { delta } = report;
+    const format = (key, unit = '') => `${before[key]} → ${after[key]} (${delta[key] > 0 ? '+' : ''}${delta[key]}${unit})`;
+    const arrivals = summary.arrivals;
+    $('impact-summary').textContent += ` Arrival comparison: ${arrivals.earlier} earlier, ${arrivals.unchanged} unchanged, ${arrivals.later} later, ${arrivals.notComparable} not comparable.`;
+    const coverageNote = delta.completedJobs < 0 ? ' The candidate completes fewer deliveries; interpret late counts with coverage.' : '';
+    $('impact-metrics').textContent = `${referenceLabel} → ${candidateLabel}: distance ${format('distanceM', ' m')}; late ${format('lateJobs')}; unreachable ${format('unreachableJobs')}; completed ${format('completedJobs')}.${coverageNote} Final outcomes, independent of replay time.`;
+    $('impact-table-caption').textContent = `Reference: ${referenceLabel} → Candidate: ${candidateLabel}. ${names[page.filter]}.`;
+    replayNote.textContent = 'Replay shows the clear-road baseline and candidate. To replay the reference plan instead, choose it as the candidate to swap the plans.';
+  } else {
+    $('impact-metrics').textContent = `Baseline → ${candidateLabel}: ${report.baselineMetrics.completedJobs} → ${report.variantMetrics.completedJobs} completed; ${report.baselineMetrics.unreachableJobs} → ${report.variantMetrics.unreachableJobs} unreachable. Final outcomes, independent of replay time.`;
+    $('impact-table-caption').textContent = `${candidateLabel} compared with the clear-road baseline. ${names[page.filter]}.`;
+    replayNote.textContent = '';
+  }
   const timing = (before, after, difference) => {
     const cell = node('td');
     const time = value => value === null ? 'Not reached' : `${value} s`;
@@ -854,11 +897,12 @@ function renderImpact() {
     identity.append(node('strong', job.id), node('small', `${job.vehicleId} · ${job.nodeId}`), node('small', `Arrival deadline ${job.dueTimeS} s`));
     const arrival = timing(job.baseline.arrivalS, job.variant.arrivalS, job.arrivalDeltaS);
     const actions = node('div', undefined, 'impact-replay-actions');
-    for (const side of ['baseline', 'variant']) {
+    for (const side of report.reference ? ['variant'] : ['baseline', 'variant']) {
       if (job[side].arrivalS === null) continue;
-      const button = node('button', `Replay ${side} arrival`, 'button impact-replay-arrival'); button.type = 'button';
+      const role = report.reference ? 'candidate' : side;
+      const button = node('button', `Replay ${role} arrival`, 'button impact-replay-arrival'); button.type = 'button';
       Object.assign(button.dataset, { impactReplay: side, jobId: job.id, time: String(job[side].arrivalS) });
-      button.setAttribute('aria-label', `Replay ${side} arrival of ${job.id} by ${job.vehicleId} at ${job[side].arrivalS} seconds in split view`);
+      button.setAttribute('aria-label', `Replay ${role} arrival of ${job.id} by ${job.vehicleId} at ${job[side].arrivalS} seconds in split view`);
       button.addEventListener('click', () => replayDeliveryArrival(context, report, renderRevision, job, side));
       actions.append(button);
     }
@@ -870,7 +914,7 @@ function renderImpact() {
   $('impact-table-region').hidden = !page.jobs.length;
   $('impact-previous').disabled = page.pageIndex === 0;
   $('impact-next').disabled = page.pageIndex + 1 >= page.pageCount;
-  const order = page.sort === 'arrival-desc' ? 'Largest comparable arrival delay first (variant minus baseline); not comparable last. Ties keep input order. Not an overall severity ranking.' : 'Original input order, not severity ranking.';
+  const order = page.sort === 'arrival-desc' ? `Largest comparable arrival delay first (${report.reference ? 'candidate minus reference' : 'variant minus baseline'}); not comparable last. Ties keep input order. Not an overall severity ranking.` : 'Original input order, not severity ranking.';
   const searchCounts = page.query ? ` ${page.filteredJobs} satisfy the filter; ${page.filteredJobs - page.matchingJobs} excluded by search.` : '';
   const counts = `${page.matchingJobs} matching of ${page.totalJobs} total deliveries. ${page.totalJobs - page.matchingJobs} excluded by filter or search.${searchCounts} ${order}`;
   const empty = !page.totalJobs ? 'This experiment has no deliveries.' : page.query ? 'No deliveries match this search and filter. Clear the search or choose All deliveries.' : `No ${names[page.filter].toLowerCase()}. Choose All deliveries to inspect unchanged outcomes too.`;
@@ -878,16 +922,17 @@ function renderImpact() {
   if (lostRowFocus) focusFirst([$('impact-search'), $('impact-filter'), $('impact-close')]);
   if ([ $('impact-previous'), $('impact-next') ].includes(active) && active.disabled || active === $('impact-table-region') && !page.jobs.length) focusFirst([$('impact-previous'), $('impact-next'), $('impact-filter'), $('impact-close')]);
 }
-function inspectDeliveries() {
+function inspectDeliveries(referenceId = null) {
   if (state.pending || !state.allResults || $('impact-dialog').open) return;
   clearImpactReturn();
   try {
-    const report = createBrowserImpact(state.experiment, state.allResults, state.selectedVariantId);
+    const report = createBrowserImpact(state.experiment, state.allResults, state.selectedVariantId, referenceId);
     inspectedImpact = { experiment: state.experiment, results: state.allResults, report }; impactPage = 0;
-    $('impact-variant').replaceChildren(...state.experiment.variants.map(variant => { const option = node('option', variant.name); option.value = variant.id; return option; }));
+    $('impact-variant').replaceChildren(...state.experiment.variants.map(variant => impactOption(variant.id, impactPlanLabel(variant))));
+    setImpactReferenceOptions(report);
     $('impact-variant').value = state.selectedVariantId; $('impact-filter').value = 'changed';
     $('impact-search').value = ''; $('impact-sort').value = 'input';
-    for (const id of ['impact-variant', 'impact-filter', 'impact-search', 'impact-sort']) $(id).disabled = false;
+    for (const id of ['impact-reference', 'impact-variant', 'impact-filter', 'impact-search', 'impact-sort']) $(id).disabled = false;
     setPlaying(false); openDialog($('impact-dialog'), $('impact-button'), $('impact-dialog-title')); renderImpact();
   } catch (error) { invalidateImpact(); toast(`Delivery comparison unavailable. ${formatInputError(error)}`, true); }
 }
@@ -895,19 +940,22 @@ function downloadImpactCsv() {
   if (!$('impact-dialog').open || !impactIsCurrent() || inspectedImpact.report.variant.id !== state.selectedVariantId) { invalidateImpact(); return; }
   let url;
   try {
-    const csv = renderJobImpactCsv(inspectedImpact.report, { experimentId: state.experiment.id });
+    const report = inspectedImpact.report;
+    const csv = renderJobImpactCsv(report, { experimentId: state.experiment.id });
     url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
-    const link = node('a'); link.href = url; link.download = 'detourlab-delivery-impact.csv';
+    const link = node('a'); link.href = url; link.download = report.reference ? 'detourlab-variant-comparison.csv' : 'detourlab-delivery-impact.csv';
     link.click();
     const downloadUrl = url; setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
-    $('impact-export-status').textContent = `CSV download requested: all ${inspectedImpact.report.summary.totalJobs} deliveries for ${inspectedImpact.report.variant.name}. Filters, search, ordering and pagination do not limit the file. Import identifier and name columns as text.`;
+    const label = `${report.reference ? impactPlanLabel(report.reference) + ' → ' : ''}${impactPlanLabel(report.variant)}`;
+    $('impact-export-status').textContent = `CSV download requested: all ${report.summary.totalJobs} deliveries for ${label}. Filters, search, ordering and pagination do not limit the file. Import identifier and name columns as text.`;
   } catch (error) {
     if (url) URL.revokeObjectURL(url);
     $('impact-export-status').textContent = `CSV could not be prepared. ${formatInputError(error)} No complete download was requested; try again or export the experiment for the CLI.`;
   }
 }
 $('impact-download-csv').addEventListener('click', downloadImpactCsv);
-$('impact-button').addEventListener('click', inspectDeliveries);
+$('impact-button').addEventListener('click', () => inspectDeliveries());
+$('impact-reference').addEventListener('change', () => updateImpactSelection($('impact-reference').value || null));
 $('impact-variant').addEventListener('change', () => { if (impactIsCurrent() && $('impact-dialog').open) selectVariant($('impact-variant').value); });
 $('impact-filter').addEventListener('change', () => { impactPage = 0; renderImpact(); });
 $('impact-search').addEventListener('input', () => { impactPage = 0; renderImpact(); });

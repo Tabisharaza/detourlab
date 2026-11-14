@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { canonicalExperiment, EXPERIMENT_LIMITS, simulateExperiment, validateExperiment } from '../src/experiment.js';
-import { projectJobOutcomes } from '../src/job-impact.js';
+import { projectVariantComparison } from '../src/variant-comparison.js';
 
 export const VARIANT_COMPARISON_MAX_BYTES = 4 * 1024 * 1024;
 
@@ -26,14 +26,7 @@ export function compareVariants(input, referenceId, candidateId) {
   const { variants } = simulateExperiment(experiment);
   const reference = variants.find(variant => variant.id === referenceId);
   const candidate = variants.find(variant => variant.id === candidateId);
-  const { summary, jobs } = projectJobOutcomes(experiment, reference.result, candidate.result);
-  const arrivals = { earlier: 0, unchanged: 0, later: 0, notComparable: 0 };
-  for (const { arrivalDeltaS } of jobs) {
-    if (arrivalDeltaS === null) arrivals.notComparable += 1;
-    else if (arrivalDeltaS < 0) arrivals.earlier += 1;
-    else if (arrivalDeltaS > 0) arrivals.later += 1;
-    else arrivals.unchanged += 1;
-  }
+  const { delta, summary, jobs } = projectVariantComparison(experiment, reference.result, candidate.result);
 
   const referenceMetrics = reference.result.metrics;
   const candidateMetrics = candidate.result.metrics;
@@ -45,13 +38,8 @@ export function compareVariants(input, referenceId, candidateId) {
     experimentSha256: createHash('sha256').update(canonicalExperiment(experiment)).digest('hex'),
     reference: { id: reference.id, name: reference.name, metrics: referenceMetrics },
     candidate: { id: candidate.id, name: candidate.name, metrics: candidateMetrics },
-    delta: {
-      distanceM: candidateMetrics.distanceM - referenceMetrics.distanceM,
-      lateJobs: candidateMetrics.lateJobs - referenceMetrics.lateJobs,
-      unreachableJobs: candidateMetrics.unreachableJobs - referenceMetrics.unreachableJobs,
-      completedJobs: candidateMetrics.completedJobs - referenceMetrics.completedJobs,
-    },
-    summary: { ...summary, arrivals },
+    delta,
+    summary,
     jobs: jobs.map(({ baseline, variant, delayDeltaS, ...row }) => ({
       ...row,
       reference: asSide(baseline),

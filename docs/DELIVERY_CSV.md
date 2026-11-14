@@ -11,8 +11,9 @@ acceptance verdict or operational recommendation.
 node scripts/explain-experiment.js examples/minimal-experiment.json --variant close-at-10 --csv > delivery-impact.csv
 ```
 
-In the source workbench, finish a run, open **Inspect deliveries**, choose a
-variant and press **Download all deliveries CSV**. The fixed filename is
+In the source workbench, finish a run, open **Inspect deliveries**, keep
+**Clear-road baseline** as the reference, choose a candidate and press
+**Download all deliveries CSV**. The fixed filename is
 `detourlab-delivery-impact.csv`. The file includes every job in original input
 order, even when the screen shows only changed outcomes, a search, a different ordering or a later page. A
 zero-job experiment exports just the column header.
@@ -55,6 +56,23 @@ The output includes no local path or execution timestamp and is repeatable for
 the same completed input. It does not contain simulation ledgers, source hashes
 or proof of authorship. Use [review packets](REVIEW_PACKETS.md) and their verifier
 for complete reproducible evidence, or `--json` for raw machine values.
+
+## Two named plans in the browser
+
+If you choose a saved reference, the source workbench instead downloads
+`detourlab-variant-comparison.csv` with these 22 columns:
+
+1. `experimentId`, `referenceId`, `referenceName`, `candidateId`, `candidateName`
+2. `jobId`, `vehicleId`, `nodeId`, `dueTimeS`
+3. `referenceStatus`, `referenceArrivalS`, `referenceCompletedS`, `referenceLatenessS`
+4. `candidateStatus`, `candidateArrivalS`, `candidateCompletedS`, `candidateLatenessS`
+5. `arrivalDeltaS`, `completedDeltaS`, `latenessDeltaS`, `changed`, `statusChanged`
+
+Deltas are candidate minus reference. The same complete-row validation, text
+precautions and bounds apply. Null and zero stay distinct. No extra Worker runs
+on reference selection or download, and filters do not limit the file. The
+[direct CLI comparison](VARIANT_COMPARISON.md) emits JSON for the same pair;
+the existing baseline CSV schema above is unchanged.
 
 ## Spreadsheet text precautions
 

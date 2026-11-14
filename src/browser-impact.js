@@ -1,5 +1,6 @@
 import { copyCompletedResults } from './report-results.js';
 import { projectJobOutcomes } from './job-impact.js';
+import { projectVariantComparison } from './variant-comparison.js';
 
 export const IMPACT_PAGE_SIZE = 20;
 const FILTERS = ['changed', 'status', 'timing', 'all'];
@@ -10,18 +11,22 @@ const SORTS = ['input', 'arrival-desc'];
  * Reuse the report boundary and the CLI's exact outcome projection. No routing,
  * timing rounding, acceptance policy or implementation-authenticity claim.
  */
-export function createBrowserImpact(experiment, completedResults, variantId) {
+export function createBrowserImpact(experiment, completedResults, variantId, referenceId = null) {
   const simulation = copyCompletedResults(experiment, completedResults);
   const selected = simulation.variants.find(variant => variant.id === variantId);
   if (!selected) throw new Error('Choose a variant from the completed experiment.');
-  const projection = projectJobOutcomes(experiment, simulation.baseline, selected.result);
+  const reference = referenceId === null ? null : simulation.variants.find(variant => variant.id === referenceId);
+  if (referenceId !== null && (!reference || reference === selected)) throw new Error('Choose a distinct reference from the completed experiment.');
+  const comparison = reference
+    ? { reference: { id: reference.id, name: reference.name }, referenceMetrics: reference.result.metrics,
+        ...projectVariantComparison(experiment, reference.result, selected.result) }
+    : { baselineMetrics: simulation.baseline.metrics, delta: selected.delta,
+        ...projectJobOutcomes(experiment, simulation.baseline, selected.result) };
   return {
     variant: { id: selected.id, name: selected.name },
-    baselineMetrics: simulation.baseline.metrics,
     variantMetrics: selected.result.metrics,
-    delta: selected.delta,
-    ...projection,
-    sameStatusArrivalChanges: projection.jobs.filter(job => !job.statusChanged && job.baseline.arrivalS !== job.variant.arrivalS).length,
+    ...comparison,
+    sameStatusArrivalChanges: comparison.jobs.filter(job => !job.statusChanged && job.baseline.arrivalS !== job.variant.arrivalS).length,
   };
 }
 
