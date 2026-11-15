@@ -131,6 +131,11 @@ Preserve exact finite arrival times including zero, omit null targets, and bind
 each handler to its completed input/result/variant and rendered row revision.
 Navigation changes replay perspective only, never input, history or Worker work.
 Test discarded-row callbacks, newer navigation and delayed native dialog close.
+For [named replay](docs/BROWSER_IMPACT.md#follow-the-same-vehicle-through-both-plans),
+also run `node --test tests/named-impact-ui.test.js tests/replay-events.test.js`.
+Keep each pane bound to its own completed ledger and closure schedule and leave
+the default fleet comparisons and bookmark format unchanged. The optional
+`tools/delivery-return-check/run.js` measures native browser behavior separately.
 [Contract and bounded native evidence](docs/DELIVERY_REPLAY.md).
 
 For [delivery comparison return points](docs/DELIVERY_RETURN.md), run

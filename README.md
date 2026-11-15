@@ -133,7 +133,10 @@ side by side without joining separate baseline reports. In the source
 workbench, open **Inspect deliveries** and choose the 5-minute plan as
 **Reference plan** and the 10-minute plan as **Candidate plan**. The summary
 shows both aggregate and delivery-level changes, and **Download all deliveries
-CSV** includes all 192 rows.
+CSV** includes all 192 rows. **Replay reference arrival** and **Replay
+candidate arrival** show both saved routes and closure schedules at the same
+exact time. For example, search for `job-02-4`: it arrives at 787 s in the
+reference and 840 s in the candidate, 53 s later despite the fleet improvement.
 
 The same pair is reproducible from the command line:
 

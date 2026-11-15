@@ -36,12 +36,13 @@ deliveries adds a coverage note even when late counts go down.
   reference**. Search and order still apply to all matching evidence before
   paging. Changes to either plan reset to the first page, retaining the query,
   filter and ordering.
-- The split maps still show the clear-road baseline and the active candidate.
-  In a named pair, **Replay candidate arrival** is shown only when the candidate
-  has a recorded arrival. To inspect the other plan on the map, make it the
-  candidate to swap the plans. **Return to delivery comparison** restores both
-  selected plans, the search, order, page and row focus without rewinding replay.
-  A fresh **Inspect deliveries** always starts with the clear-road baseline.
+- **Replay reference arrival** and **Replay candidate arrival** open the same
+  two plans side by side. Either action selects the delivery's vehicle, pauses
+  both maps at that side's exact arrival and uses each plan's own ledger and
+  closure schedule. A side without a recorded arrival has no replay action.
+  **Return to delivery comparison** restores both plans, search, order, page and
+  the exact arrival action without rewinding replay. A fresh **Inspect
+  deliveries** still starts with the clear-road baseline.
 - **Download all deliveries CSV** writes `detourlab-variant-comparison.csv`
   with both plan identities and all job rows in original input order. For
   machine-readable JSON and the same exact comparison values, use the
@@ -54,6 +55,25 @@ harnesses now include a trusted keyboard path, actual named downloads checked
 row-by-row against the CLI JSON, and named-pair replay/return. Those harnesses
 do not certify OS file dialogs, assistive technology, physical devices, other
 browser engines, or hosted deployment.
+
+### Follow the same vehicle through both plans
+
+For a hand-check, import the [four-node example](../examples/minimal-experiment.json).
+Use **Close at 10 s** as reference and **Close at 11 s** as candidate. The
+reference detours via D and reaches C at 26 s; the candidate enters B → C
+before it closes and arrives at 20 s. Replay either arrival, then move the
+shared clock to 15 s to see the routes and vehicle positions diverge. **Show
+events → Scheduled closures** lists the reference's 10 s cutoff and the
+candidate's 11 s cutoff, even though both schedules use the same closure ID.
+
+The named split is temporary. Both panes share time, vehicle and zoom. Route
+stats compare the displayed plans; status and stop details describe the
+candidate. Fleet cards above the maps still show final clear-road deltas.
+**Restore clear-road replay** returns to the ordinary split at the current
+time, leaving the delivery return point available. Another map mode, another
+candidate, an edit or a new run clears the named replay. Browser replay
+bookmarks keep their existing format: restore clear-road replay before saving.
+This is a vehicle-ledger view, not a trace attributed to a particular delivery.
 
 ## What the numbers mean
 

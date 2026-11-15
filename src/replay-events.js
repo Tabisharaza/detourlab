@@ -88,7 +88,7 @@ function eventAt(data, encoded) {
   };
   if (stream.kind === 'closure-start') {
     return { ...event, closureId: item.id, label: `Closure starts: ${item.id}`,
-      detail: `Global variant schedule: ${item.edgeIds.length} directed edge${item.edgeIds.length === 1 ? '' : 's'} (${edgeSummary(item.edgeIds)}). This does not establish an effect on the selected vehicle.` };
+      detail: `Global ${stream.run === 'schedule' ? 'variant' : stream.run === 'reference-schedule' ? 'reference' : 'candidate'} schedule: ${item.edgeIds.length} directed edge${item.edgeIds.length === 1 ? '' : 's'} (${edgeSummary(item.edgeIds)}). This does not establish an effect on the selected vehicle.` };
   }
   if (stream.kind === 'segment-entry' || stream.kind === 'segment-exit') {
     const entering = stream.kind === 'segment-entry';
@@ -107,28 +107,32 @@ function eventAt(data, encoded) {
 }
 
 /**
- * Index internal completed Worker ledgers for one vehicle and selected variant.
+ * Index internal completed Worker ledgers for one vehicle and two completed plans.
  * No routing, simulation, rounding, inferred vehicle effects or input mutation.
  * Caller owns invalidation when experiment/result/vehicle/variant changes. This
  * is not an arbitrary-result importer and does not authenticate a ledger.
  *
- * Merge 11 ordered streams rather than sorting/materializing every event. Only
- * the at-most-8,000 closure schedule is sorted (by time, then input position).
+ * Merge up to 12 ordered streams rather than sorting/materializing every event.
+ * Only the two bounded closure lists are sorted (by time, then input position).
  * Private Uint32 indexes use eight bytes per event, plus the bounded input
  * references. Pages allocate at most 20 display records; navigation is binary.
  * Equal-time display order: closure, exit, arrival, completion, reroute, entry;
- * then baseline before variant, then original source index. It is not a causal
+ * then reference/baseline before candidate/variant, then original source index. It is not a causal
  * ordering. Null unreachable timings have no synthetic event.
  */
-export function createReplayEvents(experiment, completedResults, variantId, vehicleId) {
+export function createReplayEvents(experiment, completedResults, variantId, vehicleId, referenceId = null) {
   const checked = copyCompletedResults(experiment, completedResults);
+  const reference = referenceId === null ? null : experiment.variants.find(plan => plan.id === referenceId);
+  if (referenceId !== null && (!reference || referenceId === variantId)) throw new Error('Choose a different reference plan from the completed experiment.');
+  const referenceResult = reference ? completedResults.variants.find(plan => plan.id === referenceId).result : completedResults.baseline;
+  const checkedReference = reference ? checked.variants.find(plan => plan.id === referenceId).result : checked.baseline;
   const selected = experiment.variants.find(variant => variant.id === variantId);
   const selectedResult = completedResults.variants.find(variant => variant.id === variantId);
   if (!selected || !selectedResult) throw new Error('Choose a variant from the completed experiment.');
   if (!experiment.baseScenario.vehicles.some(vehicle => vehicle.id === vehicleId)) throw new Error('Choose a vehicle from the completed experiment.');
-  const baseline = completedResults.baseline.vehicles.find(vehicle => vehicle.id === vehicleId);
+  const baseline = referenceResult.vehicles.find(vehicle => vehicle.id === vehicleId);
   const variant = selectedResult.result.vehicles.find(vehicle => vehicle.id === vehicleId);
-  const checkedBaseline = checked.baseline.vehicles.find(vehicle => vehicle.id === vehicleId);
+  const checkedBaseline = checkedReference.vehicles.find(vehicle => vehicle.id === vehicleId);
   const checkedVariant = checked.variants.find(item => item.id === variantId).result.vehicles.find(vehicle => vehicle.id === vehicleId);
   const edges = new Map(experiment.baseScenario.edges.map(edge => [edge.id, edge]));
   const nodes = new Set(experiment.baseScenario.nodes.map(node => node.id));
@@ -136,13 +140,19 @@ export function createReplayEvents(experiment, completedResults, variantId, vehi
   checkVehicle(baseline, jobs, edges, nodes);
   checkVehicle(variant, jobs, edges, nodes);
   if (baseline.segments.length + variant.segments.length > EXPERIMENT_LIMITS.totalResultSegments) fail('bounded total result segments');
-  boundedArray(selected.closures, EXPERIMENT_LIMITS.totalClosures);
-  const closures = selected.closures.map((closure, position) => ({ ...closure, position }))
-    .sort((a, b) => a.atS - b.atS || a.position - b.position);
-  const streams = [{ items: closures, timeKey: 'atS', kind: 'closure-start', category: 'closures', run: 'schedule' }];
+  const schedule = (plan, run) => {
+    boundedArray(plan.closures, EXPERIMENT_LIMITS.totalClosures);
+    return { items: plan.closures.map((closure, position) => ({ ...closure, position }))
+      .sort((a, b) => a.atS - b.atS || a.position - b.position),
+      timeKey: 'atS', kind: 'closure-start', category: 'closures', run };
+  };
+  const streams = reference
+    ? [schedule(reference, 'reference-schedule'), schedule(selected, 'candidate-schedule')]
+    : [schedule(selected, 'schedule')];
+  const closureCount = streams.reduce((total, stream) => total + stream.items.length, 0);
   const runs = [
-    { run: 'baseline', vehicle: baseline, jobs: checkedBaseline.jobs },
-    { run: 'variant', vehicle: variant, jobs: checkedVariant.jobs },
+    { run: reference ? 'reference' : 'baseline', vehicle: baseline, jobs: checkedBaseline.jobs },
+    { run: reference ? 'candidate' : 'variant', vehicle: variant, jobs: checkedVariant.jobs },
   ];
   for (const [kind, collection, timeKey, category] of [
     ['segment-exit', 'segments', 'endS', 'routing'],
@@ -152,7 +162,7 @@ export function createReplayEvents(experiment, completedResults, variantId, vehi
     ['segment-entry', 'segments', 'startS', 'routing'],
   ]) for (const run of runs) streams.push({ items: collection === 'jobs' ? run.jobs : run.vehicle[collection], timeKey, kind, category, run: run.run });
 
-  const counts = { all: 0, deliveries: 0, routing: 0, closures: closures.length };
+  const counts = { all: 0, deliveries: 0, routing: 0, closures: closureCount };
   for (const run of runs) {
     counts.deliveries += run.jobs.filter(job => job.arrivalS !== null).length * 2;
     counts.routing += run.vehicle.segments.length * 2 + run.vehicle.reroutes.length;
@@ -180,6 +190,7 @@ export function createReplayEvents(experiment, completedResults, variantId, vehi
     positions[best] += 1; advance(best);
   }
   const index = Object.freeze({
+    ...(reference && { reference: Object.freeze({ id: reference.id, name: reference.name }) }),
     variant: Object.freeze({ id: selected.id, name: selected.name }), vehicleId,
     counts: Object.freeze(counts),
     unreachableJobs: Object.freeze({ baseline: checkedBaseline.jobs.filter(job => job.arrivalS === null).length, variant: checkedVariant.jobs.filter(job => job.arrivalS === null).length }),

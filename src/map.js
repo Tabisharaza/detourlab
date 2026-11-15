@@ -178,14 +178,15 @@ export class NetworkMap {
     if (!this.width || !this.height || !this.state.scenario.nodes.length) return false;
     const scene = this.sceneState;
     if (this.dirty || !scene || scene.scenario !== this.state.scenario || scene.zoom !== this.state.zoom || scene.width !== this.width || scene.height !== this.height || scene.dpr !== this.dpr || scene.pixelWidth !== this.canvas.width || scene.pixelHeight !== this.canvas.height) this.buildScene();
-    const { baseline, disrupted, selectedVehicle, view, scenario, time }=this.state;
+    const { baseline, disrupted, selectedVehicle, view, scenario, time, routeTone }=this.state;
     const frame = this.renderedFrame;
-    if (!this.frameDirty && frame && frame.state === this.state && frame.baseline === baseline && frame.disrupted === disrupted && frame.selectedVehicle === selectedVehicle && frame.view === view && frame.time === time) return false;
+    if (!this.frameDirty && frame && frame.state === this.state && frame.baseline === baseline && frame.disrupted === disrupted && frame.selectedVehicle === selectedVehicle && frame.view === view && frame.time === time && frame.routeTone === routeTone) return false;
     this.frameDirty = true;
     const ctx=this.ctx;ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,this.canvas.width,this.canvas.height);ctx.drawImage(this.background,0,0);ctx.setTransform(this.dpr,0,0,this.dpr,0,0);
     const selected=disrupted?.vehicles.find(v=>v.id===selectedVehicle),base=baseline?.vehicles.find(v=>v.id===selectedVehicle);
+    const selectedRouteColor = routeTone === 'reference' ? colors.teal : colors.lime;
     if (view==='baseline'||view==='compare') this.drawRoute(base,colors.teal,true);
-    if (view!=='baseline') this.drawRoute(selected,colors.lime,false);
+    if (view!=='baseline') this.drawRoute(selected,selectedRouteColor,false);
     // Complete synthetic demand is subdued; selected stop outcomes get stronger marks.
     for (const job of scenario.jobs) {const n=this.nodeMap.get(job.nodeId),p=this.project(n.x,n.y);ctx.beginPath();ctx.arc(p.x,p.y,1.6,0,Math.PI*2);ctx.fillStyle='#afc9d545';ctx.fill();}
     const selectedRun=view==='baseline'?base:selected;
@@ -210,11 +211,11 @@ export class NetworkMap {
     // Depots correspond to actual vehicle starting nodes.
     const depots=new Set(scenario.vehicles.map(v=>v.startNode));for(const id of depots){const n=this.nodeMap.get(id),p=this.project(n.x,n.y);ctx.save();ctx.translate(p.x,p.y);ctx.rotate(Math.PI/4);ctx.fillStyle='#c8f38c';ctx.strokeStyle='#142723';ctx.lineWidth=2;ctx.fillRect(-4,-4,8,8);ctx.strokeRect(-4,-4,8,8);ctx.restore();}
     this.vehiclePoints=[];
-    const drawVehicles=(run,ghost)=>{if(!run)return;for(const vehicle of run.vehicles){const p=this.position(vehicle);if(!ghost)this.vehiclePoints.push({...p,id:vehicle.id});const isSelected=vehicle.id===selectedVehicle;ctx.save();ctx.globalAlpha=ghost?.45:1;ctx.beginPath();ctx.arc(p.x,p.y,isSelected?4.5:2.5,0,Math.PI*2);ctx.fillStyle=ghost?colors.teal:isSelected?colors.lime:'#bad4d6';ctx.shadowColor=isSelected?colors.lime:colors.teal;ctx.shadowBlur=isSelected?12:3;ctx.fill();ctx.shadowBlur=0;if(isSelected){ctx.beginPath();ctx.arc(p.x,p.y,8,0,Math.PI*2);ctx.strokeStyle=ghost?colors.teal:'#c6f988aa';ctx.lineWidth=1;ctx.stroke();if(!ghost)this.drawVehicleLabel(p,vehicle.id);}ctx.restore();}};
+    const drawVehicles=(run,ghost)=>{if(!run)return;for(const vehicle of run.vehicles){const p=this.position(vehicle);if(!ghost)this.vehiclePoints.push({...p,id:vehicle.id});const isSelected=vehicle.id===selectedVehicle;ctx.save();ctx.globalAlpha=ghost?.45:1;ctx.beginPath();ctx.arc(p.x,p.y,isSelected?4.5:2.5,0,Math.PI*2);ctx.fillStyle=ghost?colors.teal:isSelected?selectedRouteColor:'#bad4d6';ctx.shadowColor=isSelected?selectedRouteColor:colors.teal;ctx.shadowBlur=isSelected?12:3;ctx.fill();ctx.shadowBlur=0;if(isSelected){ctx.beginPath();ctx.arc(p.x,p.y,8,0,Math.PI*2);ctx.strokeStyle=ghost?colors.teal:'#c6f988aa';ctx.lineWidth=1;ctx.stroke();if(!ghost)this.drawVehicleLabel(p,vehicle.id);}ctx.restore();}};
     if(view==='compare')drawVehicles(baseline,true);drawVehicles(view==='baseline'?baseline:disrupted,false);
     // Retain hit points on skipped frames and publish the signature only after a
     // complete paint, so a failed/interrupted render can be retried.
-    this.renderedFrame = { state: this.state, baseline, disrupted, selectedVehicle, view, time };
+    this.renderedFrame = { state: this.state, baseline, disrupted, selectedVehicle, view, time, routeTone };
     this.frameDirty = false;
     return true;
   }

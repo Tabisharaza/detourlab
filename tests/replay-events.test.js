@@ -233,3 +233,23 @@ test('the actual 500,000-segment result limit keeps all 1,008,000 events with bo
   assert.equal(adjacentReplayEvent(index, 12345.5, 'next').atS, 12346);
   assert.equal(adjacentReplayEvent(index, 250000, 'next'), null);
 });
+
+test('a named pair indexes both real schedules, reroutes and arrivals in shared-time order', () => {
+  const { input, completed } = ready();
+  const index = createReplayEvents(input, completed, 'close-at-11', 'van-1', 'close-at-10');
+  assert.deepEqual(index.reference, { id: 'close-at-10', name: input.variants[1].name });
+  assert.deepEqual(collect(index, 'closures').map(brief), [[10, 'reference-schedule', 'closure-start'], [11, 'candidate-schedule', 'closure-start']]);
+  assert.deepEqual(collect(index, 'deliveries').map(brief), [
+    [20, 'candidate', 'job-arrival'], [23, 'candidate', 'job-completion'],
+    [26, 'reference', 'job-arrival'], [29, 'reference', 'job-completion'],
+  ]);
+  const events = collect(index);
+  assert.deepEqual(events.filter(e => e.kind === 'reroute').map(brief), [[10, 'reference', 'reroute']]);
+  assert.equal(new Set(events.map(e => e.id)).size, events.length);
+  assert.equal(adjacentReplayEvent(index, 10, 'next', 'closures').atS, 11);
+  for (const invalid of ['close-at-11', 'missing', '']) {
+    assert.throws(() => createReplayEvents(input, completed, 'close-at-11', 'van-1', invalid), /different reference plan/);
+  }
+  const swapped = createReplayEvents(input, completed, 'close-at-10', 'van-1', 'close-at-11');
+  assert.deepEqual(collect(swapped, 'closures').map(brief), [[10, 'candidate-schedule', 'closure-start'], [11, 'reference-schedule', 'closure-start']]);
+});

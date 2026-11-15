@@ -27,9 +27,10 @@ consumes it; another arrival action creates a new one. The ordinary **Inspect
 deliveries** button still starts a fresh comparison with its documented defaults
 and discards the old return point.
 
-For a [named pair](BROWSER_IMPACT.md#compare-two-saved-plans), use **Replay
-candidate arrival** and return to the same reference and candidate. The maps
-still pair the candidate with the clear-road baseline.
+For a [named pair](BROWSER_IMPACT.md#compare-two-saved-plans), either recorded
+arrival opens the reference and candidate together. Return restores the same
+pair and the exact action used. Restoring clear-road replay can change the
+maps without discarding that return point.
 
 The return point belongs to the exact completed input, results and selected plans.
 Switching variants, changing input, importing a workspace, starting a new run,

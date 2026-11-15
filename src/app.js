@@ -27,6 +27,7 @@ const state = { experiment: initialExperiment, selectedVariantId: initialExperim
 let editHistory = createExperimentHistory(state.experiment, state.selectedVariantId);
 let historyNotice = 'History starts here.';
 let baselineMap;
+let namedReplay = null;
 let worker;
 let revision = 0;
 let importRevision = 0;
@@ -69,7 +70,10 @@ const map = new NetworkMap($('network-map'), state, {
 function toast(message, error = false) { const el = $('toast'); el.textContent = message; el.classList.toggle('error', error); el.hidden = false; clearTimeout(toastTimeout); toastTimeout = setTimeout(() => { el.hidden = true; }, error ? 9000 : 4500); }
 function setPlaying(value) { state.playing = value; $('play-button').textContent = value ? 'Ⅱ' : '▶'; $('play-button').setAttribute('aria-label', value ? 'Pause simulation' : 'Play simulation'); }
 function setTime(value) { state.time = Math.max(0, Math.min(Number($('timeline').max), Number(value))); $('timeline').value = String(Math.floor(state.time)); $('clock-label').textContent = clock(state.time); updateVehicleStatus(); updateReplayEventNavigation(); }
-function setView(view) {
+const defaultSplitHelp = 'Same replay time, vehicle selection and zoom in both panes. Select a vehicle in either map; the inspector compares both routes, with status and deliveries for the selected variant. Edit roads only in the selected-variant pane. Cards above show final outcomes, not the current replay instant.';
+function setView(view, reference = null) {
+  const referenceChanged = namedReplay !== reference;
+  namedReplay = reference;
   const layoutChanged = (state.view === 'split') !== (view === 'split');
   state.view = view;
   const split = view === 'split';
@@ -81,21 +85,55 @@ function setView(view) {
   $('split-help').hidden = !split; $('map-panes').classList.toggle('split', split);
   $('map-tooltip').hidden = true;
   if (split && !baselineMap) {
-    // Stable read-only view: no copied time/results that can drift or go stale.
+    // Both renderers read the same time, zoom and vehicle directly. The left
+    // pane alone substitutes the named reference's actual schedule and ledger.
     const baselineState = new Proxy(state, {
-      get: (target, key) => key === 'view' ? 'baseline' : key === 'editing' ? false : target[key],
-      set: () => { throw new Error('Baseline pane state is read-only.'); },
+      get(target, key) {
+        if (key === 'editing') return false;
+        if (key === 'view') return namedReplay ? 'disruption' : 'baseline';
+        if (key === 'routeTone') return namedReplay ? 'reference' : undefined;
+        if (key === 'scenario' && namedReplay) return namedReplay.scenario;
+        if (key === 'disrupted' && namedReplay) return namedReplay.result;
+        return target[key];
+      },
+      set: () => { throw new Error('Reference pane state is read-only.'); },
     });
     baselineMap = new NetworkMap($('baseline-map'), baselineState, {
       onRoad: () => {}, onHover: () => {},
       onVehicle: id => { abandonReplayNavigation(); state.selectedVehicle = id; $('vehicle-select').value = id; updateInspector(); },
     });
   }
-  // Clear old hit targets before the next frame after a layout transition.
+  updateReplayLabels();
+  // Clear old hit targets before the next frame after a layout or source change.
   for (const renderer of [map, baselineMap].filter(Boolean)) {
-    if (layoutChanged) { renderer.vehiclePoints = []; renderer.edgePoints = []; renderer.resize(); renderer.invalidate(); }
+    if (layoutChanged || referenceChanged) { renderer.vehiclePoints = []; renderer.edgePoints = []; renderer.resize(); renderer.invalidate(); }
     else renderer.invalidateFrame();
   }
+  if (referenceChanged) { updateInspector(); updateReplayAvailability(); }
+}
+function updateReplayLabels() {
+  const referenceLabel = namedReplay ? impactPlanLabel(namedReplay.plan) : 'Clear-road baseline';
+  const candidateLabel = namedReplay ? impactPlanLabel(activeVariant()) : activeVariant().name;
+  if (!namedReplay && document.activeElement === $('exit-named-replay')) focusFirst([$('view-' + state.view)]);
+  $('named-replay-controls').hidden = !namedReplay;
+  $('split-help').textContent = namedReplay
+    ? 'Both plans use the same clock, vehicle and zoom. Compare routes and scheduled closures below. Final fleet cards above still compare the candidate with clear roads.'
+    : defaultSplitHelp;
+  $('baseline-pane-label').textContent = namedReplay ? `Reference: ${referenceLabel}` : referenceLabel;
+  $('baseline-pane-label').title = $('baseline-pane-label').textContent;
+  $('variant-pane-label').textContent = `${namedReplay ? 'Candidate' : 'Selected variant'}: ${candidateLabel}`;
+  $('variant-pane-label').title = $('variant-pane-label').textContent;
+  $('baseline-map').setAttribute('aria-label', `${namedReplay ? 'Reference: ' : ''}${referenceLabel} at the shared replay time. Use the vehicle selector for keyboard access.`);
+  $('network-map').setAttribute('aria-label', namedReplay
+    ? `Candidate: ${candidateLabel} at the shared replay time. Use the vehicle selector for keyboard access.`
+    : 'Synthetic district map showing roads, selected route, active closures, and simulated vehicles. All controls are also available outside this map.');
+  $('legend-reference').textContent = namedReplay ? 'Reference route' : 'Baseline route';
+  $('legend-candidate').textContent = namedReplay ? 'Candidate route' : 'Disrupted route';
+  $('route-reference-label').textContent = namedReplay ? 'REFERENCE' : 'BASELINE';
+  $('route-candidate-label').textContent = namedReplay ? 'CANDIDATE' : 'DISRUPTED';
+  const closures = state.scenario.closures;
+  const scheduleLabel = closures.length > 1 ? `${closures.length} scheduled closure events` : closures.length ? `Closure starts at ${clock(closures[0].atS)}` : 'Control run · no closures';
+  $('event-label').textContent = namedReplay ? `Candidate · ${scheduleLabel}` : scheduleLabel;
 }
 function setEditing(value) { state.editing = value; $('edit-roads').setAttribute('aria-pressed', String(value)); $('map-help').textContent = value ? 'Click a road to edit the selected direction in this variant' : 'Click a vehicle to inspect its route'; }
 function closedIds() { return new Set(state.scenario.closures.flatMap(closure => closure.edgeIds)); }
@@ -179,7 +217,10 @@ function toggleRoad(id, forceReopen = false) {
 }
 function selectVariant(id) {
   if (!state.experiment.variants.some(variant => variant.id === id)) return;
-  if (id !== state.selectedVariantId) clearImpactReturn();
+  if (id !== state.selectedVariantId) {
+    clearImpactReturn();
+    if (namedReplay) setView(state.view);
+  }
   abandonReplayNavigation();
   importRevision += 1;
   if (!state.lessonActive) editHistory = selectExperimentHistory(editHistory, id);
@@ -322,8 +363,7 @@ function updateRoadDetails() {
 }
 function updateControls() {
   const scenario = state.scenario;
-  $('variant-pane-label').textContent = `Selected variant: ${activeVariant().name}`;
-  $('variant-pane-label').title = $('variant-pane-label').textContent;
+  updateReplayLabels();
   $('scene-name').textContent = scenario.name;
   $('map-scene-title').textContent = `${scenario.name.toUpperCase()} / EXPERIMENT VIEW`;
   $('map-watermark-name').textContent = scenario.name.toUpperCase();
@@ -332,7 +372,6 @@ function updateControls() {
   $('network-description').textContent = `${scenario.nodes.length} junctions · ${scenario.vehicles.length} vehicles · ${scenario.jobs.length} deliveries`;
   $('closure-time-label').textContent = clock(closureAt());
   $('closure-time').max = '1800';
-  $('event-label').textContent = scenario.closures.length > 1 ? `${scenario.closures.length} scheduled closure events` : scenario.closures.length ? `Closure starts at ${clock(scenario.closures[0].atS)}` : 'Control run · no closures';
   const closed = closedIds();
   $('closure-count').textContent = String(roads.filter(edge => pairsFor(edge.id).some(id => closed.has(id))).length);
   const presets = createPresets(scenario).filter(preset => preset.id === 'clear' || preset.edgeIds.length > 0);
@@ -358,6 +397,7 @@ function clearResults() {
   pendingReplay = null; updateReplayAvailability();
   invalidateReview();
   invalidateImpact();
+  if (namedReplay) setView(state.view);
   updateReplayEvents();
   for (const id of ['distance', 'late', 'unreachable']) { $(id + '-value').textContent = '—'; $(id + '-delta').textContent = 'Calculating…'; $(id + '-baseline').textContent = ''; }
   for (const id of ['route-baseline-distance', 'route-scenario-distance', 'route-baseline-time', 'route-scenario-time']) $(id).textContent = '—';
@@ -450,7 +490,7 @@ function updateInspector() {
   updateReplayEvents();
   if (!state.disrupted || !state.selectedVehicle) return;
   const vehicle = state.disrupted.vehicles.find(v => v.id === state.selectedVehicle);
-  const base = state.baseline.vehicles.find(v => v.id === state.selectedVehicle); if (!vehicle || !base) return;
+  const base = (namedReplay?.result ?? state.baseline).vehicles.find(v => v.id === state.selectedVehicle); if (!vehicle || !base) return;
   $('vehicle-name').textContent = vehicle.id.toUpperCase();
   $('route-baseline-distance').textContent = distanceText(base.distanceM); $('route-scenario-distance').textContent = distanceText(vehicle.distanceM);
   const start = state.scenario.vehicles.find(v => v.id === vehicle.id).startTimeS;
@@ -463,6 +503,7 @@ function updateInspector() {
   if (!state.scenario.closures.length) reason = 'All roads remain open. Both runs use identical demand, dispatch times, and delivery order, so their results match.';
   else if (unreachable) reason = `${unreachable} assigned ${unreachable === 1 ? 'stop is' : 'stops are'} disconnected when this vehicle tries to route there. Each is recorded as unreachable; the vehicle stays at its current junction and tries the next stop.`;
   else if (changed) reason = `${reroutes.length} routing ${reroutes.length === 1 ? 'decision' : 'decisions'} changed after a closure. ${difference > 0 ? `${distanceText(difference)} of extra travel` : 'A different path'} connects the same stops in the same order. Roads already entered are completed before rerouting.`;
+  if (namedReplay) reason = `${impactPlanLabel(namedReplay.plan)} → ${impactPlanLabel(activeVariant())}: ${changed ? 'different recorded vehicle paths' : 'same recorded edge sequence'}. Status, path details and stop outcomes below are for the candidate plan.`;
   $('route-reason').textContent = reason;
   $('route-path').hidden = state.scenario.nodes.length > 12;
   if (!$('route-path').hidden) {
@@ -482,9 +523,15 @@ function updateInspector() {
 // frames. Paging materializes at most 20 records; time changes only seek the
 // adjacent event in the cached index and update the small navigation controls.
 function replayEventsAreCurrent(context = inspectedReplayEvents) {
-  return Boolean(context && !state.pending && context.results === state.allResults && context.experiment === state.experiment && context.scenario === state.scenario && context.variantId === state.selectedVariantId && context.vehicleId === state.selectedVehicle);
+  return Boolean(context && !state.pending && context.results === state.allResults && context.experiment === state.experiment && context.scenario === state.scenario && context.variantId === state.selectedVariantId && context.vehicleId === state.selectedVehicle && context.reference === namedReplay);
 }
 function replayEventSource(event, context) {
+  if (context.reference) {
+    const isReference = event.run === 'reference' || event.run === 'reference-schedule';
+    const label = isReference ? 'Reference' : 'Candidate';
+    const plan = isReference ? context.index.reference : context.index.variant;
+    return `${label}${event.category === 'closures' ? ' schedule' : ''} · ${impactPlanLabel(plan)}`;
+  }
   return event.run === 'baseline' ? 'Clear-road baseline' : `${event.run === 'schedule' ? 'Variant schedule' : 'Variant'} · ${context.index.variant.name}`;
 }
 function replayEventFocusFallback() { return [$('replay-events-filter'), $('vehicle-select'), $('run-experiment')]; }
@@ -548,11 +595,13 @@ function updateReplayEvents() {
     $('replay-events-status').textContent = 'No vehicle selected. Select a vehicle to inspect its replay events.';
   } else {
     try {
-      const index = createReplayEvents(state.experiment, state.allResults, state.selectedVariantId, state.selectedVehicle);
-      inspectedReplayEvents = { index, experiment: state.experiment, results: state.allResults, scenario: state.scenario, variantId: state.selectedVariantId, vehicleId: state.selectedVehicle };
+      const index = createReplayEvents(state.experiment, state.allResults, state.selectedVariantId, state.selectedVehicle, namedReplay?.plan.id);
+      inspectedReplayEvents = { index, experiment: state.experiment, results: state.allResults, scenario: state.scenario, variantId: state.selectedVariantId, vehicleId: state.selectedVehicle, reference: namedReplay };
       $('replay-events-filter').disabled = false;
       const missing = index.unreachableJobs;
-      $('replay-events-summary').textContent = `${state.selectedVehicle} · Clear-road baseline and ${index.variant.name}.` + (missing && (missing.baseline || missing.variant) ? ` Unreachable deliveries: ${missing.baseline} baseline, ${missing.variant} variant. Their null arrival and service times have no events.` : '');
+      const left = namedReplay ? `Reference: ${impactPlanLabel(index.reference)}` : 'Clear-road baseline';
+      const right = namedReplay ? `Candidate: ${impactPlanLabel(index.variant)}` : index.variant.name;
+      $('replay-events-summary').textContent = `${state.selectedVehicle} · ${left} and ${right}.` + (missing && (missing.baseline || missing.variant) ? ` Unreachable deliveries: ${missing.baseline} ${namedReplay ? 'reference' : 'baseline'}, ${missing.variant} ${namedReplay ? 'candidate' : 'variant'}. Their null arrival and service times have no events.` : '');
       renderReplayEventsPage();
     } catch (error) { $('replay-events-status').textContent = `Event navigation unavailable. ${formatInputError(error)}`; }
   }
@@ -843,15 +892,22 @@ function replayDeliveryArrival(context, report, renderRevision, job, side) {
   // Bind actions to the visible projection, not mutable DOM attributes or IDs.
   if (!$('impact-dialog').open || !impactIsCurrent() || inspectedImpact !== context || context.report !== report || impactRenderRevision !== renderRevision || report.variant.id !== state.selectedVariantId) return;
   const atS = job[side]?.arrivalS;
-  if (report.reference && side === 'baseline') return;
   if (!Number.isFinite(atS) || atS < 0 || atS > Number($('timeline').max) || !state.disrupted.vehicles.some(vehicle => vehicle.id === job.vehicleId)) return;
   const returnContext = { experiment: state.experiment, results: state.allResults, variantId: state.selectedVariantId,
     referenceId: report.reference?.id ?? null, filter: $('impact-filter').value, query: $('impact-search').value, sort: $('impact-sort').value, page: impactPage, jobId: job.id, side };
+  const reference = report.reference && {
+    plan: report.reference,
+    scenario: scenarioForVariant(state.experiment, report.reference.id),
+    result: state.allResults.variants.find(variant => variant.id === report.reference.id).result,
+  };
   abandonReplayNavigation(); setPlaying(false);
   state.selectedVehicle = job.vehicleId; $('vehicle-select').value = job.vehicleId;
-  setView('split'); updateInspector(); setTime(atS);
+  if (reference) setEditing(false);
+  setView('split', reference); updateInspector(); setTime(atS);
   map.invalidateFrame(); baselineMap?.invalidateFrame();
-  const source = side === 'baseline' ? 'Clear-road baseline' : `${report.reference ? 'Candidate' : 'Variant'} · ${impactPlanLabel(report.variant)}`;
+  const source = side === 'baseline'
+    ? reference ? `Reference · ${impactPlanLabel(reference.plan)}` : 'Clear-road baseline'
+    : `${reference ? 'Candidate' : 'Variant'} · ${impactPlanLabel(report.variant)}`;
   $('replay-events-announcement').textContent = `Paused at ${atS} s. ${source}: arrival of ${job.id} by ${job.vehicleId} at ${job.nodeId}. Both map panes use this exact time. This selects the vehicle's replay, not a per-delivery route or closure-causation explanation.`;
   invalidateImpact(); closeDialog($('impact-dialog'), { target: $('vehicle-select') });
   offerImpactReturn(returnContext);
@@ -879,7 +935,7 @@ function renderImpact() {
     const coverageNote = delta.completedJobs < 0 ? ' The candidate completes fewer deliveries; interpret late counts with coverage.' : '';
     $('impact-metrics').textContent = `${referenceLabel} → ${candidateLabel}: distance ${format('distanceM', ' m')}; late ${format('lateJobs')}; unreachable ${format('unreachableJobs')}; completed ${format('completedJobs')}.${coverageNote} Final outcomes, independent of replay time.`;
     $('impact-table-caption').textContent = `Reference: ${referenceLabel} → Candidate: ${candidateLabel}. ${names[page.filter]}.`;
-    replayNote.textContent = 'Replay shows the clear-road baseline and candidate. To replay the reference plan instead, choose it as the candidate to swap the plans.';
+    replayNote.textContent = 'Replay either available arrival to see the reference and candidate together at that exact time, without rerunning the experiment.';
   } else {
     $('impact-metrics').textContent = `Baseline → ${candidateLabel}: ${report.baselineMetrics.completedJobs} → ${report.variantMetrics.completedJobs} completed; ${report.baselineMetrics.unreachableJobs} → ${report.variantMetrics.unreachableJobs} unreachable. Final outcomes, independent of replay time.`;
     $('impact-table-caption').textContent = `${candidateLabel} compared with the clear-road baseline. ${names[page.filter]}.`;
@@ -897,9 +953,9 @@ function renderImpact() {
     identity.append(node('strong', job.id), node('small', `${job.vehicleId} · ${job.nodeId}`), node('small', `Arrival deadline ${job.dueTimeS} s`));
     const arrival = timing(job.baseline.arrivalS, job.variant.arrivalS, job.arrivalDeltaS);
     const actions = node('div', undefined, 'impact-replay-actions');
-    for (const side of report.reference ? ['variant'] : ['baseline', 'variant']) {
+    for (const side of ['baseline', 'variant']) {
       if (job[side].arrivalS === null) continue;
-      const role = report.reference ? 'candidate' : side;
+      const role = report.reference ? side === 'baseline' ? 'reference' : 'candidate' : side;
       const button = node('button', `Replay ${role} arrival`, 'button impact-replay-arrival'); button.type = 'button';
       Object.assign(button.dataset, { impactReplay: side, jobId: job.id, time: String(job[side].arrivalS) });
       button.setAttribute('aria-label', `Replay ${role} arrival of ${job.id} by ${job.vehicleId} at ${job[side].arrivalS} seconds in split view`);
@@ -1134,8 +1190,14 @@ $('road-select').addEventListener('change', updateRoadDetails);
 $('road-direction').addEventListener('change', updateRoadDetails);
 $('toggle-road').addEventListener('click', () => { const edge = selectedRoad(); if (edge) toggleRoad(edge.id); });
 $('edit-roads').setAttribute('aria-pressed', 'false');
-$('edit-roads').addEventListener('click', () => setEditing(!state.editing));
-for (const view of ['disruption', 'baseline', 'compare', 'split']) $('view-' + view).addEventListener('click', () => setView(view));
+$('edit-roads').addEventListener('click', () => { if (namedReplay) setView('split'); setEditing(!state.editing); });
+for (const view of ['disruption', 'baseline', 'compare', 'split']) $('view-' + view).addEventListener('click', () => {
+  if (view !== 'split' || !namedReplay) setView(view);
+});
+$('exit-named-replay').addEventListener('click', () => {
+  if (!namedReplay) return;
+  abandonReplayNavigation(); setView('split'); focusFirst([$('view-split')]);
+});
 $('vehicle-select').addEventListener('change', (event) => { state.selectedVehicle = event.target.value; updateInspector(); });
 $('play-button').addEventListener('click', () => { if (state.time >= Number($('timeline').max)) setTime(0); setPlaying(!state.playing); });
 $('timeline').addEventListener('input', (event) => { setPlaying(false); setTime(event.target.value); });
@@ -1148,7 +1210,9 @@ $('reset-button').addEventListener('click', () => { if (state.lessonActive) { re
 $('export-button').addEventListener('click', () => { const serialized = exportExperiment(state.experiment); const blob = new Blob([serialized], { type: 'application/json' }); const url = URL.createObjectURL(blob); const link = node('a'); link.href = url; link.download = `detourlab-experiment-${state.experiment.id}.json`; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); toast('All variants exported. Reproduce them with the experiment CLI.'); });
 function updateReplayAvailability() {
   const save = $('save-replay'), open = $('open-replay');
-  const disabled = state.lessonActive || state.pending || !state.allResults;
+  const disabled = state.lessonActive || state.pending || !state.allResults || Boolean(namedReplay);
+  const help = namedReplay ? 'Replay bookmarks save a clear-road comparison only. Restore clear-road replay to save a bookmark at this time.' : 'Portable JSON: experiment input + view, no results or URLs. Opening recomputes and restores paused. Return from the lesson to save or open.';
+  if ($('replay-help').textContent !== help) $('replay-help').textContent = help;
   if ((disabled && document.activeElement === save) || (state.lessonActive && document.activeElement === open)) focusFirst([$('run-experiment'), $('return-experiment')]);
   save.disabled = disabled; open.disabled = state.lessonActive;
 }
@@ -1176,7 +1240,7 @@ function restoreReplay(workerRevision) {
   $('replay-status').textContent = `Replay loaded and recomputed; paused at ${state.time} s, ${p.view} view, zoom ${p.zoom}, vehicle ${p.vehicleId ?? 'none'}.` + (p.timeS > maximum ? ` Saved time ${p.timeS} s exceeds this run; clamped to ${maximum} s.` : '');
 }
 $('save-replay').addEventListener('click', () => {
-  if (state.lessonActive || state.pending || !state.allResults) return;
+  if (state.lessonActive || state.pending || !state.allResults || namedReplay) return;
   try {
     const serialized = exportReplayBookmark(state.experiment, { variantId: state.selectedVariantId, vehicleId: state.selectedVehicle, timeS: state.time, view: state.view, zoom: state.zoom });
     const url = URL.createObjectURL(new Blob([serialized], { type: 'application/json' })), link = node('a');

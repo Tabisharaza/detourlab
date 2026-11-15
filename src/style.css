@@ -49,3 +49,5 @@
 .impact-replay-actions{display:flex;flex-direction:column;gap:8px;margin-top:10px}.impact-replay-arrival{white-space:normal;text-align:left;min-height:44px;font-size:11px;padding:8px;line-height:1.4}
 
 #impact-return{white-space:normal;min-height:44px}#impact-return-help{font-size:12px;line-height:1.6;color:#c9d9e0;margin:10px 0;overflow-wrap:anywhere}
+
+.named-replay-controls{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:0 16px 8px;color:#d0e4e8;font-size:12px}.named-replay-controls[hidden]{display:none}.named-replay-controls .button{min-height:44px}#baseline-pane-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.replay-event-reference{color:#72d4cc}.replay-event-reference-schedule,.replay-event-candidate-schedule{color:#f3b2a4}

@@ -134,7 +134,8 @@ The [headless variant comparison](VARIANT_COMPARISON.md) reports per-delivery
 changes and aggregate trade-offs between any two saved schedules in one run.
 The [browser delivery inspector](BROWSER_IMPACT.md#compare-two-saved-plans)
 uses the same outcome projection over the completed run, with paging, complete
-CSV and candidate replay/return. It keeps missing arrival evidence separate
+CSV and synchronized replay for either recorded arrival. The two maps and event
+list use the actual reference and candidate schedules. It keeps missing arrival evidence separate
 from zero and preserves baseline reports, gates and the default comparison.
 Source verification and hosted deployment remain separate.
 
