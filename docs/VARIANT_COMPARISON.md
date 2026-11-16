@@ -95,3 +95,30 @@ node --test tests/variant-comparison.test.js tests/variant-comparison-cli.test.j
 npm run check
 node scripts/verify-dist.js
 ```
+
+## Send a reproducible comparison
+
+A CSV or standalone report contains outcomes, but the recipient still needs
+the original experiment to reproduce them. Create a single evidence file instead:
+
+```sh
+node scripts/review-comparison.js create examples/meridian-experiment.json \
+  market-05 market-10 > market-evidence.json
+node scripts/review-comparison.js verify market-evidence.json
+```
+
+The versioned file contains the full validated experiment (including unselected
+plans) and every comparison row, so it can be verified after renaming or moving
+it. No network, account, timestamps, absolute paths, or separate source file
+are needed. Try the [generated one-delivery example](examples/variant-comparison/tiny-evidence.json).
+The verifier checks the complete report by rerunning the current engine over
+the embedded experiment. It rejects changes to plan identity, the experiment
+hash, individual rows, aggregates, and envelope fields rather than checking a
+hash alone. Exit 2 means the input could not be verified; no success is printed.
+
+The evidence limit is 8 MiB, with the existing 2 MiB experiment, 4 MiB report
+and simulation budgets retained. Verification is a reproducibility check, not
+a signature, a guarantee of compatibility across engine versions, or approval
+of either plan. Someone can construct a different valid file by changing and
+recomputing both input and output. Only share evidence with recipients who may
+see the full experiment and all delivery details.

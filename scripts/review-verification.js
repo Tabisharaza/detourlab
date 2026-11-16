@@ -1,39 +1,18 @@
-import { constants } from 'node:fs';
-import { lstat, open } from 'node:fs/promises';
+import { lstat } from 'node:fs/promises';
 import path from 'node:path';
 import { normalizeGenerator } from '../src/experiment-report.js';
 import { createExperimentReport, serializeExperimentReport, REPORT_LIMITS } from './experiment-report.js';
 import { createReportIdentity } from './report-identity.js';
 
+import { readBoundedRegularFile } from './read-bounded-regular-file.js';
+
 /** Read only the two fixed packet files, never paths supplied by bundle data. */
 async function readPacketFile(directory, name, limit) {
-  const filename = path.join(directory, name);
-  const entry = await lstat(filename);
-  if (entry.isSymbolicLink()) throw new Error(`${name} must not be a symbolic link.`);
-  if (!entry.isFile()) throw new Error(`${name} must be a regular file.`);
-  // O_NOFOLLOW protects the final component where supported; these checks are
-  // not a sandbox against a co-writer replacing ancestor directories.
-  const handle = await open(filename, constants.O_RDONLY | constants.O_NONBLOCK | (constants.O_NOFOLLOW ?? 0));
-  try {
-    const info = await handle.stat();
-    if (!info.isFile()) throw new Error(`${name} must be a regular file.`);
-    if (info.size > limit) throw new Error(`${name} exceeds its ${limit}-byte limit.`);
-    const buffer = Buffer.alloc(limit + 1);
-    let length = 0;
-    while (length < buffer.length) {
-      const { bytesRead } = await handle.read(buffer, length, buffer.length - length, length);
-      if (!bytesRead) break;
-      length += bytesRead;
-    }
-    if (length > limit) throw new Error(`${name} exceeds its ${limit}-byte limit.`);
-    const bytes = buffer.subarray(0, length);
-    let text;
-    try { text = new TextDecoder('utf-8', { fatal: true }).decode(bytes); }
-    catch { throw new Error(`${name} must be valid UTF-8.`); }
-    return { bytes, text };
-  } finally {
-    await handle.close();
-  }
+  const bytes = await readBoundedRegularFile(path.join(directory, name), limit, name);
+  let text;
+  try { text = new TextDecoder('utf-8', { fatal: true }).decode(bytes); }
+  catch { throw new Error(`${name} must be valid UTF-8.`); }
+  return { bytes, text };
 }
 
 /**
