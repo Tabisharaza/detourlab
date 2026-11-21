@@ -1,0 +1,24 @@
+DetourLab decision brief (verified synthetic comparison)
+Reference: Close at 10 s [close-at-10]
+Candidate: Close at 11 s [close-at-11]
+Experiment SHA-256: 7a757f1b53531826e98f44a706d3c6d235986682e6517c3c542f116fa8bf7395
+
+Fleet results (reference → candidate; candidate minus reference):
+  Completed deliveries: 1 → 1 (0)
+  Late deliveries: 1 → 0 (-1)
+  Unreachable deliveries: 0 → 0 (0)
+  Distance: 260 m → 200 m (-60 m)
+
+Arrivals (1 delivery row): 1 earlier, 0 unchanged, 0 later, 0 not comparable
+
+Newly unreachable deliveries: 0
+
+Recovered deliveries: 0
+
+Unreachable under both plans: 0
+
+Newly late deliveries: 0
+
+Largest arrival regressions: 0
+
+This is a bounded summary, not an approval or prediction. See the evidence JSON for all rows.

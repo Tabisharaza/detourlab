@@ -122,3 +122,18 @@ a signature, a guarantee of compatibility across engine versions, or approval
 of either plan. Someone can construct a different valid file by changing and
 recomputing both input and output. Only share evidence with recipients who may
 see the full experiment and all delivery details.
+
+## Share a short decision brief
+
+```sh
+node scripts/review-comparison.js brief market-evidence.json
+```
+
+`brief` performs the same full offline verification and applies the same
+input limits as `verify` before printing anything. It shows both plans' totals,
+arrival counts, newly unreachable and recovered deliveries separately,
+deliveries neither plan reached, and newly late deliveries. Zero net change
+in completed work can still hide losses and recoveries. The largest positive
+arrival regressions come first, with ties resolved by the original delivery
+order. Each section shows at most five examples; the verified evidence remains
+the source for all rows. See the [generated tiny brief](examples/variant-comparison/tiny-brief.txt).

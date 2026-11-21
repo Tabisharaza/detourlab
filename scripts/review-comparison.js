@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { parseExperiment } from '../src/experiment.js';
 import { formatInputError } from '../src/file-input.js';
+import { renderComparisonBrief } from './comparison-brief.js';
 import { readInput } from './read-input.js';
 import { readBoundedRegularFile } from './read-bounded-regular-file.js';
 import {
@@ -11,9 +12,11 @@ import {
 const usage = `Usage:
   node scripts/review-comparison.js create EXPERIMENT.json REFERENCE_ID CANDIDATE_ID
   node scripts/review-comparison.js verify EVIDENCE.json
+  node scripts/review-comparison.js brief EVIDENCE.json
 
 Create prints a self-contained JSON file. Verify recomputes the complete report
-offline. A match confirms reproducibility, not who made or approved the file.
+offline. Brief verifies the same data, then prints a short decision summary.
+A match confirms reproducibility, not who made or approved the file.
 Exit 0 means success; exit 2 means invalid, mismatching or unreadable input.`;
 
 try {
@@ -22,9 +25,10 @@ try {
   else if (action === 'create' && path && reference && candidate && !extra.length) {
     const experiment = parseExperiment(await readInput(path));
     process.stdout.write(renderComparisonEvidence(createComparisonEvidence(experiment, reference, candidate)));
-  } else if (action === 'verify' && path && reference === undefined) {
+  } else if ((action === 'verify' || action === 'brief') && path && reference === undefined) {
     const report = verifyComparisonEvidence(await readBoundedRegularFile(path, EVIDENCE_LIMIT, 'Comparison evidence', EVIDENCE_LIMIT_MESSAGE));
-    console.log(`Verified ${report.reference.id} → ${report.candidate.id}: ${report.summary.totalJobs} complete delivery rows; experiment SHA-256 ${report.experimentSha256}.`);
+    if (action === 'brief') process.stdout.write(renderComparisonBrief(report));
+    else console.log(`Verified ${report.reference.id} → ${report.candidate.id}: ${report.summary.totalJobs} complete delivery rows; experiment SHA-256 ${report.experimentSha256}.`);
   } else throw new Error('Invalid arguments. Use --help for usage.');
 } catch (error) {
   console.error(`DetourLab: ${formatInputError(error)}`);
