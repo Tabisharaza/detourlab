@@ -123,6 +123,21 @@ of either plan. Someone can construct a different valid file by changing and
 recomputing both input and output. Only share evidence with recipients who may
 see the full experiment and all delivery details.
 
+### Download the named pair from the browser
+
+In **Inspect deliveries**, choose a saved reference and candidate, then select
+**Download comparison evidence JSON**. The browser exports the exact completed
+pair without a new simulation; search and pagination do not filter the file.
+Unlike CSV, the JSON contains the complete experiment, including unselected
+plans and all demand. It is created locally in a secure browser context;
+nothing is uploaded. Save it only where recipients may see the full input.
+The implicit clear-road baseline cannot be used in this file; choose a saved
+clear-road control if you want that pairing.
+
+Use `node scripts/review-comparison.js verify detourlab-comparison-evidence.json`
+on the recipient's machine. Verification recomputes outcomes and does not
+authenticate the browser build, author, or decision.
+
 ## Share a short decision brief
 
 ```sh

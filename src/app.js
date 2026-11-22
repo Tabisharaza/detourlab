@@ -4,7 +4,7 @@ import { createReplayEvents, pageReplayEvents, adjacentReplayEvent } from './rep
 import { createDemoScenario, createPresets, validateScenario, LIMITS } from './scenario.js';
 import { experimentFromScenario, validateExperiment, parseExperiment, scenarioForVariant, exportExperiment, EXPERIMENT_LIMITS } from './experiment.js';
 import { createBrowserReview } from './browser-review.js';
-import { createBrowserImpact, pageDeliveryImpact } from './browser-impact.js';
+import { createBrowserComparisonEvidence, createBrowserImpact, pageDeliveryImpact } from './browser-impact.js';
 import { renderJobImpactCsv } from './job-impact-csv.js';
 import { createCutoffExperiment, normalizeCutoffTimes } from './cutoff-experiment.js';
 import { summarizeCutoffResults } from './cutoff-comparison.js';
@@ -821,11 +821,13 @@ function invalidateImpact() {
   inspectedImpact = null; impactPage = 0; impactRenderRevision += 1;
   // Move focus before disabling a control or hiding its scroll region.
   if ($('impact-dialog').open && $('impact-dialog').contains(document.activeElement) && document.activeElement !== $('impact-close')) focusFirst([$('impact-close')]);
-  for (const id of ['impact-download-csv', 'impact-reference', 'impact-variant', 'impact-filter', 'impact-search', 'impact-sort', 'impact-previous', 'impact-next']) $(id).disabled = true;
+  for (const id of ['impact-download-csv', 'impact-download-evidence', 'impact-reference', 'impact-variant', 'impact-filter', 'impact-search', 'impact-sort', 'impact-previous', 'impact-next']) $(id).disabled = true;
   $('impact-rows').replaceChildren(); $('impact-table-region').hidden = true;
   $('impact-summary').textContent = ''; $('impact-metrics').textContent = '';
   $('impact-replay-note').hidden = true; $('impact-replay-note').textContent = '';
   $('impact-export-status').textContent = 'CSV unavailable until a completed comparison is open.';
+  $('impact-download-evidence').setAttribute('aria-busy', 'false');
+  $('impact-evidence-status').textContent = 'Evidence unavailable until a completed comparison is open.';
   $('impact-status').textContent = 'Results changed. Close this window and finish a new run before inspecting deliveries.';
   updateImpactAvailability();
 }
@@ -920,6 +922,17 @@ function renderImpact() {
   $('impact-download-csv').disabled = false;
   const candidateLabel = impactPlanLabel(report.variant), referenceLabel = report.reference ? impactPlanLabel(report.reference) : '';
   const exportSubject = report.reference ? `${referenceLabel} → ${candidateLabel}` : candidateLabel;
+  if (context.evidenceReport !== report) {
+    // Any plan change cancels a pending export even if the old pair is later reselected.
+    context.evidenceReport = report; context.evidenceRequest = null;
+    const evidenceButton = $('impact-download-evidence');
+    if (!report.reference && document.activeElement === evidenceButton) focusFirst([$('impact-reference'), $('impact-close')]);
+    evidenceButton.disabled = !report.reference;
+    evidenceButton.setAttribute('aria-busy', 'false');
+    $('impact-evidence-status').textContent = report.reference
+      ? 'The recipient can verify this pair offline or generate a decision brief with the DetourLab CLI.'
+      : 'Choose a saved reference plan to export a named comparison. The automatic clear-road baseline is not a saved plan.';
+  }
   $('impact-export-status').textContent = `CSV includes all ${summary.totalJobs} deliveries for ${exportSubject}, regardless of the filter, search, order or page. Missing timings are blank, not zero. Import identifier and name columns as text in your spreadsheet.`;
   const page = pageDeliveryImpact(report, $('impact-filter').value, impactPage, { query: $('impact-search').value, sort: $('impact-sort').value });
   impactPage = page.pageIndex;
@@ -1009,7 +1022,38 @@ function downloadImpactCsv() {
     $('impact-export-status').textContent = `CSV could not be prepared. ${formatInputError(error)} No complete download was requested; try again or export the experiment for the CLI.`;
   }
 }
+async function downloadImpactEvidence() {
+  if (!$('impact-dialog').open || !impactIsCurrent()) return;
+  const context = inspectedImpact, report = context.report;
+  if (!report.reference || report.variant.id !== state.selectedVariantId || context.evidenceRequest) return;
+  const request = {};
+  const stillCurrent = () => $('impact-dialog').open && impactIsCurrent() && inspectedImpact === context &&
+    context.report === report && context.evidenceRequest === request && report.variant.id === state.selectedVariantId;
+  context.evidenceRequest = request;
+  const button = $('impact-download-evidence');
+  button.setAttribute('aria-busy', 'true');
+  $('impact-evidence-status').textContent = 'Preparing comparison evidence…';
+  let url;
+  try {
+    const json = await createBrowserComparisonEvidence(context.experiment, report);
+    if (!stillCurrent()) return;
+    url = URL.createObjectURL(new Blob([json], { type: 'application/json;charset=utf-8' }));
+    const link = node('a'); link.href = url; link.download = 'detourlab-comparison-evidence.json';
+    link.click();
+    const downloadUrl = url; setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
+    $('impact-evidence-status').textContent = `Evidence download requested: ${impactPlanLabel(report.reference)} → ${impactPlanLabel(report.variant)}. Contains the entire experiment and all ${report.summary.totalJobs} delivery rows for this pair.`;
+  } catch (error) {
+    if (url) URL.revokeObjectURL(url);
+    if (stillCurrent()) $('impact-evidence-status').textContent = `Evidence could not be prepared. ${formatInputError(error)} No download was requested.`;
+  } finally {
+    if (stillCurrent()) {
+      context.evidenceRequest = null;
+      button.setAttribute('aria-busy', 'false');
+    }
+  }
+}
 $('impact-download-csv').addEventListener('click', downloadImpactCsv);
+$('impact-download-evidence').addEventListener('click', downloadImpactEvidence);
 $('impact-button').addEventListener('click', () => inspectDeliveries());
 $('impact-reference').addEventListener('change', () => updateImpactSelection($('impact-reference').value || null));
 $('impact-variant').addEventListener('change', () => { if (impactIsCurrent() && $('impact-dialog').open) selectVariant($('impact-variant').value); });

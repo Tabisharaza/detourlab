@@ -1,6 +1,11 @@
 import { copyCompletedResults } from './report-results.js';
 import { projectJobOutcomes } from './job-impact.js';
-import { projectVariantComparison } from './variant-comparison.js';
+import { canonicalExperiment, parseExperiment } from './experiment.js';
+import { FILE_INPUT_MAX_BYTES } from './file-input.js';
+import {
+  COMPARISON_EVIDENCE_FORMAT, COMPARISON_EVIDENCE_VERSION, createVariantComparisonReport,
+  projectVariantComparison, renderComparisonEvidence, renderVariantComparisonJson,
+} from './variant-comparison.js';
 
 export const IMPACT_PAGE_SIZE = 20;
 const FILTERS = ['changed', 'status', 'timing', 'all'];
@@ -28,6 +33,25 @@ export function createBrowserImpact(experiment, completedResults, variantId, ref
     ...comparison,
     sameStatusArrivalChanges: comparison.jobs.filter(job => !job.statusChanged && job.baseline.arrivalS !== job.variant.arrivalS).length,
   };
+}
+
+/** Serialize a named inspector snapshot; verify independently with the CLI. */
+export async function createBrowserComparisonEvidence(input, impact) {
+  if (!impact.reference) throw new Error('Choose two saved plans to export comparison evidence.');
+  if (!globalThis.crypto?.subtle) throw new Error('Comparison evidence requires Web Crypto in a secure browser context.');
+  const canonical = canonicalExperiment(input);
+  const bytes = new TextEncoder().encode(canonical);
+  if (bytes.byteLength > FILE_INPUT_MAX_BYTES) throw new Error('Canonical experiment must be at most 2 MiB.');
+  const experiment = parseExperiment(canonical);
+  const report = structuredClone(createVariantComparisonReport(experiment.id, '',
+    { ...impact.reference, metrics: impact.referenceMetrics },
+    { ...impact.variant, metrics: impact.variantMetrics }, impact));
+  const digest = await globalThis.crypto.subtle.digest('SHA-256', bytes);
+  report.experimentSha256 = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+  return renderComparisonEvidence({
+    format: COMPARISON_EVIDENCE_FORMAT, version: COMPARISON_EVIDENCE_VERSION,
+    experiment, report: JSON.parse(renderVariantComparisonJson(report)),
+  });
 }
 
 /**

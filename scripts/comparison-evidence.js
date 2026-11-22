@@ -3,10 +3,8 @@ import { canonicalExperiment, parseExperiment } from '../src/experiment.js';
 import { FILE_INPUT_MAX_BYTES } from '../src/file-input.js';
 import { compareVariants, renderVariantComparisonJson } from './variant-comparison.js';
 
-export const EVIDENCE_LIMIT = 8 * 1024 * 1024;
-export const EVIDENCE_LIMIT_MESSAGE = 'Comparison evidence must be at most 8 MiB.';
-const format = 'detourlab-comparison-evidence';
-const version = 1;
+import { COMPARISON_EVIDENCE_FORMAT, COMPARISON_EVIDENCE_VERSION, EVIDENCE_LIMIT, EVIDENCE_LIMIT_MESSAGE } from '../src/variant-comparison.js';
+export { EVIDENCE_LIMIT, EVIDENCE_LIMIT_MESSAGE, renderComparisonEvidence } from '../src/variant-comparison.js';
 
 export function createComparisonEvidence(input, reference, candidate) {
   const canonical = canonicalExperiment(input);
@@ -14,14 +12,7 @@ export function createComparisonEvidence(input, reference, candidate) {
   const experiment = parseExperiment(canonical);
   const report = compareVariants(experiment, reference, candidate);
   // Compare the exact JSON representation, including normalized numeric values.
-  return { format, version, experiment, report: JSON.parse(renderVariantComparisonJson(report)) };
-}
-
-export function renderComparisonEvidence(evidence) {
-  // Compact JSON keeps both complete inputs and outputs within the transport bound.
-  const output = JSON.stringify(evidence) + '\n';
-  if (Buffer.byteLength(output) > EVIDENCE_LIMIT) throw new Error(EVIDENCE_LIMIT_MESSAGE);
-  return output;
+  return { format: COMPARISON_EVIDENCE_FORMAT, version: COMPARISON_EVIDENCE_VERSION, experiment, report: JSON.parse(renderVariantComparisonJson(report)) };
 }
 
 /** Recompute the full comparison. Integrity, not authenticity or safety approval. */
@@ -33,7 +24,7 @@ export function verifyComparisonEvidence(bytes) {
   } catch {
     throw new Error('Evidence must be a valid UTF-8 JSON document.');
   }
-  if (!parsed || parsed.format !== format || parsed.version !== version) throw new Error('Unsupported comparison evidence format or version.');
+  if (!parsed || parsed.format !== COMPARISON_EVIDENCE_FORMAT || parsed.version !== COMPARISON_EVIDENCE_VERSION) throw new Error('Unsupported comparison evidence format or version.');
   // Apply the original input bound before model validation or simulation.
   const embedded = JSON.stringify(parsed.experiment);
   if (!embedded || Buffer.byteLength(embedded) > FILE_INPUT_MAX_BYTES) throw new Error('Embedded experiment is missing or exceeds 2 MiB.');

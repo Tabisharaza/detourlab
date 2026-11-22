@@ -7,7 +7,7 @@ import * as scenarioSchema from '../../src/scenario.js';
 import * as experimentSchema from '../../src/experiment.js';
 import * as fileInput from '../../src/file-input.js';
 import { createBrowserReview } from '../../src/browser-review.js';
-import { createBrowserImpact, pageDeliveryImpact } from '../../src/browser-impact.js';
+import { createBrowserComparisonEvidence, createBrowserImpact, pageDeliveryImpact } from '../../src/browser-impact.js';
 import { createCutoffExperiment, normalizeCutoffTimes } from '../../src/cutoff-experiment.js';
 import { summarizeCutoffResults } from '../../src/cutoff-comparison.js';
 import { normalizePolicy } from '../../src/experiment-report.js';
@@ -15,7 +15,7 @@ import { createTutorialExperiment } from '../../src/tutorial.js';
 
 // Execute only checked-in app source with DOM/Worker stand-ins. This covers
 // handler state and result rendering, never browser layout, file pickers or QA.
-export function application({ workerConstructionError = () => null, mapClass = null, now = () => performance.now(), deferDialogClose = false, reviewBuilder = createBrowserReview, impactBuilder = createBrowserImpact, impactCsvBuilder = renderJobImpactCsv, replayEventsBuilder = replayEvents.createReplayEvents } = {}) {
+export function application({ workerConstructionError = () => null, mapClass = null, now = () => performance.now(), deferDialogClose = false, reviewBuilder = createBrowserReview, impactBuilder = createBrowserImpact, impactEvidenceBuilder = createBrowserComparisonEvidence, impactCsvBuilder = renderJobImpactCsv, replayEventsBuilder = replayEvents.createReplayEvents } = {}) {
   const created = [];
   const markup = readFileSync(new URL('../../index.html', import.meta.url), 'utf8');
   const closeEvents = [];
@@ -172,7 +172,7 @@ export function application({ workerConstructionError = () => null, mapClass = n
   const windowListeners = new Map();
   const window = { addEventListener(name, handler) { if (!windowListeners.has(name)) windowListeners.set(name, []); windowListeners.get(name).push(handler); } };
   const environment = {
-    ...experimentHistory, ...scenarioSchema, ...experimentSchema, ...fileInput, ...replayBookmark, ...replayEvents, createReplayEvents: replayEventsBuilder, createCutoffExperiment, normalizeCutoffTimes, summarizeCutoffResults, normalizePolicy, createBrowserReview: reviewBuilder, createBrowserImpact: impactBuilder, renderJobImpactCsv: impactCsvBuilder, pageDeliveryImpact, createTutorialExperiment, document, getComputedStyle: computedStyle, NetworkMap: mapClass ? class extends mapClass {
+    ...experimentHistory, ...scenarioSchema, ...experimentSchema, ...fileInput, ...replayBookmark, ...replayEvents, createReplayEvents: replayEventsBuilder, createCutoffExperiment, normalizeCutoffTimes, summarizeCutoffResults, normalizePolicy, createBrowserReview: reviewBuilder, createBrowserImpact: impactBuilder, createBrowserComparisonEvidence: impactEvidenceBuilder, renderJobImpactCsv: impactCsvBuilder, pageDeliveryImpact, createTutorialExperiment, document, getComputedStyle: computedStyle, NetworkMap: mapClass ? class extends mapClass {
       constructor(...args) { super(...args); maps.push(this); }
     } : NetworkMap, Worker: FakeWorker,
     URL, Blob, TextEncoder, TextDecoder, performance: { now }, structuredClone,

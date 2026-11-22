@@ -16,7 +16,7 @@ import { parseBrowserCheckArguments, finishBrowserEvidence, removeOwnedBrowserDi
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const hash = data => createHash('sha256').update(data).digest('hex');
-export const usage = `Optional local Chromium delivery-impact CSV checks
+export const usage = `Optional local Chromium delivery-impact CSV and comparison evidence checks
 Usage: node tools/impact-csv-check/run.js --browser /absolute/path/to/chromium --out NEW_DIRECTORY
 Fresh local profile, loopback source, synthetic inputs only. No installs or user profile.
 Native Workers and actual completed downloads compared with independent CLI processes.
@@ -115,7 +115,7 @@ export async function runImpactCsvCheck({ executable, output }) {
       await until(`window.__csvCheck.requests.length > ${previous}`, 'import Worker request'); await ready(); await frames();
       await click('impact-button'); await until("document.getElementById('impact-dialog').open", 'impact dialog');
     };
-    const download = async (label, trigger = () => click('impact-download-csv'), filename = 'detourlab-delivery-impact.csv') => {
+    const download = async (label, trigger = () => click('impact-download-csv'), filename = 'detourlab-delivery-impact.csv', mime = 'text/csv;charset=utf-8', statusId = 'impact-export-status') => {
       let started, done = false, failure;
       const before = await workers();
       const offStart = browser.on('Browser.downloadWillBegin', e => { assert.equal(started, undefined, 'one activation creates one download'); started = e; });
@@ -129,8 +129,8 @@ export async function runImpactCsvCheck({ executable, output }) {
         assert.match(started.guid, /^[a-zA-Z0-9-]+$/u);
         const bytes = await readFile(path.join(downloads, started.guid));
         assert.deepEqual(await workers(), before, 'export must not create or request a Worker');
-        assert.equal(await evaluate('window.__csvCheck.blobs.at(-1).type'), 'text/csv;charset=utf-8');
-        assert.ok(await evaluate("document.getElementById('impact-export-status').textContent.length > 0"));
+        assert.equal(await evaluate('window.__csvCheck.blobs.at(-1).type'), mime);
+        assert.ok(await evaluate(`document.getElementById(${JSON.stringify(statusId)}).textContent.length > 0`));
         evidence.downloads.push({ label, file: `downloads/${started.guid}`, suggestedFilename: started.suggestedFilename, sha256: hash(bytes), bytes: bytes.length, completed: true });
         return bytes;
       } catch (error) {
@@ -170,6 +170,24 @@ export async function runImpactCsvCheck({ executable, output }) {
       assert.equal(await evaluate('window.__csvCheck.trusted.at(-1)'), true);
       check(label, { rowCount: report.jobs.length, referenceId: reference, candidateId: candidate, cliJsonSha256: hash(result.stdout) });
     };
+    const verifyEvidence = async (file, reference, candidate, label) => {
+      const review = (...args) => spawnSync(process.execPath, ['scripts/review-comparison.js', ...args],
+        { cwd: root, maxBuffer: 8 * 1024 * 1024 });
+      const expected = review('create', file, reference, candidate);
+      assert.equal(expected.status, 0, String(expected.stderr));
+      const bytes = await download(label, async () => {
+        await evaluate("document.getElementById('impact-download-evidence').focus()");
+        for (const event of nativeKeySequence('Enter')) await send('Input.dispatchKeyEvent', event);
+      }, 'detourlab-comparison-evidence.json', 'application/json;charset=utf-8', 'impact-evidence-status');
+      const inspection = evidence.downloads.at(-1);
+      const verified = review('verify', path.join(output, inspection.file));
+      assert.equal(verified.status, 0, String(verified.stderr));
+      assert.ok(verified.stdout.toString().startsWith(`Verified ${reference} → ${candidate}:`));
+      assert.deepEqual(bytes, expected.stdout, 'browser evidence matches separately recomputed Node evidence, byte-for-byte');
+      const packet = JSON.parse(bytes);
+      check(label, { rowCount: packet.report.jobs.length, variantCount: packet.experiment.variants.length,
+        referenceId: reference, candidateId: candidate, cliSha256: hash(expected.stdout) });
+    };
     const capture = async (name, viewport) => {
       await frames();
       const geometry = await evaluate(`(() => { const rect=id=>{const r=document.getElementById(id).getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom}};return {button:rect('impact-download-csv'),status:rect('impact-export-status'),reference:rect('impact-reference'),candidate:rect('impact-variant'),dialog:rect('impact-dialog'),viewport:{width:innerWidth,height:innerHeight},overflow:document.documentElement.scrollWidth>innerWidth};})()`);
@@ -196,6 +214,9 @@ export async function runImpactCsvCheck({ executable, output }) {
     assert.deepEqual(await verify(meridian, 'market-05', 'Repeated download is byte-identical'), full);
     for (const id of ['all-bridges-05', 'clear-roads', 'market-10']) { await change('impact-variant', id); await verify(meridian, id, `Variant switch exports ${id}`); }
     const beforePair = await workers();
+    assert.equal(await evaluate("document.getElementById('impact-download-evidence').disabled"), true);
+    assert.match(await evaluate("document.getElementById('impact-evidence-help').textContent"), /Unlike CSV.*full experiment.*every saved plan/);
+
     // Verify the native reference control is in the modal's keyboard path
     // before setting a named reference through a bounded DOM change.
     await evaluate("document.getElementById('impact-download-csv').focus()");
@@ -205,6 +226,8 @@ export async function runImpactCsvCheck({ executable, output }) {
     assert.match(await evaluate("document.getElementById('impact-status').textContent"), /page 2 of/);
     assert.match(await evaluate("document.getElementById('impact-summary').textContent"), /46 earlier, 81 unchanged, 65 later, 0 not comparable/);
     await verifyNamed(meridian, 'market-05', 'market-10', 'Named reference is keyboard reachable and exports all 192 exact pair rows from page two');
+    await verifyEvidence(meridian, 'market-05', 'market-10', 'Named browser JSON contains all plans and 192 results despite page two and verifies offline');
+
     await until("document.getElementById('toast').hidden", 'transient toast clears without changing the comparison');
     await capture('impact-csv-desktop.jpg', desktop); await send('Emulation.setDeviceMetricsOverride', narrow); await capture('impact-csv-narrow.jpg', narrow); await send('Emulation.setDeviceMetricsOverride', desktop);
     await change('impact-variant', 'market-05');
@@ -246,6 +269,8 @@ export async function runImpactCsvCheck({ executable, output }) {
     await change('impact-reference', 'close-at-10');
     assert.match(await evaluate("document.getElementById('impact-summary').textContent"), /1 not comparable/);
     await verifyNamed(tinyFile, 'close-at-10', 'unreachable', 'Named comparison preserves label quoting and null unreachable timings in downloaded file');
+    await verifyEvidence(tinyFile, 'close-at-10', 'unreachable', 'Named evidence retains literal labels and unreachable timing, independently verified');
+
     assert.equal(await evaluate('document.querySelectorAll("img[onerror]").length'), 0); await click('impact-close');
     tiny.baseScenario.jobs = []; const empty = await fixture('zero-jobs.json', tiny); await load(empty); await change('impact-variant', 'close-at-10');
     await verify(empty, 'close-at-10', 'Zero-job experiment exports header only');
