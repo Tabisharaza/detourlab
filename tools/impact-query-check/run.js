@@ -204,6 +204,29 @@ export async function runImpactQueryCheck({ executable, output }) {
     assert.equal(await evaluate("document.getElementById('impact-search').value"),'');
     assert.equal(await evaluate("document.getElementById('impact-sort').value"),'input');
     assert.equal(await evaluate("document.getElementById('impact-filter').value"),'changed'); check('Reopen restores explicit default query, filter and order');
+    await change('impact-variant', 'market-10');
+    await change('impact-reference', 'market-05');
+    await change('impact-filter', 'timing');
+    await evaluate("document.getElementById('impact-filter').focus()");
+    for (const type of ['keyDown', 'keyUp']) {
+      await send('Input.dispatchKeyEvent', { type, key: 'ArrowDown', code: 'ArrowDown', windowsVirtualKeyCode: 40 });
+    }
+    await frames();
+    assert.equal(await evaluate("document.getElementById('impact-filter').value"), 'later');
+    assert.equal(await evaluate('document.activeElement.id'), 'impact-filter');
+    assert.match(await evaluate("document.getElementById('impact-status').textContent"), /65 matching of 192 total deliveries/);
+    await change('impact-sort', 'arrival-desc');
+    assert.equal((await visible())[0], 'job-11-4');
+    await query('job-11-4');
+    assert.deepEqual(await visible(), ['job-11-4']);
+    assert.match(await evaluate("document.getElementById('impact-rows').textContent"), /812 s → 896 s.*Change \+84 s/);
+    await evaluate("document.querySelector('button[data-job-id=job-11-4][data-impact-replay=baseline]').click()");
+    await click('impact-return');
+    assert.equal(await evaluate("document.getElementById('impact-filter').value"), 'later');
+    assert.equal(await evaluate('document.activeElement.dataset.jobId'), 'job-11-4');
+    assert.deepEqual(await visible(), ['job-11-4']);
+    assert.deepEqual(await workers(), beforeQueries);
+    check('Keyboard selects Later arrivals and named replay returns to the exact filtered row without a Worker rerun', { later: 65, jobId: 'job-11-4', arrivalRegressionS: 84 });
     await evaluate("document.getElementById('run-experiment').click();window.__csvCheck.queryDisabled=document.getElementById('impact-search').disabled&&document.getElementById('impact-sort').disabled");
     assert.equal(await evaluate('window.__csvCheck.queryDisabled'),true); await ready();
     check('Recomputation immediately disables stale query controls');

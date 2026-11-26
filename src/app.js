@@ -937,7 +937,7 @@ function renderImpact() {
   const page = pageDeliveryImpact(report, $('impact-filter').value, impactPage, { query: $('impact-search').value, sort: $('impact-sort').value });
   impactPage = page.pageIndex;
   $('impact-summary').textContent = `${summary.changedJobs} of ${summary.totalJobs} delivery outcomes changed; ${summary.unchangedJobs} unchanged. Status changes: ${summary.statusChangedJobs}. Arrival changes: ${summary.arrivalChangedJobs}. Same-status arrival changes: ${report.sameStatusArrivalChanges}.`;
-  const names = { changed: 'Changed outcomes', status: 'Status changes', timing: 'Same-status arrival changes', all: 'All deliveries' };
+  const names = { changed: 'Changed outcomes', status: 'Status changes', timing: 'Same-status arrival changes', later: 'Later arrivals', 'newly-unreachable': 'Newly unreachable deliveries', recovered: 'Recovered deliveries', all: 'All deliveries' };
   const replayNote = $('impact-replay-note');
   replayNote.hidden = !report.reference;
   if (report.reference) {

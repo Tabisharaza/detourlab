@@ -8,7 +8,15 @@ import {
 } from './variant-comparison.js';
 
 export const IMPACT_PAGE_SIZE = 20;
-const FILTERS = ['changed', 'status', 'timing', 'all'];
+const FILTERS = new Map([
+  ['changed', job => job.changed],
+  ['status', job => job.statusChanged],
+  ['timing', job => !job.statusChanged && job.baseline.arrivalS !== job.variant.arrivalS],
+  ['later', job => job.arrivalDeltaS !== null && job.arrivalDeltaS > 0],
+  ['newly-unreachable', job => job.baseline.status !== 'unreachable' && job.variant.status === 'unreachable'],
+  ['recovered', job => job.baseline.status === 'unreachable' && job.variant.status !== 'unreachable'],
+  ['all', () => true],
+]);
 const SORTS = ['input', 'arrival-desc'];
 
 /**
@@ -61,14 +69,14 @@ export async function createBrowserComparisonEvidence(input, impact) {
  * Case folding uses JavaScript toLowerCase, not locale-sensitive collation.
  */
 export function pageDeliveryImpact(impact, filter = 'changed', requestedPage = 0, options = {}) {
-  if (!FILTERS.includes(filter)) throw new Error('Choose a supported delivery filter.');
+  const matchesOutcome = FILTERS.get(filter);
+  if (!matchesOutcome) throw new Error('Choose a supported delivery filter.');
   if (!options || typeof options !== 'object' || Array.isArray(options)) throw new Error('Choose supported delivery search options.');
   const { query = '', sort = 'input' } = options;
   if (typeof query !== 'string') throw new Error('Enter delivery search text as a string.');
   if (!SORTS.includes(sort)) throw new Error('Choose a supported delivery order.');
   const normalizedQuery = query.trim().toLowerCase();
-  const filtered = impact.jobs.filter(job => filter === 'all' || (filter === 'changed' ? job.changed
-    : filter === 'status' ? job.statusChanged : !job.statusChanged && job.baseline.arrivalS !== job.variant.arrivalS));
+  const filtered = impact.jobs.filter(matchesOutcome);
   const matches = filtered.filter(job => !normalizedQuery || [job.id, job.vehicleId, job.nodeId]
     .some(id => id.toLowerCase().includes(normalizedQuery)));
   if (sort === 'arrival-desc') matches.sort((left, right) => {

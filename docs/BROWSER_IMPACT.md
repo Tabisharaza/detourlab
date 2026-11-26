@@ -88,7 +88,7 @@ This inspector is an outcome comparison. It does not infer per-delivery routes, 
 
 ## Bounded evidence and lifecycle
 
-At most **20 body rows** are rendered per page, up to the existing 2,000-job input limit. Every row remains reachable through pagination. Four filters operate over complete projected evidence. Search narrows the selected filter; optional arrival-delay ordering leaves incomparable deltas last. Changing filter, query, ordering or variant returns to the first page. Repeated activation of an already open inspector preserves the current page rather than rebuilding it.
+At most **20 body rows** are rendered per page, up to the existing 2,000-job input limit. Every row remains reachable through pagination. Filters operate over complete projected evidence. Search narrows the selected filter; optional arrival-delay ordering leaves incomparable deltas last. Changing filter, query, ordering or variant returns to the first page. Repeated activation of an already open inspector preserves the current page rather than rebuilding it.
 
 The app holds references to the completed input and result set. A committed edit, successful import, reset, lesson transition, cancellation or rerun removes the old rows immediately and disables the inspection controls. Completion does not silently refill an already invalidated dialog; close and reopen it to inspect the new run. Stale Worker messages cannot reinstate old rows. A rejected import or mutation leaves the previous valid run intact.
 
@@ -111,6 +111,24 @@ node scripts/verify-dist.js
 Focused tests cover exact CLI/report parity for all tiny and Meridian variants; 125/118/seven distinct counts; every filtered page and all 2,000 supported jobs; unreachable nulls; fractional engine tolerance; no simulation or mutation; stale/edit/import/cancel/reset/lesson/repeated-run flows; forced disabled dispatch; safe imported labels; keyboard focus, Escape and deferred close notifications; and bounded errors.
 
 Before claiming a native-browser release, separately exercise actual keyboard traversal and focus visibility, horizontal table scrolling, last/first page transitions, Escape/reopen, selection and filter announcements with assistive technology, 200% zoom, narrow/mobile layouts, reduced motion and other browsers. Run native import/recompute/cancel paths too. The original source milestone had no native evidence; later bounded Chromium observations and screenshots are linked above. Those do not close the remaining checks.
+
+## Isolate the outcome you need to investigate
+
+Use **Later arrivals** to isolate comparable positive arrival delays, whether or
+not the delivery became late. Choose **Largest arrival delay** to see the
+largest changes first. For the Meridian 5-minute → 10-minute pair, there are
+65 matching deliveries; searching for `job-11-4` shows one 84-second delay.
+
+**Newly unreachable deliveries** shows stops reached by the reference but not
+the candidate. **Recovered deliveries** shows the opposite transition. A
+stop reached by neither plan appears in neither filter. These separate views
+can expose changed coverage even when the two plans complete the same number
+of deliveries. All three filters work with a saved reference or the implicit
+clear-road baseline.
+
+Search and pagination are local display controls. Replay and Return preserve
+the filter without restarting the simulation. CSV and named comparison
+evidence JSON still include every delivery, even when no filtered rows appear.
 
 ## Complete CSV download
 

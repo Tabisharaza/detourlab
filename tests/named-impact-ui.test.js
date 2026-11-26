@@ -1,9 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { resolveObjectURL } from 'node:buffer';
 import { readFileSync } from 'node:fs';
 import { application } from './helpers/application.js';
 import { createBrowserImpact } from '../src/browser-impact.js';
 import { simulateExperiment } from '../src/experiment.js';
+import { verifyComparisonEvidence } from '../scripts/comparison-evidence.js';
 import { renderJobImpactCsv } from '../src/job-impact-csv.js';
 import { parseCsv } from '../tools/impact-csv-check/run.js';
 
@@ -187,4 +189,76 @@ test('zero and fractional named arrivals use ledger times rather than the rounde
   await app.change('variant-select', 'close-at-11'); await app.element('impact-button').click();
   await app.change('impact-reference', 'close-at-10'); await app.change('impact-filter', 'all');
   await actions(app)[1].click(); assert.equal(app.state.time, 0.375); assert.equal(app.maps[1].state.time, 0.375);
+});
+
+test('Later arrivals separates the 65 regressions from earlier and unchanged rows, with explicit replay and exact return', async () => {
+  const app = await ready(fixture('meridian-experiment.json'), 'market-10');
+  await app.change('impact-reference', 'market-05');
+  const filter = app.element('impact-filter');
+  filter.focus();
+  await app.change('impact-filter', 'later');
+  assert.equal(app.document.activeElement, filter);
+  assert.match(app.element('impact-status').textContent, /65 matching of 192 total deliveries/);
+  assert.match(app.element('impact-metrics').textContent, /late 118 → 106/);
+  await app.change('impact-sort', 'arrival-desc');
+  assert.equal(rowIds(app)[0], 'job-11-4');
+  await app.change('impact-search', 'JOB-11-4', 'input');
+  assert.deepEqual(rowIds(app), ['job-11-4']);
+  assert.match(app.element('impact-rows').textContent, /812 s → 896 s.*Change \+84 s/);
+  const reference = actions(app).find(button => button.dataset.impactReplay === 'baseline');
+  const workers = app.posted.length;
+  await reference.click();
+  assert.equal(app.state.time, 812);
+  await app.element('impact-return').click();
+  assert.equal(filter.value, 'later');
+  assert.equal(app.element('impact-search').value, 'JOB-11-4');
+  assert.equal(app.element('impact-sort').value, 'arrival-desc');
+  assert.equal(app.document.activeElement.dataset.jobId, 'job-11-4');
+  assert.equal(app.document.activeElement.dataset.impactReplay, 'baseline');
+  assert.equal(app.posted.length, workers);
+});
+
+test('Newly unreachable and Recovered distinguish net-zero coverage, omit both-unreachable rows, and leave both downloads complete', async () => {
+  const experiment = fixture();
+  const base = experiment.baseScenario;
+  const original = structuredClone(base);
+  for (const suffix of [2, 3]) {
+    base.nodes.push(...original.nodes.map(node => ({ ...node, id: node.id + suffix, y: node.y + 3 * suffix })));
+    base.edges.push(...original.edges.map(edge => ({ ...edge, id: edge.id + suffix, from: edge.from + suffix, to: edge.to + suffix })));
+    base.vehicles.push({ id: 'van-' + suffix, startNode: 'A' + suffix, startTimeS: 0 });
+    base.jobs.push({ ...original.jobs[0], id: 'job-' + suffix, vehicleId: 'van-' + suffix, nodeId: 'C' + suffix });
+  }
+  experiment.variants = [
+    { id: 'reference', name: 'Reach only the first network', closures: [{ id: 'blocked', atS: 0, edgeIds: ['bc2', 'bd2', 'bc3', 'bd3'] }] },
+    { id: 'candidate', name: 'Reach only the second network', closures: [{ id: 'blocked', atS: 0, edgeIds: ['bc', 'bd', 'bc3', 'bd3'] }] },
+  ];
+  const app = await ready(experiment, 'candidate');
+  await app.change('impact-reference', 'reference');
+  assert.match(app.element('impact-metrics').textContent, /completed 1 → 1 \(0\)/);
+  assert.match(app.element('impact-summary').textContent, /0 later, 3 not comparable/);
+  await app.change('impact-filter', 'later');
+  assert.deepEqual(rowIds(app), []);
+  await app.change('impact-filter', 'newly-unreachable');
+  assert.deepEqual(rowIds(app), ['job-1']);
+  assert.deepEqual(actions(app).map(button => button.dataset.impactReplay), ['baseline']);
+  await app.change('impact-filter', 'recovered');
+  assert.deepEqual(rowIds(app), ['job-2']);
+  assert.deepEqual(actions(app).map(button => button.dataset.impactReplay), ['variant']);
+  await app.element('impact-download-csv').click();
+  await app.element('impact-download-evidence').click();
+  const download = async name => {
+    const link = app.created.find(node => node.download === name);
+    assert.ok(link, name);
+    try { return await resolveObjectURL(link.href).text(); }
+    finally { URL.revokeObjectURL(link.href); }
+  };
+  const allIds = ['job-1', 'job-2', 'job-3'];
+  const csv = parseCsv(await download('detourlab-variant-comparison.csv'));
+  assert.deepEqual(csv.slice(1).map(row => row[csv[0].indexOf('jobId')]), allIds);
+  const report = verifyComparisonEvidence(Buffer.from(await download('detourlab-comparison-evidence.json')));
+  assert.deepEqual(report.jobs.map(job => job.id), allIds);
+  await app.change('impact-variant', 'reference');
+  assert.equal(app.element('impact-reference').value, 'candidate');
+  assert.equal(app.element('impact-filter').value, 'recovered');
+  assert.deepEqual(rowIds(app), ['job-1']);
 });
