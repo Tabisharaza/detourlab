@@ -126,6 +126,20 @@ can expose changed coverage even when the two plans complete the same number
 of deliveries. All three filters work with a saved reference or the implicit
 clear-road baseline.
 
+**Newly late deliveries** means on time in the reference and late in the
+candidate. **Back on time** means late in the reference and on time in the
+candidate. These counts exclude unreachable deliveries, which can otherwise
+make a plan's total late count look better even when it serves fewer stops.
+The summary reports both directions for the whole pair, not just visible rows.
+
+For Meridian, compare **Market Bridge at 05:00** with **10:00**: 12
+deliveries go back on time and none become newly late. Reverse the pair, select
+**Newly late deliveries**, and choose **Most overdue in candidate**. The first
+row is `job-05-5`, 121 seconds past its deadline. This order uses absolute
+candidate lateness, not the candidate-minus-reference arrival shift. On-time
+stops have zero lateness; unreachable stops have no value and sort last, not
+as zero. Neither order ranks overall severity.
+
 Search and pagination are local display controls. Replay and Return preserve
 the filter without restarting the simulation. CSV and named comparison
 evidence JSON still include every delivery, even when no filtered rows appear.

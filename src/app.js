@@ -937,7 +937,9 @@ function renderImpact() {
   const page = pageDeliveryImpact(report, $('impact-filter').value, impactPage, { query: $('impact-search').value, sort: $('impact-sort').value });
   impactPage = page.pageIndex;
   $('impact-summary').textContent = `${summary.changedJobs} of ${summary.totalJobs} delivery outcomes changed; ${summary.unchangedJobs} unchanged. Status changes: ${summary.statusChangedJobs}. Arrival changes: ${summary.arrivalChangedJobs}. Same-status arrival changes: ${report.sameStatusArrivalChanges}.`;
-  const names = { changed: 'Changed outcomes', status: 'Status changes', timing: 'Same-status arrival changes', later: 'Later arrivals', 'newly-unreachable': 'Newly unreachable deliveries', recovered: 'Recovered deliveries', all: 'All deliveries' };
+  const transitions = summary.transitions;
+  $('impact-summary').textContent += ` Deadline changes: ${transitions['on-time'].late} newly late, ${transitions.late['on-time']} back on time. Unreachable deliveries are counted separately.`;
+  const names = { changed: 'Changed outcomes', status: 'Status changes', timing: 'Same-status arrival changes', later: 'Later arrivals', 'newly-unreachable': 'Newly unreachable deliveries', recovered: 'Recovered deliveries', 'newly-late': 'Newly late deliveries', 'back-on-time': 'Back on time', all: 'All deliveries' };
   const replayNote = $('impact-replay-note');
   replayNote.hidden = !report.reference;
   if (report.reference) {
@@ -983,10 +985,12 @@ function renderImpact() {
   $('impact-table-region').hidden = !page.jobs.length;
   $('impact-previous').disabled = page.pageIndex === 0;
   $('impact-next').disabled = page.pageIndex + 1 >= page.pageCount;
-  const order = page.sort === 'arrival-desc' ? `Largest comparable arrival delay first (${report.reference ? 'candidate minus reference' : 'variant minus baseline'}); not comparable last. Ties keep input order. Not an overall severity ranking.` : 'Original input order, not severity ranking.';
+  const order = page.sort === 'arrival-desc' ? `Largest comparable arrival delay first (${report.reference ? 'candidate minus reference' : 'variant minus baseline'}); not comparable last. Ties keep input order. Not an overall severity ranking.` : page.sort === 'candidate-lateness-desc'
+    ? 'Largest candidate deadline miss first; unreachable last. Ties keep input order. Not an overall severity ranking.'
+    : 'Original input order, not severity ranking.';
   const searchCounts = page.query ? ` ${page.filteredJobs} satisfy the filter; ${page.filteredJobs - page.matchingJobs} excluded by search.` : '';
   const counts = `${page.matchingJobs} matching of ${page.totalJobs} total deliveries. ${page.totalJobs - page.matchingJobs} excluded by filter or search.${searchCounts} ${order}`;
-  const empty = !page.totalJobs ? 'This experiment has no deliveries.' : page.query ? 'No deliveries match this search and filter. Clear the search or choose All deliveries.' : `No ${names[page.filter].toLowerCase()}. Choose All deliveries to inspect unchanged outcomes too.`;
+  const empty = !page.totalJobs ? 'This experiment has no deliveries.' : page.query ? 'No deliveries match this search and filter. Clear the search or choose All deliveries.' : page.filter === 'back-on-time' ? 'No deliveries went from late to on time. Choose All deliveries to inspect other outcomes.' : `No ${names[page.filter].toLowerCase()}. Choose All deliveries to inspect unchanged outcomes too.`;
   $('impact-status').textContent = page.jobs.length ? `Showing ${page.from}–${page.to}; page ${page.pageIndex + 1} of ${page.pageCount}. ${counts}` : `${empty} ${counts}`;
   if (lostRowFocus) focusFirst([$('impact-search'), $('impact-filter'), $('impact-close')]);
   if ([ $('impact-previous'), $('impact-next') ].includes(active) && active.disabled || active === $('impact-table-region') && !page.jobs.length) focusFirst([$('impact-previous'), $('impact-next'), $('impact-filter'), $('impact-close')]);

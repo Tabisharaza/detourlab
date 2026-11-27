@@ -218,3 +218,21 @@ test('named comparison rejects a missing, malformed or identical reference witho
   }
   assert.doesNotThrow(() => createBrowserImpact(input, completed, 'close-at-10', null));
 });
+
+test('candidate lateness orders absolute deadline misses, with stable ties and missing values last', () => {
+  const delays = [null, 0, 1.75, 1.75, 110, null, 0];
+  const impact = freeze(searchImpact(delays.map((delayS, index) => ({
+    variant: { delayS }, arrivalDeltaS: 200 - index,
+  }))));
+  const { jobs } = pageDeliveryImpact(impact, 'all', 0, { sort: 'candidate-lateness-desc' });
+  assert.deepEqual(jobs.map(job => job.id), [4, 2, 3, 1, 6, 0, 5].map(index => `job-${index}`));
+});
+
+test('deadline filters distinguish exact crossings from late-to-unreachable and unreachable-to-on-time', () => {
+  const statuses = ['on-time', 'late', 'unreachable'];
+  const impact = freeze(searchImpact(statuses.flatMap(from => statuses.map(to => ({
+    baseline: { status: from }, variant: { status: to },
+  })))));
+  assert.deepEqual(pageDeliveryImpact(impact, 'newly-late').jobs.map(row => row.id), ['job-1']);
+  assert.deepEqual(pageDeliveryImpact(impact, 'back-on-time').jobs.map(row => row.id), ['job-3']);
+});

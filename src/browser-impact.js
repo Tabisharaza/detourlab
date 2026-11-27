@@ -15,9 +15,14 @@ const FILTERS = new Map([
   ['later', job => job.arrivalDeltaS !== null && job.arrivalDeltaS > 0],
   ['newly-unreachable', job => job.baseline.status !== 'unreachable' && job.variant.status === 'unreachable'],
   ['recovered', job => job.baseline.status === 'unreachable' && job.variant.status !== 'unreachable'],
+  ['newly-late', job => job.baseline.status === 'on-time' && job.variant.status === 'late'],
+  ['back-on-time', job => job.baseline.status === 'late' && job.variant.status === 'on-time'],
   ['all', () => true],
 ]);
-const SORTS = ['input', 'arrival-desc'];
+const sortValue = new Map([
+  ['arrival-desc', job => job.arrivalDeltaS],
+  ['candidate-lateness-desc', job => job.variant.delayS],
+]);
 
 /**
  * Inspect internal, completed Worker results for an already validated input.
@@ -64,8 +69,8 @@ export async function createBrowserComparisonEvidence(input, impact) {
 
 /**
  * Filter, literal ID search, then stable ordering before a bounded page.
- * Arrival order compares numeric deltas only: incomparable nulls come last,
- * including after negative changes. This is not an overall severity ranking.
+ * Numeric orders leave missing values last, even after zero or negative
+ * values. Stable ties keep input order. Neither order ranks overall severity.
  * Case folding uses JavaScript toLowerCase, not locale-sensitive collation.
  */
 export function pageDeliveryImpact(impact, filter = 'changed', requestedPage = 0, options = {}) {
@@ -74,15 +79,17 @@ export function pageDeliveryImpact(impact, filter = 'changed', requestedPage = 0
   if (!options || typeof options !== 'object' || Array.isArray(options)) throw new Error('Choose supported delivery search options.');
   const { query = '', sort = 'input' } = options;
   if (typeof query !== 'string') throw new Error('Enter delivery search text as a string.');
-  if (!SORTS.includes(sort)) throw new Error('Choose a supported delivery order.');
+  if (sort !== 'input' && !sortValue.has(sort)) throw new Error('Choose a supported delivery order.');
   const normalizedQuery = query.trim().toLowerCase();
   const filtered = impact.jobs.filter(matchesOutcome);
   const matches = filtered.filter(job => !normalizedQuery || [job.id, job.vehicleId, job.nodeId]
     .some(id => id.toLowerCase().includes(normalizedQuery)));
-  if (sort === 'arrival-desc') matches.sort((left, right) => {
-    if (left.arrivalDeltaS === null) return right.arrivalDeltaS === null ? 0 : 1;
-    if (right.arrivalDeltaS === null) return -1;
-    return right.arrivalDeltaS - left.arrivalDeltaS;
+  const value = sortValue.get(sort);
+  if (value) matches.sort((left, right) => {
+    const a = value(left), b = value(right);
+    if (a === null) return b === null ? 0 : 1;
+    if (b === null) return -1;
+    return b - a;
   });
   const pageCount = Math.ceil(matches.length / IMPACT_PAGE_SIZE);
   const pageIndex = Math.max(0, Math.min(Math.max(0, pageCount - 1), Number.isFinite(requestedPage) ? Math.floor(requestedPage) : 0));

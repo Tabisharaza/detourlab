@@ -262,3 +262,24 @@ test('Newly unreachable and Recovered distinguish net-zero coverage, omit both-u
   assert.equal(app.element('impact-filter').value, 'recovered');
   assert.deepEqual(rowIds(app), ['job-1']);
 });
+
+test('deadline triage separates deadline crossings from coverage changes and directional ranking', async () => {
+  const experiment = fixture('meridian-experiment.json');
+  const app = await ready(experiment, 'market-10');
+  await app.change('impact-reference', 'market-05');
+  assert.match(app.element('impact-summary').textContent, /0 newly late, 12 back on time/);
+  await app.change('impact-filter', 'back-on-time');
+  assert.equal(rowIds(app).length, 12);
+  await app.change('impact-variant', 'all-bridges-05');
+  assert.match(app.element('impact-summary').textContent, /0 newly late, 66 back on time/);
+  assert.match(app.element('impact-metrics').textContent, /completes fewer deliveries/);
+  await app.change('impact-variant', 'market-05');
+  await app.change('impact-reference', 'market-10');
+  assert.match(app.element('impact-summary').textContent, /12 newly late, 0 back on time/);
+  assert.match(app.element('impact-status').textContent, /No deliveries went from late to on time/);
+  await app.change('impact-filter', 'newly-late');
+  await app.change('impact-sort', 'candidate-lateness-desc');
+  assert.equal(rowIds(app)[0], 'job-05-5');
+  assert.equal(rowIds(app).length, 12);
+  assert.match(app.element('impact-status').textContent, /Largest candidate deadline miss first; unreachable last/);
+});
