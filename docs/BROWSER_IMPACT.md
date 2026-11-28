@@ -152,7 +152,7 @@ ordering. Choose **Download matching deliveries CSV** below the table to export
 selection cannot produce a file. For example, the Meridian
 5-minute → 10-minute pair exports 65 rows under **Later arrivals**, not just
 the 20 visible at once. For deadline review, select **Newly late deliveries**
-and order by **Largest candidate deadline miss**.
+and order by **Most overdue in candidate**.
 
 The file includes delivery, vehicle and destination IDs, plan names and
 timings, plus the filter, order, matching row count and full comparison count.
