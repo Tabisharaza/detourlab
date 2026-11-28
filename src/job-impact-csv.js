@@ -54,6 +54,27 @@ const quote = value => /[",\r\n]/u.test(value) ? `"${value.replace(/"/gu, '""')}
  * Validate and bound the entire string before callers can write/download it.
  */
 export function renderJobImpactCsv(impact, { experimentId } = {}) {
+  return renderRows(impact, experimentId);
+}
+
+/** Distinct display-only export. Context describes the subset without exposing the input query. */
+export function renderJobImpactCohortCsv(impact, { experimentId, selection } = {}) {
+  requireValue(impact && Array.isArray(impact.jobs) && impact.jobs.length <= JOB_IMPACT_CSV_LIMITS.maxJobs,
+    'a bounded complete impact report is required.');
+  const jobs = selection?.jobs;
+  requireValue(Array.isArray(jobs) && jobs.length > 0 && jobs.length <= impact.jobs.length,
+    'a nonempty matching delivery cohort is required.');
+  const members = new Set(impact.jobs);
+  requireValue(jobs.every(job => members.has(job)), 'cohort rows must belong to the completed comparison.');
+  requireValue(typeof selection.query === 'string', 'cohort search must be a string.');
+  const context = [
+    'matching-deliveries', text(selection.filter), text(selection.sort), String(Boolean(selection.query)),
+    String(jobs.length), String(impact.jobs.length),
+  ];
+  return renderRows(impact, experimentId, jobs, context);
+}
+
+function renderRows(impact, experimentId, jobs = impact?.jobs, cohortContext = []) {
   requireValue(impact && typeof impact === 'object', 'a complete impact report is required.');
   const named = Object.hasOwn(impact, 'reference');
   const candidate = [text(impact.variant?.id), text(impact.variant?.name)];
@@ -63,10 +84,11 @@ export function renderJobImpactCsv(impact, { experimentId } = {}) {
   requireValue(Array.isArray(impact.jobs) && impact.jobs.length <= JOB_IMPACT_CSV_LIMITS.maxJobs, 'jobs must be an array of at most 2000 rows.');
   requireValue(Number.isInteger(impact.summary?.totalJobs) && impact.summary.totalJobs === impact.jobs.length, 'summary totalJobs must equal the complete row count.');
   const columns = named ? NAMED_IMPACT_CSV_COLUMNS : JOB_IMPACT_CSV_COLUMNS;
-  const lines = [columns.join(',') + '\r\n'];
+  const cohortColumns = ['exportScope', 'outcomeFilter', 'rowOrder', 'searchApplied', 'matchingRows', 'totalComparisonRows'];
+  const lines = [[...columns, ...(cohortContext.length ? cohortColumns : [])].join(',') + '\r\n'];
   let bytes = encoder.encode(lines[0]).byteLength;
   const ids = new Set();
-  for (const job of impact.jobs) {
+  for (const job of jobs) {
     requireValue(job && typeof job === 'object', 'each job must be an object.');
     const labels = [text(job.id), text(job.vehicleId), text(job.nodeId)];
     requireValue(!ids.has(job.id), 'duplicate job ID.');
@@ -82,7 +104,7 @@ export function renderJobImpactCsv(impact, { experimentId } = {}) {
       requireValue(job[delta] === expected, 'deltas must match outcomes.');
     }
     const row = [...identity, ...labels, number(job.dueTimeS), ...baseline, ...variant,
-      number(job.arrivalDeltaS, true), number(job.completedDeltaS, true), number(job.delayDeltaS, true), String(job.changed), String(job.statusChanged)];
+      number(job.arrivalDeltaS, true), number(job.completedDeltaS, true), number(job.delayDeltaS, true), String(job.changed), String(job.statusChanged), ...cohortContext];
     const line = row.map(quote).join(',') + '\r\n';
     bytes += encoder.encode(line).byteLength;
     requireValue(bytes <= JOB_IMPACT_CSV_LIMITS.maxBytes, 'output exceeds the 4 MiB UTF-8 limit.');

@@ -144,6 +144,28 @@ Search and pagination are local display controls. Replay and Return preserve
 the filter without restarting the simulation. CSV and named comparison
 evidence JSON still include every delivery, even when no filtered rows appear.
 
+## Export a matching review cohort
+
+In **Inspect deliveries**, choose an outcome filter, optional ID search and an
+ordering. Choose **Download matching deliveries CSV** below the table to export
+**every matching row**, from all pages in the displayed order. An empty
+selection cannot produce a file. For example, the Meridian
+5-minute → 10-minute pair exports 65 rows under **Later arrivals**, not just
+the 20 visible at once. For deadline review, select **Newly late deliveries**
+and order by **Largest candidate deadline miss**.
+
+The file includes delivery, vehicle and destination IDs, plan names and
+timings, plus the filter, order, matching row count and full comparison count.
+It records whether a search was applied, but not the typed search text. It
+does not include experiment inputs, schedules or other plans. This is a local
+download, not a redaction tool or independently verifiable evidence. Share it only
+with people who should see those IDs, names and outcomes.
+
+**Download all deliveries CSV** and **Download comparison evidence JSON**
+are unchanged. They still contain the complete comparison, even when the
+screen is filtered. Use evidence JSON if a reviewer should independently
+recompute results offline and is allowed to see the full experiment.
+
 ## Complete CSV download
 
 The source inspector now offers **Download all deliveries CSV**. It exports the

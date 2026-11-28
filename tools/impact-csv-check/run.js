@@ -227,6 +227,28 @@ export async function runImpactCsvCheck({ executable, output }) {
     assert.match(await evaluate("document.getElementById('impact-summary').textContent"), /46 earlier, 81 unchanged, 65 later, 0 not comparable/);
     await verifyNamed(meridian, 'market-05', 'market-10', 'Named reference is keyboard reachable and exports all 192 exact pair rows from page two');
     await verifyEvidence(meridian, 'market-05', 'market-10', 'Named browser JSON contains all plans and 192 results despite page two and verifies offline');
+    await change('impact-filter', 'later');
+    await change('impact-sort', 'candidate-lateness-desc');
+    await click('impact-next');
+    assert.match(await evaluate("document.getElementById('impact-status').textContent"), /page 2 of 4/);
+    const cohort = await download('Named matching CSV spans all four later-arrival pages', async () => {
+      await evaluate("document.getElementById('impact-download-cohort').focus()");
+      for (const event of nativeKeySequence('Enter')) await send('Input.dispatchKeyEvent', event);
+    }, 'detourlab-matching-deliveries.csv', 'text/csv;charset=utf-8', 'impact-cohort-status');
+    const comparison = spawnSync(process.execPath, ['scripts/compare-variants.js', meridian,
+      '--reference', 'market-05', '--candidate', 'market-10', '--json'], { cwd: root });
+    assert.equal(comparison.status, 0, String(comparison.stderr));
+    const later = JSON.parse(comparison.stdout).jobs.filter(job => job.arrivalDeltaS > 0)
+      .sort((a, b) => b.candidate.latenessS - a.candidate.latenessS);
+    const [cohortHeader, ...cohortRows] = parseCsv(cohort.toString('utf8'));
+    assert.equal(later.length, 65);
+    assert.deepEqual(cohortRows.map(row => row[cohortHeader.indexOf('jobId')]), later.map(job => job.id));
+    assert.ok(cohortRows.every(row => row.slice(-6).join(',') === 'matching-deliveries,later,candidate-lateness-desc,false,65,192'));
+    check('Native keyboard cohort download preserves all 65 matches and independent CLI rank, not just the visible page', { rows: 65, total: 192 });
+    await change('impact-filter', 'all');
+    await change('impact-sort', 'input');
+    await click('impact-next');
+
 
     await until("document.getElementById('toast').hidden", 'transient toast clears without changing the comparison');
     await capture('impact-csv-desktop.jpg', desktop); await send('Emulation.setDeviceMetricsOverride', narrow); await capture('impact-csv-narrow.jpg', narrow); await send('Emulation.setDeviceMetricsOverride', desktop);

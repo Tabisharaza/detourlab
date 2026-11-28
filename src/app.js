@@ -4,8 +4,8 @@ import { createReplayEvents, pageReplayEvents, adjacentReplayEvent } from './rep
 import { createDemoScenario, createPresets, validateScenario, LIMITS } from './scenario.js';
 import { experimentFromScenario, validateExperiment, parseExperiment, scenarioForVariant, exportExperiment, EXPERIMENT_LIMITS } from './experiment.js';
 import { createBrowserReview } from './browser-review.js';
-import { createBrowserComparisonEvidence, createBrowserImpact, pageDeliveryImpact } from './browser-impact.js';
-import { renderJobImpactCsv } from './job-impact-csv.js';
+import { createBrowserComparisonEvidence, createBrowserImpact, pageDeliveryImpact, selectDeliveryImpact } from './browser-impact.js';
+import { renderJobImpactCohortCsv, renderJobImpactCsv } from './job-impact-csv.js';
 import { createCutoffExperiment, normalizeCutoffTimes } from './cutoff-experiment.js';
 import { summarizeCutoffResults } from './cutoff-comparison.js';
 import { normalizePolicy } from './experiment-report.js';
@@ -821,11 +821,12 @@ function invalidateImpact() {
   inspectedImpact = null; impactPage = 0; impactRenderRevision += 1;
   // Move focus before disabling a control or hiding its scroll region.
   if ($('impact-dialog').open && $('impact-dialog').contains(document.activeElement) && document.activeElement !== $('impact-close')) focusFirst([$('impact-close')]);
-  for (const id of ['impact-download-csv', 'impact-download-evidence', 'impact-reference', 'impact-variant', 'impact-filter', 'impact-search', 'impact-sort', 'impact-previous', 'impact-next']) $(id).disabled = true;
+  for (const id of ['impact-download-csv', 'impact-download-cohort', 'impact-download-evidence', 'impact-reference', 'impact-variant', 'impact-filter', 'impact-search', 'impact-sort', 'impact-previous', 'impact-next']) $(id).disabled = true;
   $('impact-rows').replaceChildren(); $('impact-table-region').hidden = true;
   $('impact-summary').textContent = ''; $('impact-metrics').textContent = '';
   $('impact-replay-note').hidden = true; $('impact-replay-note').textContent = '';
   $('impact-export-status').textContent = 'CSV unavailable until a completed comparison is open.';
+  $('impact-cohort-status').textContent = '';
   $('impact-download-evidence').setAttribute('aria-busy', 'false');
   $('impact-evidence-status').textContent = 'Evidence unavailable until a completed comparison is open.';
   $('impact-status').textContent = 'Results changed. Close this window and finish a new run before inspecting deliveries.';
@@ -936,6 +937,12 @@ function renderImpact() {
   $('impact-export-status').textContent = `CSV includes all ${summary.totalJobs} deliveries for ${exportSubject}, regardless of the filter, search, order or page. Missing timings are blank, not zero. Import identifier and name columns as text in your spreadsheet.`;
   const page = pageDeliveryImpact(report, $('impact-filter').value, impactPage, { query: $('impact-search').value, sort: $('impact-sort').value });
   impactPage = page.pageIndex;
+  const cohortButton = $('impact-download-cohort');
+  if (!page.matchingJobs && document.activeElement === cohortButton) focusFirst([$('impact-search'), $('impact-filter'), $('impact-close')]);
+  cohortButton.disabled = !page.matchingJobs;
+  $('impact-cohort-status').textContent = page.matchingJobs
+    ? `${page.matchingJobs} of ${page.totalJobs} deliveries match. CSV uses the displayed order across all pages.`
+    : 'No matching deliveries to download.';
   $('impact-summary').textContent = `${summary.changedJobs} of ${summary.totalJobs} delivery outcomes changed; ${summary.unchangedJobs} unchanged. Status changes: ${summary.statusChangedJobs}. Arrival changes: ${summary.arrivalChangedJobs}. Same-status arrival changes: ${report.sameStatusArrivalChanges}.`;
   const transitions = summary.transitions;
   $('impact-summary').textContent += ` Deadline changes: ${transitions['on-time'].late} newly late, ${transitions.late['on-time']} back on time. Unreachable deliveries are counted separately.`;
@@ -1026,6 +1033,25 @@ function downloadImpactCsv() {
     $('impact-export-status').textContent = `CSV could not be prepared. ${formatInputError(error)} No complete download was requested; try again or export the experiment for the CLI.`;
   }
 }
+function downloadImpactCohort() {
+  if (!$('impact-dialog').open || !impactIsCurrent()) return;
+  const report = inspectedImpact.report;
+  if (report.variant.id !== state.selectedVariantId) return;
+  let url;
+  try {
+    const selection = selectDeliveryImpact(report, $('impact-filter').value,
+      { query: $('impact-search').value, sort: $('impact-sort').value });
+    if (!selection.matchingJobs) return;
+    const csv = renderJobImpactCohortCsv(report, { experimentId: state.experiment.id, selection });
+    url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    const link = node('a'); link.href = url; link.download = 'detourlab-matching-deliveries.csv'; link.click();
+    const downloadUrl = url; setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
+    $('impact-cohort-status').textContent = `Matching CSV download requested: ${selection.matchingJobs} of ${selection.totalJobs} deliveries in the selected order.`;
+  } catch (error) {
+    if (url) URL.revokeObjectURL(url);
+    $('impact-cohort-status').textContent = `Matching CSV could not be prepared. ${formatInputError(error)} No download was requested.`;
+  }
+}
 async function downloadImpactEvidence() {
   if (!$('impact-dialog').open || !impactIsCurrent()) return;
   const context = inspectedImpact, report = context.report;
@@ -1057,6 +1083,7 @@ async function downloadImpactEvidence() {
   }
 }
 $('impact-download-csv').addEventListener('click', downloadImpactCsv);
+$('impact-download-cohort').addEventListener('click', downloadImpactCohort);
 $('impact-download-evidence').addEventListener('click', downloadImpactEvidence);
 $('impact-button').addEventListener('click', () => inspectDeliveries());
 $('impact-reference').addEventListener('change', () => updateImpactSelection($('impact-reference').value || null));

@@ -68,12 +68,12 @@ export async function createBrowserComparisonEvidence(input, impact) {
 }
 
 /**
- * Filter, literal ID search, then stable ordering before a bounded page.
+ * Filter, literal ID search, then stable ordering across every matching row.
  * Numeric orders leave missing values last, even after zero or negative
  * values. Stable ties keep input order. Neither order ranks overall severity.
  * Case folding uses JavaScript toLowerCase, not locale-sensitive collation.
  */
-export function pageDeliveryImpact(impact, filter = 'changed', requestedPage = 0, options = {}) {
+export function selectDeliveryImpact(impact, filter = 'changed', options = {}) {
   const matchesOutcome = FILTERS.get(filter);
   if (!matchesOutcome) throw new Error('Choose a supported delivery filter.');
   if (!options || typeof options !== 'object' || Array.isArray(options)) throw new Error('Choose supported delivery search options.');
@@ -91,9 +91,16 @@ export function pageDeliveryImpact(impact, filter = 'changed', requestedPage = 0
     if (b === null) return -1;
     return b - a;
   });
-  const pageCount = Math.ceil(matches.length / IMPACT_PAGE_SIZE);
+  return { jobs: matches, filter, query: normalizedQuery, sort, filteredJobs: filtered.length,
+    totalJobs: impact.summary.totalJobs, matchingJobs: matches.length };
+}
+
+/** Project only the requested page, never used for CSV cohort selection. */
+export function pageDeliveryImpact(impact, filter = 'changed', requestedPage = 0, options = {}) {
+  const selection = selectDeliveryImpact(impact, filter, options);
+  const pageCount = Math.ceil(selection.matchingJobs / IMPACT_PAGE_SIZE);
   const pageIndex = Math.max(0, Math.min(Math.max(0, pageCount - 1), Number.isFinite(requestedPage) ? Math.floor(requestedPage) : 0));
   const start = pageIndex * IMPACT_PAGE_SIZE;
-  const jobs = matches.slice(start, start + IMPACT_PAGE_SIZE);
-  return { jobs, filter, query: normalizedQuery, sort, filteredJobs: filtered.length, totalJobs: impact.summary.totalJobs, matchingJobs: matches.length, pageIndex, pageCount, from: jobs.length ? start + 1 : 0, to: start + jobs.length };
+  const jobs = selection.jobs.slice(start, start + IMPACT_PAGE_SIZE);
+  return { ...selection, jobs, pageIndex, pageCount, from: jobs.length ? start + 1 : 0, to: start + jobs.length };
 }

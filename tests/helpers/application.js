@@ -1,4 +1,4 @@
-import { renderJobImpactCsv } from '../../src/job-impact-csv.js';
+import { renderJobImpactCohortCsv, renderJobImpactCsv } from '../../src/job-impact-csv.js';
 import * as experimentHistory from '../../src/experiment-history.js';
 import * as replayBookmark from '../../src/replay-bookmark.js';
 import * as replayEvents from '../../src/replay-events.js';
@@ -7,7 +7,7 @@ import * as scenarioSchema from '../../src/scenario.js';
 import * as experimentSchema from '../../src/experiment.js';
 import * as fileInput from '../../src/file-input.js';
 import { createBrowserReview } from '../../src/browser-review.js';
-import { createBrowserComparisonEvidence, createBrowserImpact, pageDeliveryImpact } from '../../src/browser-impact.js';
+import { createBrowserComparisonEvidence, createBrowserImpact, pageDeliveryImpact, selectDeliveryImpact } from '../../src/browser-impact.js';
 import { createCutoffExperiment, normalizeCutoffTimes } from '../../src/cutoff-experiment.js';
 import { summarizeCutoffResults } from '../../src/cutoff-comparison.js';
 import { normalizePolicy } from '../../src/experiment-report.js';
@@ -172,7 +172,7 @@ export function application({ workerConstructionError = () => null, mapClass = n
   const windowListeners = new Map();
   const window = { addEventListener(name, handler) { if (!windowListeners.has(name)) windowListeners.set(name, []); windowListeners.get(name).push(handler); } };
   const environment = {
-    ...experimentHistory, ...scenarioSchema, ...experimentSchema, ...fileInput, ...replayBookmark, ...replayEvents, createReplayEvents: replayEventsBuilder, createCutoffExperiment, normalizeCutoffTimes, summarizeCutoffResults, normalizePolicy, createBrowserReview: reviewBuilder, createBrowserImpact: impactBuilder, createBrowserComparisonEvidence: impactEvidenceBuilder, renderJobImpactCsv: impactCsvBuilder, pageDeliveryImpact, createTutorialExperiment, document, getComputedStyle: computedStyle, NetworkMap: mapClass ? class extends mapClass {
+    ...experimentHistory, ...scenarioSchema, ...experimentSchema, ...fileInput, ...replayBookmark, ...replayEvents, createReplayEvents: replayEventsBuilder, createCutoffExperiment, normalizeCutoffTimes, summarizeCutoffResults, normalizePolicy, createBrowserReview: reviewBuilder, createBrowserImpact: impactBuilder, createBrowserComparisonEvidence: impactEvidenceBuilder, renderJobImpactCsv: impactCsvBuilder, renderJobImpactCohortCsv, pageDeliveryImpact, selectDeliveryImpact, createTutorialExperiment, document, getComputedStyle: computedStyle, NetworkMap: mapClass ? class extends mapClass {
       constructor(...args) { super(...args); maps.push(this); }
     } : NetworkMap, Worker: FakeWorker,
     URL, Blob, TextEncoder, TextDecoder, performance: { now }, structuredClone,
