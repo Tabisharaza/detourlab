@@ -227,6 +227,10 @@ export async function runImpactCsvCheck({ executable, output }) {
     assert.match(await evaluate("document.getElementById('impact-summary').textContent"), /46 earlier, 81 unchanged, 65 later, 0 not comparable/);
     await verifyNamed(meridian, 'market-05', 'market-10', 'Named reference is keyboard reachable and exports all 192 exact pair rows from page two');
     await verifyEvidence(meridian, 'market-05', 'market-10', 'Named browser JSON contains all plans and 192 results despite page two and verifies offline');
+    // Capture the top export controls before keyboard focus on the lower
+    // cohort button scrolls the modal away from them.
+    await until("document.getElementById('toast').hidden", 'transient toast clears without changing the comparison');
+    await capture('impact-csv-desktop.jpg', desktop); await send('Emulation.setDeviceMetricsOverride', narrow); await capture('impact-csv-narrow.jpg', narrow); await send('Emulation.setDeviceMetricsOverride', desktop);
     await change('impact-filter', 'later');
     await change('impact-sort', 'candidate-lateness-desc');
     await click('impact-next');
@@ -249,9 +253,6 @@ export async function runImpactCsvCheck({ executable, output }) {
     await change('impact-sort', 'input');
     await click('impact-next');
 
-
-    await until("document.getElementById('toast').hidden", 'transient toast clears without changing the comparison');
-    await capture('impact-csv-desktop.jpg', desktop); await send('Emulation.setDeviceMetricsOverride', narrow); await capture('impact-csv-narrow.jpg', narrow); await send('Emulation.setDeviceMetricsOverride', desktop);
     await change('impact-variant', 'market-05');
     assert.equal(await evaluate("document.getElementById('impact-reference').value"), 'market-10');
     assert.match(await evaluate("document.getElementById('impact-summary').textContent"), /65 earlier, 81 unchanged, 46 later, 0 not comparable/);
